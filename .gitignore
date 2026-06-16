@@ -1,0 +1,42 @@
+# ── Sui / Move ────────────────────────────────────────────
+build/
+.sui/
+*.mv
+*.mv.bcs
+Move.lock
+
+# ── Node / TypeScript SDK ─────────────────────────────────
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+
+# ── OS ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ── IDE ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.iml
+
+# ── Hackathon reference (not our content) ─────────────────
+sui_hackathon.md
+AURA.md
+
+# ── Logs & debug ──────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Keys (NEVER commit) ──────────────────────────────────
+*.keystore
+*.key
+*.pem
+sui.keystore
