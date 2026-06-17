@@ -75,16 +75,18 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                   <h4 className="text-[13px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Capital Management</h4>
                 </div>
                 <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    placeholder={`Deposit dUSDC (Max 450)`}
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg text-[13px] outline-none transition-all"
-                    style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-                  />
+                  <div className="flex-1 relative">
+                    <input
+                      type="number"
+                      placeholder={`Deposit dUSDC (Max 450)`}
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-lg text-[13px] outline-none transition-all focus:ring-2 focus:ring-[var(--color-brand)]"
+                      style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                    />
+                  </div>
                   <button 
-                    className="px-4 py-2 rounded-lg text-[12px] font-bold transition-all"
+                    className="px-4 py-2.5 rounded-lg text-[12px] font-bold transition-all shadow-sm hover:opacity-90"
                     style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                   >
                     Withdraw {currentStake > 0 ? `${currentStake.toFixed(2)} SUI` : 'All'}
@@ -94,9 +96,12 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
 
               {/* Risk Slider */}
               <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4" style={{ color: 'var(--color-warning)' }} />
-                  <h4 className="text-[13px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Risk Tolerance</h4>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4" style={{ color: 'var(--color-warning)' }} />
+                    <h4 className="text-[13px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Risk Tolerance</h4>
+                  </div>
+                  <span className="text-[12px] font-mono font-bold" style={{ color: 'var(--color-brand)' }}>{riskLevel}%</span>
                 </div>
                 <div>
                   <input 
@@ -105,9 +110,13 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                     max="90" 
                     value={riskLevel}
                     onChange={(e) => setRiskLevel(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer transition-all"
+                    style={{
+                      background: `linear-gradient(to right, var(--color-success) 0%, var(--color-warning) 50%, var(--color-danger) 100%)`,
+                      opacity: 0.8
+                    }}
                   />
-                  <div className="flex justify-between mt-2 text-[11px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                  <div className="flex justify-between mt-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>
                     <span>Conservative</span>
                     <span>Balanced</span>
                     <span>Aggressive</span>

@@ -535,10 +535,22 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => setSettingsAgent(agent)}
-                              className="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-                              title="Agent Settings"
+                              className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
+                              style={{
+                                background: 'var(--color-surface)',
+                                color: 'var(--color-text-secondary)',
+                                borderColor: 'var(--color-border)'
+                              }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
+                                (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
+                                (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
+                              }}
                             >
-                              <Settings className="h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
+                              <Settings className="h-3.5 w-3.5" /> Configure
                             </button>
                             <button
                               id={`btn-audit-${agent.address.substring(2, 8)}`}

@@ -249,6 +249,9 @@ To remove the single-point-of-failure admin key in the reputation registry, intr
     *   If the key is published → a DAO committee (or on-chain oracle) verifies the decrypted trace against the policy bounds. Innocent → user's dispute bond is awarded to the operator. Guilty → operator's performance bond is slashed and distributed to the user.
 4.  **Griefing Resistance:** The dispute bond cost is calibrated to make frivolous disputes unprofitable — the disputer risks losing their bond if the agent is proven innocent.
 
+## 🔮 Future Polish (If Time Permits)
+- [ ] **Sui Wallet Browser Integration:** Integrate `@mysten/dapp-kit` to allow the Owner to connect a Chrome Sui Wallet. Replace the "simulated" Agent Settings Modal with real Sui Programmable Transaction Blocks that mutate the `AgentWalletPolicy` on-chain.
+
 ---
 
 ## Dependency & Toolchain Table
