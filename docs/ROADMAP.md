@@ -166,6 +166,13 @@ Performed a deep audit of all previous phase logic to eliminate mock data for ha
 *   ✅ **Dynamic Strikes:** `predict_agent.ts` now dynamically calculates DeepBook `lowerStrike` and `higherStrike` based on the real `svi.sigma` spread instead of hardcoding 68k-72k.
 *   ✅ **Real On-Chain Telemetry:** Walrus audit trace generation now queries `SUI_CLIENT.getLatestSuiSystemState()` for real epoch data and computes a deterministic `reasoningHash` directly from the SVI metrics.
 
+### 🟡 Phase 5.4: Live Multi-Agent Simulation & UI Amplification (In Progress)
+
+To make the testnet deployment feel truly "live" and production-grade without touching mainnet, we are amplifying the simulation:
+*   **Continuous Automation:** Evolving the agent script from a one-shot execution to a continuous autonomous loop that executes trades and uploads telemetry streams dynamically over time.
+*   **Multi-Agent Ecosystem:** Spinning up multiple distinct agent profiles (e.g., Conservative, Aggressive, Delta-Neutral) with unique private keys to populate the registry with diverse data points.
+*   **UI Amplification:** Enhancing the Dashboard to track multiple agents simultaneously, displaying varying strategies, PnL profiles, and distinct Walrus traces to give the application life and substance.
+
 ---
 
 

@@ -237,7 +237,6 @@ export async function executeTradeCycle(
   if (!mockMode && !AURA_PACKAGE_ID.includes("placeholder")) {
     try {
       tx.setSender(agentAddress);
-      const keypair = getAgentKeypair();
       
       const agentGasCoins = await SUI_CLIENT.getCoins({ owner: agentAddress });
       if (agentGasCoins.data.length > 0) {
@@ -260,7 +259,7 @@ export async function executeTradeCycle(
       console.log("✅ Sui PTB dry-run succeeded.");
 
       const result = await SUI_CLIENT.signAndExecuteTransaction({
-        signer: keypair,
+        signer: agentKeypair,
         transaction: tx,
       });
       txDigest = result.digest;
