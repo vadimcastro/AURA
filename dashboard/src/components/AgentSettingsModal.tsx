@@ -78,6 +78,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                   <div className="flex-1 relative">
                     <input
                       type="number"
+                      min="0"
                       placeholder={`Deposit dUSDC (Max 450)`}
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(e.target.value)}
