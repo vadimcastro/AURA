@@ -204,8 +204,8 @@ To upgrade AURA from a testnet prototype to a production-grade release:
 #### 🔧 User Prerequisites & Hosting Setup (Vercel Deploy)
 To deploy the completed Phase 5 dashboard to Vercel, configure the following settings:
 *   **Vercel Account:** For deploying the React/Vite frontend. Ensure you are ready to configure the following environment secrets in Vercel:
-    *   `AURA_PACKAGE_ID`: `0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef`
-    *   `REGISTRY_OBJECT_ID`: `0x458bbc14f6fb58c8ba460e5167349602d5d368f354c843b310320682881f31d7`
+    *   `AURA_PACKAGE_ID`: `0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd922`
+    *   `REGISTRY_OBJECT_ID`: `0x4a293e9a18b3eeedfccdd179907ac132c4fe3b84489c9a9cb0a704261d72af5c`
     *   `SUI_RPC_URL`: `https://fullnode.testnet.sui.io:443`
     *   `WALRUS_AGGREGATOR`: `https://aggregator.walrus-testnet.walrus.space`
     *   *Root Directory:* In your Vercel Project Settings, set the **Root Directory** to `dashboard/` (which we will scaffold next) so Vercel builds only the frontend module.
