@@ -144,7 +144,7 @@ export async function executeTradeCycle(
 
   // Step 4: Construct Sui PTB
   const tx = new Transaction();
-  const tradeAmount = 100_000_000; // 100 dUSDC (6 decimals / MIST-equivalent)
+  const tradeAmount = 10_000_000; // 10 dUSDC (6 decimals) - lowered for conservative testing
 
   // 4.1 Verify reputation on-chain
   tx.moveCall({
@@ -172,8 +172,11 @@ export async function executeTradeCycle(
   // args: [pool, coin, oracle_id, expiry, lower_strike, higher_strike]
   const oracleId = process.env.DEEPBOOK_ORACLE_ID || "0x0000000000000000000000000000000000000000000000000000000000000006";
   const expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
-  const lowerStrike = 68000;
-  const higherStrike = 72000;
+  // Dynamically calculate strikes (baseline 70,000 adjusted by SVI volatility)
+  const basePrice = 70000;
+  const spread = Math.floor(basePrice * svi.sigma); // e.g. 70000 * 0.15 = 10500
+  const lowerStrike = basePrice - spread;
+  const higherStrike = basePrice + spread;
 
   let remainingCoin;
   if (poolExists) {
@@ -274,13 +277,35 @@ export async function executeTradeCycle(
 
   // Step 6: Trigger the Walrus verifiable audit archiving pipeline
   console.log("💾 Archiving trade execution trace...");
+  
+  // Create a dynamic reasoning hash from actual inputs to prove determinism
+  const reasoningInput = `SVI(sigma=${svi.sigma.toFixed(3)},rho=${svi.rho.toFixed(3)}) -> spread=${spread}`;
+  const reasoningHash = crypto.createHash("sha256").update(reasoningInput).digest("hex");
+  const decisionStr = `Mint Range ${(lowerStrike/1000).toFixed(1)}k-${(higherStrike/1000).toFixed(1)}k`;
+
+  // Fetch actual epoch if possible, otherwise derive from timestamp
+  let currentEpoch = 100;
+  let currentGasBalance = 5_200_000_000;
+  if (!mockMode) {
+    try {
+      const state = await SUI_CLIENT.getLatestSuiSystemState();
+      currentEpoch = Number(state.epoch);
+      const agentGasCoins = await SUI_CLIENT.getCoins({ owner: agentAddress });
+      currentGasBalance = agentGasCoins.data.reduce((acc, c) => acc + Number(c.balance), 0);
+    } catch (e) {
+      console.warn("⚠️ Could not query on-chain epoch/gas. Using mock fallback.");
+    }
+  } else {
+    currentEpoch = Math.floor(Date.now() / 1000 / 86400); // 1 epoch ~ 1 day fallback
+  }
+
   const simulatedTradeResult = {
-    epoch: 100, // mock epoch or fetch from client
-    decision: "Mint Range 68k-72k",
+    epoch: currentEpoch,
+    decision: decisionStr,
     amount: tradeAmount,
-    refund: Math.floor(tradeAmount * 0.98), // simulate a small gas/execution loss
-    reasoningHash: crypto.createHash("sha256").update("mock-llm-reasoning").digest("hex"),
-    gasBalance: 5_200_000_000, // mock 5.2 SUI balance
+    refund: Math.floor(tradeAmount * 0.98), // Real slippage/fees will be parsed from tx.effects in production
+    reasoningHash: reasoningHash,
+    gasBalance: currentGasBalance,
   };
 
   let archiveResult;

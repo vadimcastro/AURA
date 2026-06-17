@@ -46,3 +46,9 @@ artifacts/
 sdk/npm_cache/
 dashboard/npm_cache/
 sdk/.memwal_cache/
+
+# ── Vite / React / Frontend (Dashboard) ───────────────────
+dashboard/dist/
+dashboard/dist-ssr/
+dashboard/.eslintcache
+dashboard/.vite/

@@ -1,1 +1,88 @@
 @import "tailwindcss";
+
+/* ─── Global Design Tokens ──────────────────────────────────── */
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Light palette */
+  --color-bg:          #f8f9fc;
+  --color-surface:     #ffffff;
+  --color-surface-2:   #f1f3f8;
+  --color-border:      #e2e6ef;
+  --color-border-soft: #edf0f7;
+
+  /* Brand */
+  --color-brand:        #4f6ef7;   /* calm indigo-blue */
+  --color-brand-light:  #eef1fe;
+  --color-brand-dark:   #3451d1;
+
+  /* Semantic */
+  --color-success:      #12b76a;
+  --color-success-bg:   #ecfdf3;
+  --color-warning:      #f59e0b;
+  --color-warning-bg:   #fffbeb;
+  --color-danger:       #ef4444;
+  --color-danger-bg:    #fef2f2;
+
+  /* Text */
+  --color-text-primary:   #0f1729;
+  --color-text-secondary: #5a6482;
+  --color-text-muted:     #9aa3be;
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5 { font-weight: 700; letter-spacing: -0.02em; }
+
+/* Mono font for code-like elements */
+.font-mono, code, kbd, samp, pre { font-family: var(--font-mono) !important; }
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: var(--color-surface-2); }
+::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ─── Selection ─────────────────────────────────────────────── */
+::selection { background: #c7d3fd; color: var(--color-text-primary); }
+
+/* ─── Spinner ────────────────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ─── Pulse dot ─────────────────────────────────────────────── */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+.pulse-dot { animation: pulseDot 1.8s ease-in-out infinite; }
+
+/* ─── Card hover lift ───────────────────────────────────────── */
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79, 110, 247, 0.10);
+}

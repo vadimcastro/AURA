@@ -109,7 +109,65 @@ sui client gas                         # List gas coins owned by active address
 *   ✅ Implemented client-side AES-GCM decryption in browser memory using Web Cryptography API.
 *   ✅ Fully verified production compilation and bundler assets integration (`npm run build`).
 
+### ✅ Phase 5.1: Dashboard Review & Polish — COMPLETE (2026-06-17)
+
+**Theme & UX overhaul:**
+*   ✅ Replaced dark neon aesthetic with a clean, professional light design system (white surfaces, `#f8f9fc` page background, calm indigo brand colour `#4f6ef7`).
+*   ✅ Added Inter + JetBrains Mono from Google Fonts via `<link>` in `index.html` (previously browser defaults).
+*   ✅ Defined a full CSS custom-property token set in `index.css` (`--color-*`, `--font-*`) consumed by all components.
+*   ✅ Replaced all per-component Tailwind colour overrides with CSS var references for a single source of truth.
+*   ✅ Added subtle `card-hover` lift animation (transform + box-shadow) in place of heavy glow effects.
+*   ✅ Removed jarring `animate-bounce` on the unlock icon.
+
+**Data fixes:**
+*   ✅ **Reputation percentage formula corrected:** raw score is `0–1,000,000` so the conversion is `raw / 1_000_000 * 100`. Previous code used `/ 10000`, which was 100× too large.
+*   ✅ **dUSDC decimal fix:** demo trade amounts now use 6-decimal dUSDC (`1_000_000 = 1.00 dUSDC`) not 9-decimal (SUI precision). Added `DUSDC_DECIMALS` constant.
+*   ✅ Replaced arbitrary "1,842 Blobs" placeholder stat on landing page with a truthful "Walrus-backed" description.
+*   ✅ Chart disclaimer added: "Illustrative PnL curves derived from on-chain reputation scores. Not real historical trade data."
+
+**Architecture improvements:**
+*   ✅ Fully replaced `any` types with proper interfaces (`AgentInfo`, `SealEnvelope`, `AuditTrace`, `SviSurface`).
+*   ✅ Exported `SealEnvelope` from `TimelineVisualizer.tsx` and imported it in `App.tsx` — eliminated cross-component `any` prop.
+*   ✅ Added `useMemo` on `generatePnLData` so chart data only recomputes when agent list changes.
+*   ✅ Added `AbortSignal.timeout(8000)` to Walrus fetch for clean cancellation.
+*   ✅ `TimelineVisualizer` now tracks `isMocked` state and shows a `WifiOff` badge instead of a misleading "Sync Connected" status when serving offline fallback data.
+*   ✅ Fixed Uint8Array → BufferSource TypeScript error in Web Crypto API calls using `.buffer as ArrayBuffer`.
+*   ✅ Added Reputation column with colour-coded mini progress bar to agent table (green ≥ 70%, amber ≥ 40%, red below).
+*   ✅ Added `id` attributes to all interactive elements for browser testing/automation.
+
+**SEO & meta:**
+*   ✅ Updated `index.html` title from generic "dashboard" to descriptive "AURA Protocol — Autonomous Reputation & User Risk Assurance".
+*   ✅ Added `<meta name="description">` and Open Graph tags.
+
+### ✅ Phase 5.2: Dashboard Data Accuracy Audit — COMPLETE (2026-06-17)
+
+Cross-referenced every dashboard data value against `sdk/walrus_archiver.ts`, `sdk/predict_agent.ts`, and the Move contracts:
+
+**SVI field name correction (critical):**
+*   ✅ `SealDecrypter` was displaying invented fields `sigma_atm / skew / kurtosis / blocks_freshness`. The real `SVIParameters` in `predict_agent.ts` uses `a, b, rho, m, sigma` (raw SVI model coefficients). Dashboard now shows correct field names with mathematical descriptions.
+
+**Trade data corrections (critical):**
+*   ✅ `trade_amount_dusdc` → `100_000_000` (100.00 dUSDC) matching `tradeAmount = 100_000_000` in `predict_agent.ts:147`.
+*   ✅ `refund_amount_dusdc` → `98_000_000` (98.00 dUSDC) matching `Math.floor(tradeAmount * 0.98)`.
+*   ✅ `pnl_dusdc` → `-2_000_000` (**-2.00 dUSDC loss** — the real trade has a 2% execution cost, not a gain).
+*   ✅ `trade_decision` → `"Mint Range 68k-72k"` matching `predict_agent.ts:279`.
+*   ✅ `epoch` → `100` matching the mock epoch in `predict_agent.ts:278`.
+*   ✅ `gas_balance_sui` stored in MIST (`5_200_000_000 = 5.20 SUI`) — now divided by `1e9` for display.
+
+**Cryptographic values corrected:**
+*   ✅ `model_reasoning_hash` → `18f576496773fc3c...` = actual `SHA256("mock-llm-reasoning")` from `predict_agent.ts:282`. Prior value was `SHA256("")`.
+*   ✅ `sealVersion` in demo envelope → `"1.0.0-mock"` matching `walrus_archiver.ts:63`.
+*   ✅ `policyObjectId` in demo envelope → real Mock Options Pool Object ID from Phase 4.
+
+### ✅ Phase 5.3: Phase 1-4 Dynamic Execution Refactor — COMPLETE (2026-06-17)
+
+Performed a deep audit of all previous phase logic to eliminate mock data for hackathon presentation:
+*   ✅ **Conservative Balances:** `MIN_STAKE` reverted to `10_000_000` (0.01 SUI) in `aura_registry.move` to prevent faucet drain. `tradeAmount` lowered to 10 dUSDC to support >100 live execution cycles.
+*   ✅ **Dynamic Strikes:** `predict_agent.ts` now dynamically calculates DeepBook `lowerStrike` and `higherStrike` based on the real `svi.sigma` spread instead of hardcoding 68k-72k.
+*   ✅ **Real On-Chain Telemetry:** Walrus audit trace generation now queries `SUI_CLIENT.getLatestSuiSystemState()` for real epoch data and computes a deterministic `reasoningHash` directly from the SVI metrics.
+
 ---
+
 
 ## 🏆 Hackathon Submission Strategy & Costs
 

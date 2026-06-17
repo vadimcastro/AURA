@@ -22,7 +22,7 @@ module aura::aura_registry {
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
-    /// Minimum SUI stake to register as an agent (0.5 SUI in MIST).
+    /// Minimum SUI stake to register as an agent (0.01 SUI in MIST).
     /// Recalibrate for mainnet based on expected value at risk.
     const MIN_STAKE: u64 = 10_000_000;
 

@@ -378,21 +378,22 @@ module aura::aura_registry {
 
     // ── Structs ──────────────────────────────────────────────
 
-    struct AgentRegistry has key {
+    struct Registry has key {
         id: UID,
-        agents: Table<address, AgentMetadata>,
+        agents: Table<address, AgentRecord>,
         admin: address, // DAO or Arbiter address authorized to execute slashing
     }
 
-    struct AgentMetadata has store {
-        owner: address,
+    struct AgentRecord has store {
+        stake: Balance<SUI>,
         reputation_score: u64,    // Scaled to 10^6 (e.g. 500_000 = 50%)
         total_tasks: u64,
         successful_tasks: u64,
-        stake_bond: Balance<SUI>,
+        walrus_history_blob: Option<vector<u8>>, // Latest Walrus blob ID for audit trail
+        active: bool,
         blacklist_until: u64,
-        walrus_history_id: vector<u8>, // Latest Walrus blob ID for audit trail
     }
+
 
     // ── Events ───────────────────────────────────────────────
 
