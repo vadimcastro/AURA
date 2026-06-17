@@ -110,6 +110,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -128,25 +129,30 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           options: { showContent: true },
         });
         if (registryObj.error) throw new Error(`Registry object error: ${registryObj.error.code}`);
+        const tableId = (registryObj.data?.content as any)?.fields?.agents?.fields?.id?.id;
+        if (!tableId) throw new Error('Could not parse agents Table ID from Registry object.');
 
-        const content = registryObj.data?.content;
-        if (!content || content.dataType !== 'moveObject') throw new Error('Invalid registry object structure.');
-
-        const tableId = (content.fields as Record<string, unknown> & {
-          agents?: { fields?: { id?: { id?: string } } };
-        }).agents?.fields?.id?.id;
-        if (!tableId) throw new Error('Failed to resolve agents Table ID.');
-
-        // 2. Query AgentRegistered events for addresses
-        const eventType = `${PACKAGE_ID}::aura_registry::AgentRegistered`;
-        const events = await suiClient.queryEvents({ query: { MoveEventType: eventType }, limit: 100 });
-
+        // 2. Paginate through dynamic fields to get all agent addresses
+        let hasNextPage = true;
+        let cursor: string | null = null;
         const uniqueAddresses = new Set<string>();
-        events.data.forEach((evt) => {
-          const agent = (evt.parsedJson as { agent?: string } | null)?.agent;
-          if (agent) uniqueAddresses.add(agent);
-        });
-        // Always include the known demo address as a fallback
+
+        while (hasNextPage) {
+          const dfPage = await suiClient.getDynamicFields({
+            parentId: tableId,
+            cursor,
+            limit: 50, // For demo purposes
+          });
+          for (const df of dfPage.data) {
+            if (df.name.type === 'address') {
+              uniqueAddresses.add(df.name.value as string);
+            }
+          }
+          hasNextPage = dfPage.hasNextPage;
+          cursor = dfPage.nextCursor;
+        }
+
+        // Pre-fill with Owner as an active "Agent" for the demo if empty
         uniqueAddresses.add('0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676');
 
         // 3. Resolve each address from the dynamic Table fields
@@ -435,7 +441,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                   </tr>
                 </thead>
                 <tbody>
-                  {agents.map((agent) => {
+                  {(isExpanded ? agents : agents.slice(0, 12)).map((agent) => {
                     const repPct = reputationPct(agent.reputation);
                     const srPct  = agent.totalTasks > 0
                       ? ((agent.successfulTasks / agent.totalTasks) * 100).toFixed(1)
@@ -550,6 +556,19 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                   })}
                 </tbody>
               </table>
+              {agents.length > 12 && (
+                <div
+                  className="px-6 py-3 border-t flex justify-center"
+                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
+                >
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-[12px] font-semibold text-[var(--color-brand)] hover:underline"
+                  >
+                    {isExpanded ? 'Show fewer agents' : `Show all ${agents.length} agents`}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </>
