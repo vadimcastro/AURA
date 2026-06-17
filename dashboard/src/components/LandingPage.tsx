@@ -54,7 +54,7 @@ import { SuiClient } from '@mysten/sui/client';
 import { useEffect, useState } from 'react';
 
 const PACKAGE_ID = import.meta.env.VITE_AURA_PACKAGE_ID || '';
-const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '';
+// const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '';
 const SUI_RPC_URL = import.meta.env.VITE_SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443';
 const suiClient = new SuiClient({ url: SUI_RPC_URL });
 
