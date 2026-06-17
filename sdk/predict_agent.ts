@@ -180,7 +180,13 @@ export async function executeTradeCycle(
   // Step 4: Construct Sui PTB
   const tx = new Transaction();
   const trace = popTrace();
-  const tradeAmount = trace ? trace.tradeAmount : 0; // use historical trace amount if available, otherwise 0 for infinite testnet loops
+  let tradeAmount = 0;
+  if (trace) {
+    // Normalize massive historical trades down to our 25 dUSDC testnet limits
+    // Whales (>1000) use 20 dUSDC, Retail use 5 dUSDC
+    const isWhale = trace.tradeAmount > 1000_000_000;
+    tradeAmount = isWhale ? 20_000_000 : 5_000_000;
+  }
 
   // 4.1 Verify reputation on-chain
   tx.moveCall({
