@@ -367,7 +367,7 @@ export async function executeTradeCycle(
       simulatedTradeResult,
       svi,
       policyObjectId,
-      agentAddress,
+      agentKeypair,
       { mockMode, walrusMockFallback }
     );
   } catch (error) {

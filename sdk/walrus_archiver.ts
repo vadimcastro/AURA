@@ -166,9 +166,10 @@ export async function uploadToWalrus(
  */
 export async function commitBlobIdOnChain(
   blobId: string,
-  agentAddress: string,
+  agentKeypair: Ed25519Keypair,
   mockMode: boolean = false
 ): Promise<string> {
+  const agentAddress = agentKeypair.toSuiAddress();
   const tx = new Transaction();
   const blobIdBytes = new TextEncoder().encode(blobId);
 
@@ -188,16 +189,17 @@ export async function commitBlobIdOnChain(
     return `mock-tx-digest-commit-${crypto.randomBytes(8).toString("hex")}`;
   }
 
-  const keypair = getAgentKeypair();
   tx.setSender(agentAddress);
 
   const result = await SUI_CLIENT.signAndExecuteTransaction({
-    signer: keypair,
+    signer: agentKeypair,
     transaction: tx,
   });
 
   return result.digest;
 }
+
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 
 /**
  * Orchestrates the full audit-archiving pipeline:
@@ -218,9 +220,10 @@ export async function archiveTradeAudit(
   },
   svi: any,
   policyWallet: string,
-  agentAddress: string,
+  agentKeypair: Ed25519Keypair,
   options: { mockMode?: boolean; walrusMockFallback?: boolean } = {}
 ): Promise<{ blobId: string; txDigest: string }> {
+  const agentAddress = agentKeypair.toSuiAddress();
   const mockMode = options.mockMode ?? false;
   const walrusMockFallback = options.walrusMockFallback ?? true;
 
@@ -266,7 +269,7 @@ export async function archiveTradeAudit(
   console.log(`📦 Walrus blob uploaded: ${blobId}`);
 
   // 5. Commit on-chain
-  const txDigest = await commitBlobIdOnChain(blobId, agentAddress, mockMode);
+  const txDigest = await commitBlobIdOnChain(blobId, agentKeypair, mockMode);
   console.log(`🔗 On-chain blob_id committed: ${txDigest}`);
 
   return { blobId, txDigest };
