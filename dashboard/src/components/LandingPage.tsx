@@ -50,9 +50,41 @@ const Step: React.FC<{ n: number; text: string }> = ({ n, text }) => (
 );
 
 /* ─── Landing Page ──────────────────────────────────────────── */
+import { SuiClient } from '@mysten/sui/client';
+import { useEffect, useState } from 'react';
+
+const PACKAGE_ID = import.meta.env.VITE_AURA_PACKAGE_ID || '';
+const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '';
+const SUI_RPC_URL = import.meta.env.VITE_SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443';
+const suiClient = new SuiClient({ url: SUI_RPC_URL });
+
 interface LandingPageProps { onNavigate: (tab: string) => void; }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
+  const [totalAgents, setTotalAgents] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const fetchAgentsCount = async () => {
+      try {
+        if (!PACKAGE_ID) return;
+        const eventType = `${PACKAGE_ID}::aura_registry::AgentRegistered`;
+        const events = await suiClient.queryEvents({ query: { MoveEventType: eventType }, limit: 100 });
+        const uniqueAddresses = new Set<string>();
+        events.data.forEach((evt) => {
+          const agent = (evt.parsedJson as { agent?: string } | null)?.agent;
+          if (agent) uniqueAddresses.add(agent);
+        });
+        uniqueAddresses.add('0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676');
+        if (active) setTotalAgents(uniqueAddresses.size);
+      } catch (e) {
+        console.error('Failed to fetch agents count:', e);
+      }
+    };
+    fetchAgentsCount();
+    return () => { active = false; };
+  }, []);
+
   return (
     <div className="relative py-12">
 
@@ -112,8 +144,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           />
           <StatCard
             label="Verified Agents"
-            value="2 Active"
-            subtext="0.01 SUI collateral bonds locked"
+            value={totalAgents !== null ? `${totalAgents} Active Agents` : "Loading..."}
+            subtext={`${totalAgents !== null ? (totalAgents * 0.01).toFixed(2) : "0.01"} SUI collateral bonds locked`}
             accent="var(--color-success)"
           />
           <StatCard

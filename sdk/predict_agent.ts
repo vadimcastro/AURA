@@ -148,7 +148,7 @@ export async function executeTradeCycle(
 
   // Step 4: Construct Sui PTB
   const tx = new Transaction();
-  const tradeAmount = 10_000_000; // 10 dUSDC (6 decimals) - lowered for conservative testing
+  const tradeAmount = 0; // 0 dUSDC for infinite testnet loops
 
   // 4.1 Verify reputation on-chain
   tx.moveCall({
@@ -326,6 +326,32 @@ export async function executeTradeCycle(
   }
 
   console.log("🎉 Trade cycle completed successfully!");
+  
+  if (!mockMode && archiveResult.blobId && !AURA_PACKAGE_ID.includes("placeholder")) {
+    console.log("📝 Writing Walrus blob ID to on-chain registry...");
+    try {
+      const historyTx = new Transaction();
+      historyTx.setSender(agentAddress);
+      
+      const blobBytes = Array.from(Buffer.from(archiveResult.blobId, "utf8"));
+      
+      historyTx.moveCall({
+        target: `${AURA_PACKAGE_ID}::aura_registry::update_walrus_history`,
+        arguments: [
+          historyTx.object(REGISTRY_OBJECT_ID),
+          historyTx.pure.vector("u8", blobBytes),
+        ],
+      });
+      
+      await SUI_CLIENT.signAndExecuteTransaction({
+        signer: agentKeypair,
+        transaction: historyTx,
+      });
+      console.log("✅ Walrus history updated on-chain.");
+    } catch (err) {
+      console.error("❌ Failed to update Walrus history on-chain:", err);
+    }
+  }
   return {
     success: true,
     txDigest,
