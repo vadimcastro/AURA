@@ -97,7 +97,7 @@ sui client gas                         # List gas coins owned by active address
 ### ✅ Phase 4: Testnet Deploy & Demo — COMPLETE (2026-06-17)
 *   ✅ Published Move contracts to Sui Testnet. Package ID: `0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef`
 *   ✅ Shared Registry Object ID: `0x458bbc14f6fb58c8ba460e5167349602d5d368f354c843b310320682881f31d7`
-*   ✅ Mock Options Pool Object ID: `0x319dd6c61b960465c27652dd2aff3638d3d00eeea4b6776f57d895f0134fae49`
+*   ✅ Mock Options Pool Object ID: `0xb1c2c42afc347fe432d27f238cb0c4d5adee5c91254b12666d93c18f800c31ff`
 *   ✅ Executed the complete successful options trading and telemetry-archiving cycle on Sui Testnet (Success Path Tx Digest: `96ggfYP8LDfDQajgur4MD6AhUVEEZFzgPavNGdrp5hiR`, Walrus Audit Blob: `xyfwRUYqWnmbw2C_9WUOMxrz1SMlJEzBumkoLg-AhFc`).
 *   ✅ Verified all adversarial scenarios (budget ceiling, expired policy, unauthorized agent, admin slashing) correctly reverting on-chain.
 *   ✅ Cleaned up dynamic policy wallet and recovered 1000 dUSDC to the owner's balance (Revoke Tx Digest: `EB5mw1ZhTBwWXQa7z5UbhGMfV8rKR5gK5ejCAVmhDPNW`).
