@@ -136,11 +136,23 @@ To upgrade AURA from a testnet prototype to a production-grade release:
 
 ## Future Work
 
-### Phase 5: Visual Audit Studio Dashboard
-A lightweight Web frontend that makes Walrus audit data legible to users and LPs:
-*   **Real-time Timeline:** Queries Sui for agent metadata → resolves `blob_id` hashes → fetches audit payloads from Walrus aggregator.
-*   **Seal Decryption Interface:** User imports their private viewer key to decrypt and inspect the agent's historical SVI oracle checks, trade decisions, and model reasoning directly in the browser.
-*   **Agent Comparison:** Side-by-side reputation scores, PnL curves, and audit trail density for multiple registered agents.
+### Phase 5: Visual Audit Studio Dashboard & Marketing Landing Page
+
+A lightweight, visually stunning Web frontend deployed on Vercel that combines the interactive protocol visualizer with a high-fidelity marketing/sales landing page designed for the hackathon video walkthrough:
+*   **Integrated Marketing & Moat Presentation:** A premium landing section displaying AURA's core value propositions, the Liquidity-Reputation flywheel, and the verified resume network effects. This page will act as our "live slide deck" for the 3-minute hackathon screen recording.
+*   **Real-time Timeline:** Queries Sui Testnet for agent metadata ➔ resolves `blob_id` hashes ➔ fetches audit payloads from the Walrus aggregator.
+*   **Seal Decryption Interface:** Allows users to import their private viewer key to decrypt and inspect the agent's historical SVI oracle checks, trade decisions, and reasoning directly in the browser.
+*   **Agent Comparison Dashboard:** Side-by-side reputation scores, PnL curves, and audit trail density for multiple registered agents.
+
+#### 🔧 User Prerequisites & Hosting Setup (Prepare for Phase 5)
+To prepare for the Phase 5 deployment, set up and configure the following services on your end:
+*   **Vercel Account:** For deploying the React/Vite frontend. Ensure you are ready to configure the following environment secrets in Vercel:
+    *   `AURA_PACKAGE_ID`: `0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef`
+    *   `REGISTRY_OBJECT_ID`: `0x458bbc14f6fb58c8ba460e5167349602d5d368f354c843b310320682881f31d7`
+    *   `SUI_RPC_URL`: `https://fullnode.testnet.sui.io:443`
+    *   `WALRUS_AGGREGATOR`: `https://aggregator.walrus-testnet.walrus.space`
+*   **Railway Account:** Prepared for deploying any optional caching microservices or indexer layers (if required by performance testing; we will prioritize a client-side-only architecture to minimize infrastructure complexity, but Railway is our backup hosting for server-side utilities).
+*   **Wallet Setup:** Ensure your local browser wallet (e.g., Sui Wallet) is configured for Testnet and has a small SUI balance for testing frontend policy creations.
 
 ### Phase 6: Optimistic Slashing & Decentralized Dispute Resolution
 To remove the single-point-of-failure admin key in the reputation registry, introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
