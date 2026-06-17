@@ -75,7 +75,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           const agent = (evt.parsedJson as { agent?: string } | null)?.agent;
           if (agent) uniqueAddresses.add(agent);
         });
-        uniqueAddresses.add('0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676');
         if (active) setTotalAgents(uniqueAddresses.size);
       } catch (e) {
         console.error('Failed to fetch agents count:', e);

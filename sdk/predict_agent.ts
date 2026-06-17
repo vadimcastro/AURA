@@ -343,7 +343,8 @@ export async function executeTradeCycle(
       const state = await SUI_CLIENT.getLatestSuiSystemState();
       currentEpoch = Number(state.epoch);
       const agentGasCoins = await SUI_CLIENT.getCoins({ owner: agentAddress });
-      currentGasBalance = agentGasCoins.data.reduce((acc, c) => acc + Number(c.balance), 0);
+      const coinData = Array.isArray(agentGasCoins?.data) ? agentGasCoins.data : [];
+      currentGasBalance = coinData.reduce((acc, c) => acc + Number(c.balance), 0);
     } catch (e) {
       console.warn("⚠️ Could not query on-chain epoch/gas. Using mock fallback.");
     }

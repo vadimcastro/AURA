@@ -47,18 +47,27 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
   console.log(yellow(`   Policy creation & Gas funding sent. Digest: ${tx1Res.digest}`));
   await SUI_CLIENT.waitForTransaction({ digest: tx1Res.digest });
 
-  const effects = await SUI_CLIENT.getTransactionBlock({
-    digest: tx1Res.digest,
-    options: { showObjectChanges: true }
-  });
+  let policyObject;
+  for (let i = 0; i < 5; i++) {
+    try {
+      const effects = await SUI_CLIENT.getTransactionBlock({
+        digest: tx1Res.digest,
+        options: { showObjectChanges: true }
+      });
+      policyObject = effects.objectChanges?.find(
+        (c) => c.type === "created" && c.objectType.includes("WalletPolicy")
+      );
+      if (policyObject) break;
+    } catch (e) {
+      // ignore
+    }
+    await sleep(2000);
+  }
 
-  const policyObj = effects.objectChanges?.find(
-    (c) => c.type === "created" && c.objectType.includes("WalletPolicy")
-  );
-  if (!policyObj || !("objectId" in policyObj)) {
+  if (!policyObject || !("objectId" in policyObject)) {
     throw new Error("Failed to find Policy Object.");
   }
-  const policyId = policyObj.objectId;
+  const policyId = policyObject.objectId;
 
   // 2. Deposit dUSDC
   const tx2 = new Transaction();
@@ -136,8 +145,8 @@ async function main() {
           mockMode: false,
           successOverride,
         });
-      } catch (e) {
-        console.error(red(`[${name}] Trade cycle failed: `), e);
+      } catch (error) {
+        console.error(red(`[${name}] Trade cycle failed:`), error);
       }
       console.log(`[${name}] Sleeping for ${delayMs/1000}s...`);
       await sleep(delayMs);
