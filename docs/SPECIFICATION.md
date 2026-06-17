@@ -51,6 +51,25 @@ AURA is **security and reputation middleware for AgentFi**:
 * **In-Scope:** Developing the on-chain execution sandbox (Hot Potato enforcement, budget constraints, policy revocation) and the trust registry (SUI staking, reputation scoring, and Walrus audit logging).
 * **Out-of-Scope:** We do *not* write the trading bots, algorithmic SVI volatility solvers, or the prediction markets themselves. AURA is designed to compose with any external agent (LLMs, Python scripts, statistical bots) and any target DeFi protocol (DeepBook, option markets, AMMs).
 
+### E. The AURA Moat & Competitive Strategy
+To stand out, stay on top, and provide unparalleled value, AURA builds its moat on three core structural flywheels that make it highly defensible and impossible to displace:
+
+1. **The Liquidity-Reputation Flywheel (Network Effects):**
+   * *The Mechanism:* Users (liquidity providers) will only delegate capital to agents through AURA's `WalletPolicy` because of the Move VM safety guarantees. As capital pools inside AURA policies, agent developers are forced to register on AURA's `Registry` to access this liquidity.
+   * *The Moat:* More registered agents create a richer dataset of audit logs and reputation history. This data increases the reliability of AURA's reputation scores, attracting more user deposits. Once this flywheel starts spinning, a competitor cannot simply fork AURA's open-source code, because they cannot copy the **real SUI staked collateral** or the **verifiable on-chain reputation history** of the active agents.
+
+2. **Verified Resume Lock-In (High Switching Costs):**
+   * *The Mechanism:* Every trade, oracle input, and LLM reasoning trace is sealed and archived on Walrus, with the cryptographic proof committed to the agent's identity on-chain.
+   * *The Moat:* Over time, an agent accumulates a massive, verifiable performance resume. If the agent developer attempts to switch to a copycat registry, they lose access to their on-chain track record. Re-building a reputation history takes months and requires risking capital. This creates high switching costs that lock successful agents into AURA.
+
+3. **Move-Native Structural Advantage (Unparalleled Value):**
+   * *The Mechanism:* AURA leverages Sui's unique **Hot Potato** type system (`TradeTicket` with no capabilities) to enforce post-execution states. 
+   * *The Moat:* In EVM ecosystems (like Ethereum), delegated wallets check permissions *before* execution but cannot enforce what happens *during* the transaction (allowing bots to be front-run or execute poisoned trades). AURA's hot potato model physically prevents a transaction from compiling or executing unless the funds are returned to the policy wallet in the same atomic execution block. This level of VM-level security cannot be replicated on EVM without massive gas overhead and friction, making Sui the native home of secure AgentFi.
+
+4. **Integration Composability (Standardization Lock-In):**
+   * *The Mechanism:* AURA acts as the security middleware firewall. By standardizing the `borrow_for_trade` / `return_and_complete` interface, any new DeFi pool or prediction market on Sui integrates AURA easily.
+   * *The Moat:* As more protocols natively support AURA's `TradeTicket` standard, it becomes the default routing framework. A competitor would have to convince the entire Sui DeFi ecosystem to support a new type signature, cementing AURA's position as the core financial routing firewall for all of Sui AgentFi.
+
 ---
 
 ## 📋 2. Scope, Roadmap & Dependencies
