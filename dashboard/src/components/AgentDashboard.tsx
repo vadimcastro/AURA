@@ -241,12 +241,15 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
         }
 
         if (active) {
+          // Filter out agents without telemetry to preserve UX
+          const filteredAgents = agentsData.filter(a => a.latestBlobId !== null);
+          
           // Sort: active first, then by descending reputation
-          agentsData.sort((a, b) => {
+          filteredAgents.sort((a, b) => {
             if (a.active !== b.active) return a.active ? -1 : 1;
             return b.reputation - a.reputation;
           });
-          setAgents(agentsData);
+          setAgents(filteredAgents);
         }
       } catch (err) {
         if (active) setError((err as Error).message);
