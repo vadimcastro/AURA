@@ -173,14 +173,24 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
 
             // Decode walrus_history_blob: Option<vector<u8>>
             let latestBlobId: string | null = null;
-            const blobOpt = rf.walrus_history_blob as {
-              type?: string; fields?: { vec?: unknown[] };
-            } | null;
-            if (blobOpt?.type?.includes('Option') && Array.isArray(blobOpt.fields?.vec) && blobOpt.fields!.vec.length > 0) {
-              const byteVec = blobOpt.fields!.vec[0];
-              latestBlobId = typeof byteVec === 'string'
-                ? byteVec
-                : String.fromCharCode(...(byteVec as number[]));
+            const blobRaw = rf.walrus_history_blob;
+            
+            if (blobRaw) {
+              if (Array.isArray(blobRaw)) {
+                // If the SDK flattens it into an array of numbers
+                latestBlobId = String.fromCharCode(...(blobRaw as number[]));
+              } else if (typeof blobRaw === 'string') {
+                latestBlobId = blobRaw;
+              } else {
+                // Older struct format fallback
+                const blobStruct = blobRaw as any;
+                if (blobStruct.type?.includes('Option') && Array.isArray(blobStruct.fields?.vec) && blobStruct.fields.vec.length > 0) {
+                  const byteVec = blobStruct.fields.vec[0];
+                  latestBlobId = typeof byteVec === 'string'
+                    ? byteVec
+                    : String.fromCharCode(...(byteVec as number[]));
+                }
+              }
             }
 
             agentsData.push({
