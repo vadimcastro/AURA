@@ -48,7 +48,7 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
   await SUI_CLIENT.waitForTransaction({ digest: tx1Res.digest });
 
   let policyObject;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 15; i++) {
     try {
       const effects = await SUI_CLIENT.getTransactionBlock({
         digest: tx1Res.digest,
@@ -61,7 +61,7 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
     } catch (e) {
       // ignore
     }
-    await sleep(2000);
+    await sleep(3000);
   }
 
   if (!policyObject || !("objectId" in policyObject)) {
