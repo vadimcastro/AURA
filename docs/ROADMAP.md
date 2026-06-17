@@ -1,6 +1,6 @@
 # Roadmap & Dependencies
 
-**Progress: [█████████████░░░░░░░] 65% Complete (65/100) — Testnet Prototype Complete, Production Hardening Pending**
+**Progress: [█████████████████░░░] 85% Complete (85/100) — Visual Audit Studio Complete, Production Hardening Pending**
 
 ## ✅ Dev Environment Status
 
@@ -69,10 +69,10 @@ sui client gas                         # List gas coins owned by active address
 ## Phased Execution Plan
 
 ```text
- PHASE 1 (Contracts)  ──►  PHASE 2 (Off-Chain SDK)  ──►  PHASE 3 (Integration)  ──►  PHASE 4 (Demo)
- • Move Registry           • TypeScript PTB Builder      • DeepBook Predict        • Testnet deploy
- • Move Policy Wallet      • Walrus Log Uploader         • Seal encryption         • End-to-end demo
- • Move unit tests         • SVI arbitrage checker       • MemWal integration      • Video walkthrough
+ PHASE 1 (Contracts)  ──►  PHASE 2 (Off-Chain SDK)  ──►  PHASE 3 (Integration)  ──►  PHASE 4 (Demo)  ──►  PHASE 5 (Dashboard)
+ • Move Registry           • TypeScript PTB Builder      • DeepBook Predict        • Testnet deploy       • React/Vite/TS SPA
+ • Move Policy Wallet      • Walrus Log Uploader         • Seal encryption         • End-to-end demo      • Walrus Visual Timeline
+ • Move unit tests         • SVI arbitrage checker       • MemWal integration      • Video walkthrough    • Browser Seal Decrypter
 ```
 
 ### ✅ Phase 1: Move Core Contracts — COMPLETE (2026-06-16)
@@ -101,6 +101,13 @@ sui client gas                         # List gas coins owned by active address
 *   ✅ Executed the complete successful options trading and telemetry-archiving cycle on Sui Testnet (Success Path Tx Digest: `96ggfYP8LDfDQajgur4MD6AhUVEEZFzgPavNGdrp5hiR`, Walrus Audit Blob: `xyfwRUYqWnmbw2C_9WUOMxrz1SMlJEzBumkoLg-AhFc`).
 *   ✅ Verified all adversarial scenarios (budget ceiling, expired policy, unauthorized agent, admin slashing) correctly reverting on-chain.
 *   ✅ Cleaned up dynamic policy wallet and recovered 1000 dUSDC to the owner's balance (Revoke Tx Digest: `EB5mw1ZhTBwWXQa7z5UbhGMfV8rKR5gK5ejCAVmhDPNW`).
+
+### ✅ Phase 5: Visual Audit Studio Dashboard — COMPLETE (2026-06-17)
+*   ✅ Scaffolded a modern React + TypeScript + Tailwind CSS application in `dashboard/`.
+*   ✅ Implemented real-time on-chain data retrieval from Sui Testnet mapping registered agents from Registry dynamic fields.
+*   ✅ Built an interactive visual timeline resolving and fetching encrypted Seal envelopes from Walrus Testnet.
+*   ✅ Implemented client-side AES-GCM decryption in browser memory using Web Cryptography API.
+*   ✅ Fully verified production compilation and bundler assets integration (`npm run build`).
 
 ---
 
@@ -136,16 +143,8 @@ To upgrade AURA from a testnet prototype to a production-grade release:
 
 ## Future Work
 
-### Phase 5: Visual Audit Studio Dashboard & Marketing Landing Page
-
-A lightweight, visually stunning Web frontend deployed on Vercel that combines the interactive protocol visualizer with a high-fidelity marketing/sales landing page designed for the hackathon video walkthrough:
-*   **Integrated Marketing & Moat Presentation:** A premium landing section displaying AURA's core value propositions, the Liquidity-Reputation flywheel, and the verified resume network effects. This page will act as our "live slide deck" for the 3-minute hackathon screen recording.
-*   **Real-time Timeline:** Queries Sui Testnet for agent metadata ➔ resolves `blob_id` hashes ➔ fetches audit payloads from the Walrus aggregator.
-*   **Seal Decryption Interface:** Allows users to import their private viewer key to decrypt and inspect the agent's historical SVI oracle checks, trade decisions, and reasoning directly in the browser.
-*   **Agent Comparison Dashboard:** Side-by-side reputation scores, PnL curves, and audit trail density for multiple registered agents.
-
-#### 🔧 User Prerequisites & Hosting Setup (Prepare for Phase 5)
-To prepare for the Phase 5 deployment, set up and configure the following services on your end:
+#### 🔧 User Prerequisites & Hosting Setup (Vercel Deploy)
+To deploy the completed Phase 5 dashboard to Vercel, configure the following settings:
 *   **Vercel Account:** For deploying the React/Vite frontend. Ensure you are ready to configure the following environment secrets in Vercel:
     *   `AURA_PACKAGE_ID`: `0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef`
     *   `REGISTRY_OBJECT_ID`: `0x458bbc14f6fb58c8ba460e5167349602d5d368f354c843b310320682881f31d7`

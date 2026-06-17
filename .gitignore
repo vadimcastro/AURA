@@ -44,4 +44,5 @@ sui.keystore
 # ── Local planning artifacts (task lists, notes, etc.) ───
 artifacts/
 sdk/npm_cache/
+dashboard/npm_cache/
 sdk/.memwal_cache/
