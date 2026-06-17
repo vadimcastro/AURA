@@ -12,6 +12,37 @@ import {
   getAgentKeypair 
 } from "./config.js";
 import { archiveTradeAudit } from "./walrus_archiver.js";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+
+// ESM __dirname resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export interface DeepBookTrace {
+  id: string;
+  timestampMs: number;
+  tradeAmount: number;
+  lowerStrike: number;
+  higherStrike: number;
+  expiry: number;
+  action: "MintRange" | "PlaceUp" | "PlaceDown";
+  volatilityEstimate: number;
+}
+
+let tracesCache: DeepBookTrace[] | null = null;
+function popTrace(): DeepBookTrace | null {
+  if (tracesCache === null) {
+    const tracePath = path.join(__dirname, "deepbook_traces.json");
+    if (fs.existsSync(tracePath)) {
+      tracesCache = JSON.parse(fs.readFileSync(tracePath, "utf-8"));
+    } else {
+      tracesCache = [];
+    }
+  }
+  return tracesCache.length > 0 ? tracesCache.shift()! : null;
+}
 
 // ── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -148,7 +179,8 @@ export async function executeTradeCycle(
 
   // Step 4: Construct Sui PTB
   const tx = new Transaction();
-  const tradeAmount = 0; // 0 dUSDC for infinite testnet loops
+  const trace = popTrace();
+  const tradeAmount = trace ? trace.tradeAmount : 0; // use historical trace amount if available, otherwise 0 for infinite testnet loops
 
   // 4.1 Verify reputation on-chain
   tx.moveCall({
@@ -175,12 +207,23 @@ export async function executeTradeCycle(
   // target: `${DEEPBOOK_PREDICT_PACKAGE_ID}::predict_pool::mint_range`
   // args: [pool, coin, oracle_id, expiry, lower_strike, higher_strike]
   const oracleId = process.env.DEEPBOOK_ORACLE_ID || "0x0000000000000000000000000000000000000000000000000000000000000006";
-  const expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
-  // Dynamically calculate strikes (baseline 70,000 adjusted by SVI volatility)
-  const basePrice = 70000;
-  const spread = Math.floor(basePrice * svi.sigma); // e.g. 70000 * 0.15 = 10500
-  const lowerStrike = basePrice - spread;
-  const higherStrike = basePrice + spread;
+  let expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
+  let lowerStrike = 0;
+  let higherStrike = 0;
+
+  if (trace) {
+    expiry = trace.expiry;
+    lowerStrike = trace.lowerStrike;
+    higherStrike = trace.higherStrike;
+    svi.sigma = trace.volatilityEstimate; // align SVI logic with the historical data
+    console.log(`📊 Ingested DeepBook User Trace: ${trace.id} | Amount: ${tradeAmount / 1_000_000} dUSDC | Spread: ${lowerStrike}-${higherStrike}`);
+  } else {
+    // Dynamically calculate strikes (baseline 70,000 adjusted by SVI volatility)
+    const basePrice = 70000;
+    const spread = Math.floor(basePrice * svi.sigma); // e.g. 70000 * 0.15 = 10500
+    lowerStrike = basePrice - spread;
+    higherStrike = basePrice + spread;
+  }
 
   let remainingCoin;
   if (poolExists) {

@@ -174,6 +174,14 @@ To make the testnet deployment feel truly "live" and production-grade without to
 *   ✅ **Dynamic Performance Simulation:** Wired the agents to have distinct algorithmic success rates (100%, ~90%, ~50%) passed directly to the `record_task_outcome` transaction, causing their UI reputation curves to dynamically and mathematically diverge in real-time.
 *   ✅ **Capital Efficiency:** Lowered the per-agent testnet dUSDC collateral requirement to 25 dUSDC (from 100 dUSDC) to support extended multi-agent looping without draining the owner wallet.
 
+### 🟡 Phase 5.5: DeepBook User Behavior Simulation Pipeline (In Progress)
+
+To generate highly authentic market activity without needing complex predictive AI or risking real funds, we will implement a simulation pipeline that replays real historical DeepBook Predict user behaviors.
+
+*   **Data Ingestion Script:** Build a script (`sdk/fetch_deepbook_traces.ts`) that queries the Sui RPC for historical DeepBook Predict `MintRangeEvent` or user transactions.
+*   **Behavior Mapping:** Parse these human trading traces (amounts, strike prices, expiries) and map them directly into our AURA agent logic.
+*   **Authentic Telemetry Generation:** Replace the current mocked `svi.sigma` logic in `predict_agent.ts` with these real-world data points to submit perfectly authentic trade decisions to the on-chain registry and Walrus audit trails.
+
 ---
 
 
