@@ -1,5 +1,68 @@
 # Roadmap & Dependencies
 
+## ✅ Dev Environment Status
+
+> Last verified: 2026-06-16
+
+| Item | Status | Detail |
+|---|---|---|
+| **Sui CLI** | ✅ Installed | `sui 1.73.1-ff1fe0ec4551` |
+| **Active Network** | ✅ Testnet | `sui client active-env` → `testnet` |
+| **Active Address** | ✅ Configured | `0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676` |
+| **Testnet SUI Balance** | ✅ Funded | **3.00 SUI** (3,000,000,000 MIST) — ready for gas & test deploys |
+| **Node.js** | ⬜ Pending | Verify with `node --version` (need ≥ 18) |
+| **`@mysten/sui` SDK** | ⬜ Pending | Install once `sdk/` scaffold is created |
+
+---
+
+## 🔧 Key Sui CLI Commands
+
+### Environment & Wallet
+```bash
+sui --version                          # Check Sui CLI version
+sui client active-env                  # Show active network (testnet/mainnet/devnet)
+sui client active-address              # Show current wallet address
+sui client balance                     # Show all coin balances
+sui client envs                        # List all configured network environments
+sui client switch --env testnet        # Switch to testnet
+```
+
+### Faucet & Tokens
+```bash
+sui client faucet                      # Request testnet SUI from faucet
+```
+
+### Move Contract Development
+```bash
+sui move build                         # Compile Move contracts (run from contracts_sui/)
+sui move test                          # Run all Move unit tests
+sui move test --filter <test_name>     # Run a specific test
+sui move build --lint                  # Lint Move source files
+```
+
+### Deployment & Publishing
+```bash
+sui client publish --gas-budget 100000000          # Publish package to active network
+sui client publish --gas-budget 200000000 --skip-fetch-latest-git-deps  # Skip git deps (faster)
+```
+
+### Object & Transaction Inspection
+```bash
+sui client object <OBJECT_ID>                      # Inspect an on-chain object
+sui client tx-block <TX_DIGEST>                    # Inspect a transaction
+sui client objects                                 # List all objects owned by active address
+sui client call --package <PKG> --module <MOD> --function <FN> --gas-budget 10000000  # Call a Move function
+```
+
+### Useful Extras
+```bash
+sui keytool list                       # List all local keypairs
+sui keytool generate ed25519           # Generate a new Ed25519 keypair
+sui client gas                         # List gas coins owned by active address
+```
+
+---
+
 ## Phased Execution Plan
 
 ```text
@@ -9,10 +72,12 @@
  • Move unit tests         • SVI arbitrage checker       • MemWal integration      • Video walkthrough
 ```
 
-### Phase 1: Move Core Contracts
-*   Write `aura_registry.move` and `agent_wallet_policy.move` under `contracts_sui/sources`.
-*   Implement all functions: `delegate_budget`, `deposit`, `borrow_for_trade`, `return_and_complete`, `revoke_policy`, `register_agent`, `assert_valid_agent`, `record_task_outcome`, `update_walrus_history`, `slash_bond`, `deregister_agent`.
-*   Write native Move unit tests to validate: budget ceiling enforcement, underflow-safe refund handling, expiration checks, safety floor, allowlist enforcement, owner-only access control, slashing mechanics, and event emission correctness.
+### ✅ Phase 1: Move Core Contracts — COMPLETE (2026-06-16)
+*   ✅ Wrote `aura_registry.move` and `agent_wallet_policy.move` under `contracts_sui/sources`.
+*   ✅ Implemented all functions: `create_policy`, `deposit`, `delegate_budget`, `borrow_for_trade`, `return_and_complete`, `revoke_policy`, `register_agent`, `assert_valid_agent`, `record_task_outcome`, `update_walrus_history`, `slash_bond`, `deregister_agent`.
+*   ✅ 15/15 unit tests passing — zero errors, zero warnings (`sui move build && sui move test`).
+*   ✅ Validated: budget ceiling, safety floor, allowlist, expiration, owner-only access control, slashing, deregistration, reputation math.
+
 
 ### Phase 2: Off-Chain TypeScript SDK
 *   Build `predict_agent.ts` with the SVI arbitrage checker and full PTB construction (borrow → trade → return atomic flow).
@@ -56,7 +121,7 @@ To remove the single-point-of-failure admin key in the reputation registry, intr
 
 | Dependency | Version / Reference | Purpose |
 |---|---|---|
-| Sui CLI | `sui --version` ≥ 1.x (2024 Move edition) | Contract compilation, publishing, and testnet interaction |
+| Sui CLI | `1.73.1` ✅ **Installed** | Contract compilation, publishing, and testnet interaction |
 | Move Edition | `edition = "2024.beta"` in `Move.toml` | Enables `public(package)`, struct field syntax |
 | `@mysten/sui` | `^1.x` (latest) | TypeScript SDK for PTB construction, signing, and RPC queries |
 | Sui Testnet RPC | `https://fullnode.testnet.sui.io:443` | Fullnode endpoint for `SuiClient` |

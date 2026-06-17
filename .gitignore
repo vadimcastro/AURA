@@ -40,3 +40,6 @@ yarn-error.log*
 *.key
 *.pem
 sui.keystore
+
+# ── Local planning artifacts (task lists, notes, etc.) ───
+artifacts/
