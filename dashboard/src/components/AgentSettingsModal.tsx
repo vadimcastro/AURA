@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldAlert, Zap, Lock, DollarSign, Activity, AlertTriangle } from 'lucide-react';
+import { X, Zap, Lock, DollarSign, Activity, AlertTriangle } from 'lucide-react';
 
 export interface AgentSettingsModalProps {
   agentAddress: string;
@@ -11,12 +11,10 @@ export interface AgentSettingsModalProps {
 export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
   agentAddress,
   currentStake,
-  isActive,
   onClose,
 }) => {
   const [depositAmount, setDepositAmount] = useState<string>('');
   const [riskLevel, setRiskLevel] = useState<number>(50);
-  const [isPaused, setIsPaused] = useState(!isActive);
   const [isSimulating, setIsSimulating] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -89,7 +87,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                     className="px-4 py-2 rounded-lg text-[12px] font-bold transition-all"
                     style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                   >
-                    Withdraw All
+                    Withdraw {currentStake > 0 ? `${currentStake.toFixed(2)} SUI` : 'All'}
                   </button>
                 </div>
               </div>
