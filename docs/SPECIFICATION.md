@@ -24,6 +24,33 @@ The architecture is structured into three decoupled layers:
 *   **Reputation Registry (Incentive Alignment):** Enforces skin-in-the-game collateral from bot operators, tracks performance history, and provides on-chain eligibility assertions.
 *   **Walrus / MemWal (Telemetry & Audit):** Archives transaction reasoning, oracle inputs, and historical traces off-chain in a verifiable, Seal-encrypted format.
 
+### A. How it Works (General Execution Flow with DeepBook Predict)
+1. **Delegation Setup:** A user deposits tokens (e.g. `dUSDC` or `SUI`) into a shared `WalletPolicy` on-chain, configuring allowlisted targets (DeepBook Predict), expiration, and budget.
+2. **Operator Staking:** The trading bot operator registers the bot address in AURA's `Registry` by staking a SUI bond to establish "skin in the game".
+3. **Atomic PTB Trade Execution:** The bot queries volatility SVI parameters off-chain. If it discovers an arbitrage opportunity on DeepBook Predict, it broadcasts a single Programmable Transaction Block (PTB) containing:
+   * **Assertion:** `aura_registry::assert_valid_agent` verifies the bot is registered, active, and has sufficient staked collateral.
+   * **Borrow:** `agent_wallet_policy::borrow_for_trade` extracts the required trading balance and issues a hot potato `TradeTicket` (which has no capabilities and cannot be dropped or stored).
+   * **Execution:** `deepbook_predict::mint_range` takes the borrowed coins and places the range orders on the DeepBook Predict pool, returning the remaining/refunded tokens.
+   * **Return & Consume:** `agent_wallet_policy::return_and_complete` accepts the returned tokens and consumes the `TradeTicket`.
+   * **Reputation Recording:** `aura_registry::record_task_outcome` increments the bot's task count and updates its reputation score on-chain.
+4. **Verifiable Auditing:** The bot encrypts its reasoning, SVI inputs, and order details client-side via Seal, uploads the encrypted payload to Walrus, and commits the resulting `blob_id` on-chain via `update_walrus_history`.
+
+### B. Instant Value Proposition
+* **Zero-Loss Bounds:** Even if the bot is compromised, bugged, or hijacked, it physically cannot steal funds or lose more than the user's defined budget ceiling. The Move VM prevents the transaction from executing unless the funds return to the policy wallet.
+* **Instant Trust Verification:** Liquidity providers can instantly view the bot operator's staked bond and on-chain reputation before delegating capital.
+* **Verifiable Memory:** Users can audit the exact reason for every trade retrospectively without trusting the bot operator.
+
+### C. Human UI Requirements
+While the security layer is enforced at the Move VM level, a clean Web Frontend (the **Visual Audit Studio**) is vital to make this value instantly visible to human users:
+* **For Users/LPs:** A simple dashboard to deploy policies, configure limits, deposit coins, view active bot reputation scores, and click a single "Revoke" button to reclaim all capital instantly.
+* **For Bot Operators:** An interface to stake bonds, register bot keypairs, and monitor active drawdowns.
+* **Audit Dashboard:** An inspector that queries the registry on-chain, fetches the encrypted audit payload from Walrus using the `blob_id`, decrypts the telemetry locally using the user's viewer key, and renders trade reasoning charts.
+
+### D. Protocol Scope & Role Boundary
+AURA is **security and reputation middleware for AgentFi**:
+* **In-Scope:** Developing the on-chain execution sandbox (Hot Potato enforcement, budget constraints, policy revocation) and the trust registry (SUI staking, reputation scoring, and Walrus audit logging).
+* **Out-of-Scope:** We do *not* write the trading bots, algorithmic SVI volatility solvers, or the prediction markets themselves. AURA is designed to compose with any external agent (LLMs, Python scripts, statistical bots) and any target DeFi protocol (DeepBook, option markets, AMMs).
+
 ---
 
 ## 📋 2. Scope, Roadmap & Dependencies
