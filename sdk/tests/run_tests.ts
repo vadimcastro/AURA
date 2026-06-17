@@ -3,8 +3,10 @@ import {
   encryptWithSeal, 
   decryptWithSeal, 
   buildAuditTrace, 
-  uploadToWalrus 
+  uploadToWalrus,
+  SealEnvelope
 } from "../walrus_archiver.js";
+import { MemWalClient } from "../memwal_client.js";
 
 // ── Assertion Utility ───────────────────────────────────────────────────────
 
@@ -68,27 +70,41 @@ async function testSealEncryption() {
 
   const originalText = "AURA secure telemetries audit log payload — Top Secret";
   const payload = new TextEncoder().encode(originalText);
+  const mockPolicyId = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
   // Encrypt
-  const encrypted = await encryptWithSeal(payload);
-  assert(encrypted.length > payload.length, "Encrypted payload should have IV and auth tag overhead");
-  assert(
-    Buffer.from(encrypted).toString("hex") !== Buffer.from(payload).toString("hex"),
-    "Encrypted bytes must differ from plaintext bytes"
-  );
+  const encrypted = await encryptWithSeal(payload, mockPolicyId);
+  assert(encrypted.length > payload.length, "Encrypted payload should have envelope metadata overhead");
+
+  // Verify structured SealEnvelope properties
+  const jsonStr = new TextDecoder().decode(encrypted);
+  let parsedEnvelope: SealEnvelope | null = null;
+  try {
+    parsedEnvelope = JSON.parse(jsonStr);
+  } catch (e) {
+    // Fail test
+  }
+  assert(parsedEnvelope !== null, "Encrypted payload must be a valid JSON-encoded SealEnvelope");
+  assert(parsedEnvelope?.policyObjectId === mockPolicyId, "Envelope policy ID must match the parameter passed");
+  assert(parsedEnvelope?.sealVersion === "1.0.0-mock", "Envelope version should be set correctly");
+  assert(typeof parsedEnvelope?.ciphertext === "string" && parsedEnvelope.ciphertext.length > 0, "Ciphertext must be non-empty hex string");
+  assert(typeof parsedEnvelope?.iv === "string" && parsedEnvelope.iv.length === 24, "IV must be 24-character hex string (12 bytes)");
+  assert(typeof parsedEnvelope?.tag === "string" && parsedEnvelope.tag.length === 32, "Tag must be 32-character hex string (16 bytes)");
 
   // Decrypt
   const decrypted = await decryptWithSeal(encrypted);
   const decryptedText = new TextDecoder().decode(decrypted);
   assert(decryptedText === originalText, "Decrypted text must match the original text losslessly");
 
-  // Authentication validation (corrupting encrypted payload)
-  const corrupted = new Uint8Array(encrypted);
-  corrupted[corrupted.length - 1] ^= 0xff; // Flip a bit
+  // Authentication validation (corrupting encrypted payload's ciphertext)
+  const envelopeObj = JSON.parse(jsonStr);
+  const corruptedCipher = envelopeObj.ciphertext.substring(0, envelopeObj.ciphertext.length - 2) + "00";
+  const corruptedEnvelope = { ...envelopeObj, ciphertext: corruptedCipher };
+  const corruptedPayload = new TextEncoder().encode(JSON.stringify(corruptedEnvelope));
   
   let threwError = false;
   try {
-    await decryptWithSeal(corrupted);
+    await decryptWithSeal(corruptedPayload);
   } catch (error) {
     threwError = true;
   }
@@ -157,6 +173,36 @@ async function testExecuteTradeCycleMock() {
   );
 }
 
+async function testEndToEndIntegration() {
+  console.log("\n🧪 Running End-to-End Integrated Simulation Test...");
+
+  const agentAddress = "0x000000000000000000000000000000000000000000000000000000000000000a";
+  const policyObjectId = "0x0000000000000000000000000000000000000000000000000000000000000003";
+
+  // Run full trade cycle in mock mode
+  const result = await executeTradeCycle(agentAddress, policyObjectId, {
+    mockMode: true,
+    walrusMockFallback: true,
+  });
+
+  assert(result.success === true, "Integrated trade cycle execution should succeed");
+  assert(typeof result.txDigest === "string", "Trade cycle must return transaction digest");
+  assert(typeof result.blobId === "string" && result.blobId.length > 0, "Trade cycle must return uploaded Walrus blob ID");
+
+  // Query local simulated MemWal cache to verify sync happened correctly
+  const memWalClient = new MemWalClient();
+  const memWalKey = `audit_trace_100_${agentAddress}`;
+  const storedTrace = await memWalClient.readSessionData(memWalKey);
+
+  assert(storedTrace !== null, "Audit trace must be saved and readable in MemWal database");
+  assert(storedTrace.agent_address === agentAddress, "Telemetry trace agent address must match");
+  assert(storedTrace.policy_wallet === policyObjectId, "Telemetry trace policy wallet ID must match");
+  assert(storedTrace.trade_decision === "Mint Range 68k-72k", "Telemetry trace trade decision must match");
+  assert(storedTrace.arbitrage_check_passed === true, "Telemetry trace arbitrage validation status must be true");
+
+  console.log("  Successfully verified local MemWal telemetry database record.");
+}
+
 // ── Main Runner ─────────────────────────────────────────────────────────────
 
 async function runAllTests() {
@@ -169,6 +215,7 @@ async function runAllTests() {
     await testAuditTraceFormatting();
     await testWalrusUploadMock();
     await testExecuteTradeCycleMock();
+    await testEndToEndIntegration();
 
     const duration = Date.now() - startTime;
     console.log(`\n🎉 ALL TESTS PASSED! (${passedCount}/${testCount} assertions in ${duration}ms)\n`);

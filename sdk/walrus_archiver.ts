@@ -5,8 +5,11 @@ import {
   AURA_PACKAGE_ID, 
   REGISTRY_OBJECT_ID, 
   WALRUS_PUBLISHER, 
+  MEMWAL_API_URL,
+  MEMWAL_TOKEN,
   getAgentKeypair 
 } from "./config.js";
+import { MemWalClient } from "./memwal_client.js";
 
 // ── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -27,38 +30,60 @@ export interface AuditTrace {
 
 // ── Seal Mock Encryption (AES-256-GCM) ──────────────────────────────────────
 
+export interface SealEnvelope {
+  policyObjectId: string;
+  sealVersion: string;
+  ciphertext: string; // hex encoded ciphertext
+  iv: string;         // hex encoded initialization vector
+  tag: string;        // hex encoded authentication tag
+  timestamp: string;  // ISO timestamp
+}
+
 // Secure mock key derived deterministically for testing round-trips
 const MOCK_SEAL_KEY = crypto.scryptSync("mock-seal-passphrase", "aura-salt", 32);
 
 /**
  * Mocks the client-side Seal threshold encryption by encrypting the payload
- * using AES-256-GCM.
+ * using AES-256-GCM, wrapping it inside a structured SealEnvelope.
  */
-export async function encryptWithSeal(payload: Uint8Array): Promise<Uint8Array> {
+export async function encryptWithSeal(
+  payload: Uint8Array,
+  policyObjectId: string = ""
+): Promise<Uint8Array> {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", MOCK_SEAL_KEY, iv);
   
   const encrypted = Buffer.concat([cipher.update(payload), cipher.final()]);
   const tag = cipher.getAuthTag();
   
-  // Format: [iv (12 bytes)] + [tag (16 bytes)] + [encrypted data]
-  return new Uint8Array(Buffer.concat([iv, tag, encrypted]));
+  const envelope: SealEnvelope = {
+    policyObjectId,
+    sealVersion: "1.0.0-mock",
+    ciphertext: encrypted.toString("hex"),
+    iv: iv.toString("hex"),
+    tag: tag.toString("hex"),
+    timestamp: new Date().toISOString(),
+  };
+
+  return new TextEncoder().encode(JSON.stringify(envelope));
 }
 
 /**
- * Decrypts the mock Seal payload to recover the original trace.
+ * Decrypts the mock Seal envelope payload to recover the original trace.
  */
 export async function decryptWithSeal(encryptedPayload: Uint8Array): Promise<Uint8Array> {
   try {
-    const buf = Buffer.from(encryptedPayload);
-    const iv = buf.subarray(0, 12);
-    const tag = buf.subarray(12, 28);
-    const encryptedData = buf.subarray(28);
+    const jsonStr = new TextDecoder().decode(encryptedPayload);
+    const envelope: SealEnvelope = JSON.parse(jsonStr);
+
+    const iv = Buffer.from(envelope.iv, "hex");
+    const tag = Buffer.from(envelope.tag, "hex");
+    const ciphertext = Buffer.from(envelope.ciphertext, "hex");
     
     const decipher = crypto.createDecipheriv("aes-256-gcm", MOCK_SEAL_KEY, iv);
     decipher.setAuthTag(tag);
     
-    return new Uint8Array(Buffer.concat([decipher.update(encryptedData), decipher.final()]));
+    return new Uint8Array(Buffer.concat([decipher.update(ciphertext), decipher.final()]));
   } catch (error) {
     throw new Error(`Seal decryption failed: ${(error as Error).message}`);
   }
@@ -219,9 +244,21 @@ export async function archiveTradeAudit(
   // 2. Build audit trace
   const trace = buildAuditTrace(tradeResult, svi, policyWallet, agentAddress);
 
+  // 2.5 Store audit trace in MemWal persistent session storage
+  try {
+    const memWalClient = new MemWalClient({
+      apiUrl: MEMWAL_API_URL,
+      token: MEMWAL_TOKEN,
+    });
+    const memWalKey = `audit_trace_${tradeResult.epoch}_${agentAddress}`;
+    await memWalClient.writeSessionData(memWalKey, trace);
+  } catch (memWalError) {
+    console.warn("⚠️ MemWal Client Sync failed:", (memWalError as Error).message);
+  }
+
   // 3. Encrypt payload
   const rawBytes = new TextEncoder().encode(JSON.stringify(trace));
-  const encrypted = await encryptWithSeal(rawBytes);
+  const encrypted = await encryptWithSeal(rawBytes, policyWallet);
 
   // 4. Upload to Walrus
   const blobId = await uploadToWalrus(encrypted, walrusMockFallback);

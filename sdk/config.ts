@@ -26,6 +26,9 @@ export const DEEPBOOK_PREDICT_PACKAGE_ID = process.env.DEEPBOOK_PREDICT_PACKAGE_
 export const DEEPBOOK_POOL_ID = process.env.DEEPBOOK_POOL_ID || "0x0000000000000000000000000000000000000000000000000000000000000005";
 export const DUSDC_TYPE_TAG = process.env.DUSDC_TYPE_TAG || "0x0000000000000000000000000000000000000000000000000000000000000004::dusdc::DUSDC";
 
+export const MEMWAL_API_URL = process.env.MEMWAL_API_URL || "https://memwal-playground.walrus-testnet.walrus.space";
+export const MEMWAL_TOKEN = process.env.MEMWAL_TOKEN || "";
+
 export const SUI_CLIENT = new SuiClient({ url: SUI_RPC_URL });
 
 /**

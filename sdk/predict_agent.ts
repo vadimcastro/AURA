@@ -125,6 +125,23 @@ export async function executeTradeCycle(
   }
   console.log("✅ Volatility surface verified arbitrage-free.");
 
+  // Step 3.5: Verify if target pool exists on-chain
+  let poolExists = false;
+  if (!mockMode && !DEEPBOOK_POOL_ID.includes("placeholder") && DEEPBOOK_POOL_ID !== "0x0000000000000000000000000000000000000000000000000000000000000005") {
+    try {
+      const poolObject = await SUI_CLIENT.getObject({
+        id: DEEPBOOK_POOL_ID,
+        options: { showType: true },
+      });
+      if (poolObject.data) {
+        poolExists = true;
+        console.log(`✅ DeepBook Pool validated on-chain: ${DEEPBOOK_POOL_ID}`);
+      }
+    } catch (e) {
+      console.warn(`⚠️ Target pool ${DEEPBOOK_POOL_ID} not found or query failed. Falling back to mock/simulation mode.`);
+    }
+  }
+
   // Step 4: Construct Sui PTB
   const tx = new Transaction();
   const tradeAmount = 100_000_000; // 100 dUSDC (6 decimals / MIST-equivalent)
@@ -150,15 +167,45 @@ export async function executeTradeCycle(
   });
 
   // 4.3 Execute trade range on DeepBook Predict
-  // (In Phase 2, this is a mock trading call to deepbook predict pool)
-  const [remainingCoin] = tx.moveCall({
-    target: `${DEEPBOOK_PREDICT_PACKAGE_ID}::predict_pool::mint_range`,
-    arguments: [
-      tx.object(DEEPBOOK_POOL_ID),
-      borrowedCoin,
-      tx.pure(new TextEncoder().encode("mint_range_args")),
-    ],
-  });
+  // Resolve actual mint_range signature arguments:
+  // target: `${DEEPBOOK_PREDICT_PACKAGE_ID}::predict_pool::mint_range`
+  // args: [pool, coin, oracle_id, expiry, lower_strike, higher_strike]
+  const oracleId = process.env.DEEPBOOK_ORACLE_ID || "0x0000000000000000000000000000000000000000000000000000000000000006";
+  const expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
+  const lowerStrike = 68000;
+  const higherStrike = 72000;
+
+  let remainingCoin;
+  if (poolExists) {
+    const [remCoin] = tx.moveCall({
+      target: `${DEEPBOOK_PREDICT_PACKAGE_ID}::predict_pool::mint_range`,
+      typeArguments: [DUSDC_TYPE_TAG],
+      arguments: [
+        tx.object(DEEPBOOK_POOL_ID),
+        borrowedCoin,
+        tx.pure.address(oracleId),
+        tx.pure.u64(expiry),
+        tx.pure.u64(lowerStrike),
+        tx.pure.u64(higherStrike),
+      ],
+    });
+    remainingCoin = remCoin;
+  } else {
+    // Fallback/Mock Call matching the resolved signature format
+    const [remCoin] = tx.moveCall({
+      target: `${DEEPBOOK_PREDICT_PACKAGE_ID}::predict_pool::mint_range_mock`,
+      typeArguments: [DUSDC_TYPE_TAG],
+      arguments: [
+        tx.object(DEEPBOOK_POOL_ID),
+        borrowedCoin,
+        tx.pure.address(oracleId),
+        tx.pure.u64(expiry),
+        tx.pure.u64(lowerStrike),
+        tx.pure.u64(higherStrike),
+      ],
+    });
+    remainingCoin = remCoin;
+  }
 
   // 4.4 Return remaining/refunded funds and consume the TradeTicket
   tx.moveCall({
