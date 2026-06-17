@@ -79,10 +79,11 @@ sui client gas                         # List gas coins owned by active address
 *   ✅ Validated: budget ceiling, safety floor, allowlist, expiration, owner-only access control, slashing, deregistration, reputation math.
 
 
-### Phase 2: Off-Chain TypeScript SDK
-*   Build `predict_agent.ts` with the SVI arbitrage checker and full PTB construction (borrow → trade → return atomic flow).
-*   Build `walrus_archiver.ts` to encrypt audit traces via Seal and push to the Walrus publisher API.
-*   Build `config.ts` to manage testnet package IDs, object IDs, and dUSDC type tags from environment variables.
+### ✅ Phase 2: Off-Chain TypeScript SDK — COMPLETE (2026-06-16)
+*   ✅ Built `predict_agent.ts` with SVI parameter checks, time freshness assertions, and full PTB construction.
+*   ✅ Built `walrus_archiver.ts` with client-side mock Seal encryption (AES-256-GCM) and Walrus publisher uploader.
+*   ✅ Built `config.ts` parsing `.env` variables and resolving fallback/real hex addresses.
+*   ✅ 25/25 unit & integration tests passing with ESM/NodeNext compilation.
 
 ### Phase 3: Protocol Integration
 *   Resolve actual DeepBook Predict contract addresses and `mint_range` function signatures from the `predict-testnet-4-16` branch.

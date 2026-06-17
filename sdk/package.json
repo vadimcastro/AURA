@@ -1,0 +1,21 @@
+{
+  "name": "aura-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Off-chain TypeScript SDK for AURA reputation routing & policy enforcement",
+  "main": "dist/predict_agent.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node predict_agent.ts",
+    "test": "ts-node tests/run_tests.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.1.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
