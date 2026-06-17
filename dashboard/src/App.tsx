@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { AgentDashboard } from './components/AgentDashboard';
 import { TimelineVisualizer, type SealEnvelope } from './components/TimelineVisualizer';
@@ -9,10 +9,17 @@ import type React from 'react';
 type TabType = 'landing' | 'agents';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('landing');
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    return window.location.hash === '#agents' ? 'agents' : 'landing';
+  });
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [selectedBlobId, setSelectedBlobId] = useState<string | null>(null);
   const [selectedEnvelope, setSelectedEnvelope] = useState<SealEnvelope | null>(null);
+
+  // Sync hash to state changes
+  useEffect(() => {
+    window.location.hash = activeTab;
+  }, [activeTab]);
 
   const handleSelectAgent = (agentAddress: string, blobId: string | null) => {
     setSelectedAgent(agentAddress);
