@@ -104,6 +104,25 @@ sui client gas                         # List gas coins owned by active address
 
 ---
 
+## 🏆 Hackathon Submission Strategy & Costs
+
+### 1. Mainnet Costs vs. Testnet Demonstrations
+*   **Mainnet Gas & Collateral:** Deploying to Sui Mainnet requires real SUI for gas and real USDC/dUSDC for trading capital. 
+*   **The Zero-Cost Solution:** For hackathon evaluations, **Sui Testnet and Walrus Testnet are 100% free and functional**. They execute the exact same Move VM logic, transaction fee structures, and cryptographic boundary checks as Mainnet. 
+*   **Standard Practice:** Judges do not expect (and often discourage) developers from deploying experimental, un-audited agentic smart contracts on Mainnet with real funds. A fully functional Testnet prototype is the standard for a winning hackathon entry.
+
+### 2. Hackathon Submission Readiness & Strength
+*   **Current Prototype Strength:** **High.** AURA implements a complete AgentFi loop: an on-chain atomic security boundary (Hot Potato `TradeTicket`), dynamic budget enforcement (`WalletPolicy`), collateral-backed reputation (`aura_registry`), a fully functional off-chain agent script (`run_demo.ts`), and decentralized storage integration (Walrus).
+*   **Is Production Hardening Required?** No. Hackathons reward technical novelty, architecture viability, and functional demos. Hardening items (like zkLogin, threshold key networks, and professional audits) are standard items for the "Future Roadmap".
+
+### 3. Prioritized Pre-Submission Roadmap
+To maximize our hackathon scoring potential before submitting, we prioritize the remaining work as follows:
+1.  **Step-by-Step Interactive Demo (High Priority):** Implement a command-line flag (e.g., `npm run demo -- --interactive`) that pauses between each step (Policy Creation ➔ Deposit ➔ Registration ➔ Success Trade ➔ Adversarial Reverts ➔ Slashing ➔ Revocation) and outputs explanation cards with Sui Explorer links.
+2.  **Telemetry Visualizer UI (Medium-High Priority):** A simple single-page Web application that queries the `Registry` on-chain, resolves the latest `walrus_history_id` blob, fetches it from the Walrus aggregator, and renders a clean visual dashboard showing the agent's recent trade decisions and SVI parameters.
+3.  **Video Walkthrough Recording (Medium Priority):** A 3-minute video showing the codebase, running the interactive demo, showing transaction digests in the Sui Testnet Explorer, and fetching the audit trace from Walrus.
+
+---
+
 ## 🛡️ Production Hardening Tasks (Pending for Prod-Grade Release)
 
 To upgrade AURA from a testnet prototype to a production-grade release:
