@@ -1,4 +1,5 @@
 import { Transaction } from "@mysten/sui/transactions";
+import { bcs } from "@mysten/sui/bcs";
 import * as crypto from "crypto";
 import { 
   SUI_CLIENT, 
@@ -175,7 +176,7 @@ export async function commitBlobIdOnChain(
     target: `${AURA_PACKAGE_ID}::aura_registry::update_walrus_history`,
     arguments: [
       tx.object(REGISTRY_OBJECT_ID),
-      tx.pure(blobIdBytes),
+      tx.pure(bcs.vector(bcs.u8()).serialize(Array.from(blobIdBytes)).toBytes()),
     ],
   });
 
@@ -234,10 +235,10 @@ export async function archiveTradeAudit(
     }
   }
 
-  const minGasRequirement = BigInt(1_000_000_000); // 1 SUI
+  const minGasRequirement = BigInt(1_000_000); // 0.001 SUI
   if (actualBalance < minGasRequirement) {
     throw new Error(
-      `❌ GAS_EXHAUSTED: Ephemeral agent balance (${actualBalance} MIST) is below the safety floor of 1 SUI. Archival aborted.`
+      `❌ GAS_EXHAUSTED: Ephemeral agent balance (${actualBalance} MIST) is below the safety floor of 0.001 SUI. Archival aborted.`
     );
   }
 

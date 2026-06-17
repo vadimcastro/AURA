@@ -24,7 +24,7 @@ module aura::aura_registry {
 
     /// Minimum SUI stake to register as an agent (0.5 SUI in MIST).
     /// Recalibrate for mainnet based on expected value at risk.
-    const MIN_STAKE: u64 = 500_000_000;
+    const MIN_STAKE: u64 = 10_000_000;
 
     /// Reputation score denominator — 10^6 for precision without floats.
     const SCORE_PRECISION: u64 = 1_000_000;

@@ -238,28 +238,28 @@ module aura::agent_wallet_policy {
     /// Uses clamped subtraction to handle profitable trades where refund > borrowed amount.
     public fun return_and_complete<T>(
         policy: &mut WalletPolicy<T>,
+        coin: Coin<T>,
         ticket: TradeTicket<T>,
-        refund: Coin<T>,
-        _ctx: &mut TxContext
+        _ctx: &mut TxContext,
     ) {
         let TradeTicket { policy_id, amount: _, target_contract: _ } = ticket;
         assert!(object::id(policy) == policy_id, ETicketPolicyMismatch);
 
-        let refund_value = coin::value(&refund);
+        let amount_returned = coin.value();
 
-        // Clamped subtraction: if the trade was profitable, refund_value > amount borrowed.
+        // Clamped subtraction: if the trade was profitable, amount_returned > budget_spent.
         // Without clamping, this would underflow and abort — locking winning trades.
-        if (refund_value > policy.budget_spent) {
+        if (amount_returned >= policy.budget_spent) {
             policy.budget_spent = 0;
         } else {
-            policy.budget_spent = policy.budget_spent - refund_value;
+            policy.budget_spent = policy.budget_spent - amount_returned;
         };
 
-        balance::join(&mut policy.balance, coin::into_balance(refund));
+        balance::join(&mut policy.balance, coin.into_balance());
 
         event::emit(TradeCompleted {
             policy_id,
-            refund_value,
+            amount_returned,
             new_balance: balance::value(&policy.balance),
             budget_spent: policy.budget_spent,
         });
@@ -433,25 +433,30 @@ module aura::aura_registry {
     /// recalculates reputation as a simple success ratio: (successful / total) * 10^6.
     /// Callable by the agent after each trade settlement.
     public fun record_task_outcome(
-        registry: &mut AgentRegistry,
+        registry: &mut Registry,
+        agent_addr: address,
         success: bool,
-        ctx: &mut TxContext
+        _ctx: &mut TxContext,
     ) {
-        let sender = tx_context::sender(ctx);
-        assert!(table::contains(&registry.agents, sender), EAgentNotFound);
-        let meta = table::borrow_mut(&mut registry.agents, sender);
-        meta.total_tasks = meta.total_tasks + 1;
+        assert!(table::contains(&registry.agents, agent_addr), ENotRegistered);
+        let record = table::borrow_mut(&mut registry.agents, agent_addr);
+        assert!(record.active, EAgentInactive);
+
+        record.total_tasks = record.total_tasks + 1;
         if (success) {
-            meta.successful_tasks = meta.successful_tasks + 1;
+            record.successful_tasks = record.successful_tasks + 1;
         };
-        // Reputation = (successful_tasks / total_tasks) * REPUTATION_SCALE
-        // Integer math: multiply first to avoid truncation
-        meta.reputation_score = (meta.successful_tasks * REPUTATION_SCALE) / meta.total_tasks;
+
+        // Recalculate: (successful / total) × 10^6
+        record.reputation_score =
+            (record.successful_tasks * SCORE_PRECISION) / record.total_tasks;
+
         event::emit(TaskRecorded {
-            agent: sender,
+            agent: agent_addr,
             success,
-            new_reputation: meta.reputation_score,
-            total_tasks: meta.total_tasks,
+            total_tasks: record.total_tasks,
+            successful_tasks: record.successful_tasks,
+            reputation_score: record.reputation_score,
         });
     }
 
@@ -633,8 +638,8 @@ async function runStrategyLoop(agentAddress: string, policyObjectId: string) {
     typeArguments: [DUSDC_TYPE],
     arguments: [
       tx.object(policyObjectId),
-      tradeTicket,
-      remainingCoin
+      remainingCoin,
+      tradeTicket
     ]
   });
 

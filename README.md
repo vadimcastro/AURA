@@ -118,9 +118,11 @@ npx ts-node predict_agent.ts
 
 ## Documentation
 
-- **[Technical Specification](docs/SPECIFICATION.md)** — Full protocol engineering spec including Move contracts, TypeScript SDK, and Walrus archiver
-- **[Roadmap & Dependencies](docs/ROADMAP.md)** — Phased execution plan with toolchain versions
-- **[Edge Cases & Failure Modes](docs/EDGE_CASES.md)** — Flash crash protection, oracle staleness, gas exhaustion, key compromise
+- **[Technical Specification](file:///Users/vadim/Desktop/AURA/docs/SPECIFICATION.md)** — Full protocol engineering spec including Move contracts, TypeScript SDK, and Walrus archiver
+- **[Roadmap & Dependencies](file:///Users/vadim/Desktop/AURA/docs/ROADMAP.md)** — Phased execution plan with toolchain versions
+- **[Edge Cases & Failure Modes](file:///Users/vadim/Desktop/AURA/docs/EDGE_CASES.md)** — Flash crash protection, oracle staleness, gas exhaustion, key compromise
+- **[Sui CLI Command Guide](file:///Users/vadim/Desktop/AURA/docs/SUI_COMMANDS.md)** — Verified commands for environment setup, compilation, and protocol calls
+- **[Sui Commands Developer Skill](file:///Users/vadim/Desktop/AURA/skills/sui-commands/SKILL.md)** — Developer instructions, SDK patterns, and Move VM troubleshooting lessons
 
 ---
 

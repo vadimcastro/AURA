@@ -236,6 +236,16 @@ export async function executeTradeCycle(
       tx.setSender(agentAddress);
       const keypair = getAgentKeypair();
       
+      const agentGasCoins = await SUI_CLIENT.getCoins({ owner: agentAddress });
+      if (agentGasCoins.data.length > 0) {
+        tx.setGasPayment(agentGasCoins.data.map(coin => ({
+          objectId: coin.coinObjectId,
+          version: coin.version,
+          digest: coin.digest
+        })));
+        tx.setGasBudget(2_000_000); // 0.002 SUI budget
+      }
+      
       const transactionBlockBytes = await tx.build({ client: SUI_CLIENT });
       const dryRun = await SUI_CLIENT.dryRunTransactionBlock({
         transactionBlock: transactionBlockBytes,
