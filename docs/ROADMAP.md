@@ -151,6 +151,7 @@ To prepare for the Phase 5 deployment, set up and configure the following servic
     *   `REGISTRY_OBJECT_ID`: `0x458bbc14f6fb58c8ba460e5167349602d5d368f354c843b310320682881f31d7`
     *   `SUI_RPC_URL`: `https://fullnode.testnet.sui.io:443`
     *   `WALRUS_AGGREGATOR`: `https://aggregator.walrus-testnet.walrus.space`
+    *   *Root Directory:* In your Vercel Project Settings, set the **Root Directory** to `dashboard/` (which we will scaffold next) so Vercel builds only the frontend module.
 *   **Railway Account:** Prepared for deploying any optional caching microservices or indexer layers (if required by performance testing; we will prioritize a client-side-only architecture to minimize infrastructure complexity, but Railway is our backup hosting for server-side utilities).
 *   **Wallet Setup:** Ensure your local browser wallet (e.g., Sui Wallet) is configured for Testnet and has a small SUI balance for testing frontend policy creations.
 

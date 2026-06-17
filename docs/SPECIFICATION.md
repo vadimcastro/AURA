@@ -45,6 +45,7 @@ While the security layer is enforced at the Move VM level, a clean Web Frontend 
 * **For Users/LPs:** A simple dashboard to deploy policies, configure limits, deposit coins, view active bot reputation scores, and click a single "Revoke" button to reclaim all capital instantly.
 * **For Bot Operators:** An interface to stake bonds, register bot keypairs, and monitor active drawdowns.
 * **Audit Dashboard:** An inspector that queries the registry on-chain, fetches the encrypted audit payload from Walrus using the `blob_id`, decrypts the telemetry locally using the user's viewer key, and renders trade reasoning charts.
+* **Vercel Serverless Hosting:** The Vite React frontend is hosted on Vercel (Project: `aura`), leveraging browser-side client RPC queries to communicate directly with Sui Testnet and the Walrus aggregator, ensuring a highly responsive, zero-maintenance global deployment.
 
 ### D. Protocol Scope & Role Boundary
 AURA is **security and reputation middleware for AgentFi**:
