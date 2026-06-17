@@ -25,6 +25,9 @@ function App() {
     setSelectedAgent(agentAddress);
     setSelectedBlobId(blobId);
     setSelectedEnvelope(null);
+    setTimeout(() => {
+      document.getElementById('timeline-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleSelectEnvelope = (envelope: SealEnvelope) => {
@@ -106,7 +109,7 @@ function App() {
             </section>
 
             {selectedAgent && (
-              <div className="grid gap-8 lg:grid-cols-2 items-start pt-2 border-t" style={{ borderColor: 'var(--color-border)' }}>
+              <div id="timeline-section" className="grid gap-8 lg:grid-cols-2 items-start pt-2 border-t" style={{ borderColor: 'var(--color-border)' }}>
                 <section>
                   <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Timeline Inspector</p>
                   <TimelineVisualizer
