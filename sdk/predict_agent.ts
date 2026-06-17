@@ -331,7 +331,7 @@ export async function executeTradeCycle(
   console.log("💾 Archiving trade execution trace...");
   
   // Create a dynamic reasoning hash from actual inputs to prove determinism
-  const reasoningInput = `SVI(sigma=${svi.sigma.toFixed(3)},rho=${svi.rho.toFixed(3)}) -> spread=${spread}`;
+  const reasoningInput = `SVI(sigma=${svi.sigma.toFixed(3)},rho=${svi.rho.toFixed(3)}) -> spread=${higherStrike - lowerStrike}`;
   const reasoningHash = crypto.createHash("sha256").update(reasoningInput).digest("hex");
   const decisionStr = `Mint Range ${(lowerStrike/1000).toFixed(1)}k-${(higherStrike/1000).toFixed(1)}k`;
 
