@@ -123,9 +123,9 @@ async function main() {
 
   console.log(green("\n[Phase 1] Bootstrapping 3 distinct Agents..."));
   // Split 25 dUSDC per agent, 0.2 SUI for gas
-  const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", dusdcCoinId, 25_000_000, 10_000_000);
-  const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", dusdcCoinId, 25_000_000, 10_000_000);
-  const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", dusdcCoinId, 25_000_000, 10_000_000);
+  const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", dusdcCoinId, 25_000_000, 100_000_000);
+  const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", dusdcCoinId, 25_000_000, 100_000_000);
+  const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", dusdcCoinId, 25_000_000, 100_000_000);
 
   console.log(green("\n[Phase 2] Starting Continuous Autonomous Trading Loops..."));
 
