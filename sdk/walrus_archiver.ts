@@ -133,11 +133,17 @@ export async function uploadToWalrus(
   useMockFallback: boolean = false
 ): Promise<string> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
     const response = await fetch(`${WALRUS_PUBLISHER}/v1/blobs`, {
       method: "PUT",
       headers: { "Content-Type": "application/octet-stream" },
       body: Buffer.from(encryptedPayload),
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
