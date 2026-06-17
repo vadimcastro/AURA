@@ -95,13 +95,17 @@ export async function fetchSVIParameters(
  * 4. Signs and executes (or mocks) the transaction.
  * 5. Runs the Walrus verifiable audit archiving pipeline.
  */
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+
 export async function executeTradeCycle(
-  agentAddress: string,
+  agentKeypair: Ed25519Keypair,
   policyObjectId: string,
-  options: { mockMode?: boolean; walrusMockFallback?: boolean } = {}
+  options: { mockMode?: boolean; walrusMockFallback?: boolean; successOverride?: boolean } = {}
 ): Promise<{ success: boolean; txDigest?: string; blobId?: string }> {
   const mockMode = options.mockMode ?? false;
   const walrusMockFallback = options.walrusMockFallback ?? true;
+  const successOverride = options.successOverride ?? true;
+  const agentAddress = agentKeypair.toSuiAddress();
 
   console.log(`🤖 Starting trade cycle for agent: ${agentAddress}`);
   console.log(`  Policy Wallet: ${policyObjectId}`);
@@ -227,7 +231,7 @@ export async function executeTradeCycle(
     arguments: [
       tx.object(REGISTRY_OBJECT_ID),
       tx.pure.address(agentAddress),
-      tx.pure.bool(true), // Success (in production derived from settlement)
+      tx.pure.bool(successOverride), // Success (in production derived from settlement)
     ],
   });
 

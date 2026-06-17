@@ -124,10 +124,20 @@ async function main() {
   const runLoop = async (name: string, agent: any, delayMs: number) => {
     while (true) {
       console.log(cyan(`\n>>> [${name}] Waking up to execute trade cycle...`));
+      let successOverride = true;
+      if (name.includes("Aggressive")) {
+        successOverride = Math.random() > 0.5; // 50% success
+      } else if (name.includes("Delta-Neutral")) {
+        successOverride = Math.random() > 0.1; // 90% success
+      }
+      
       try {
-        await executeTradeCycle(agent.agentKeypair, agent.policyId, false);
+        await executeTradeCycle(agent.agentKeypair, agent.policyId, {
+          mockMode: false,
+          successOverride,
+        });
       } catch (e) {
-        console.error(red(`[${name}] Trade cycle failed: ${(e as Error).message}`));
+        console.error(red(`[${name}] Trade cycle failed: `), e);
       }
       console.log(`[${name}] Sleeping for ${delayMs/1000}s...`);
       await sleep(delayMs);

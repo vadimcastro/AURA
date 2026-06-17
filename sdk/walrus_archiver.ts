@@ -176,7 +176,7 @@ export async function commitBlobIdOnChain(
     target: `${AURA_PACKAGE_ID}::aura_registry::update_walrus_history`,
     arguments: [
       tx.object(REGISTRY_OBJECT_ID),
-      tx.pure(bcs.vector(bcs.u8()).serialize(Array.from(blobIdBytes)).toBytes()),
+      tx.pure.string(blobId),
     ],
   });
 
