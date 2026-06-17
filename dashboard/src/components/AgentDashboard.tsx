@@ -165,9 +165,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             if (!rf) continue;
 
             const rawScore       = parseInt(String(rf.reputation_score ?? '500000'), 10);
-            const stakeRaw       = parseInt(
-              String((rf.stake as { fields?: { value?: unknown } } | null)?.fields?.value ?? '0'), 10,
-            );
+            const stakeRaw       = parseInt(String(rf.stake ?? '0'), 10);
             const totalTasks     = parseInt(String(rf.total_tasks ?? '0'), 10);
             const successfulTasks = parseInt(String(rf.successful_tasks ?? '0'), 10);
             const active         = rf.active !== false;
