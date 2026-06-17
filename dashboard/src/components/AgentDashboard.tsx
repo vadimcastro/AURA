@@ -2,14 +2,15 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { SuiClient } from '@mysten/sui/client';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
-  TrendingUp, Users, RefreshCw,
+  TrendingUp, Users, RefreshCw, Settings,
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
+  Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { AgentSettingsModal } from './AgentSettingsModal';
 
-// ─── Config ─────────────────────────────────────────────────────────────────
+// ─── Environment config ─────────────────────────────────────────────────────────────────
 const PACKAGE_ID        = import.meta.env.VITE_AURA_PACKAGE_ID  || '';
 const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '';
 const SUI_RPC_URL       = import.meta.env.VITE_SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443';
@@ -111,6 +112,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
   const [error, setError]         = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [settingsAgent, setSettingsAgent] = useState<AgentInfo | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -530,29 +532,38 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
 
                         {/* Action */}
                         <td className="px-5 py-3.5 text-right">
-                          <button
-                            id={`btn-audit-${agent.address.substring(2, 8)}`}
-                            onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
-                            disabled={!agent.latestBlobId}
-                            className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                            style={{
-                              background: 'var(--color-brand-light)',
-                              color: 'var(--color-brand)',
-                              border: '1px solid #c7d3fd',
-                            }}
-                            onMouseEnter={e => {
-                              if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                                (e.currentTarget as HTMLElement).style.background = 'var(--color-brand)';
-                                (e.currentTarget as HTMLElement).style.color = '#fff';
-                              }
-                            }}
-                            onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-light)';
-                              (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';
-                            }}
-                          >
-                            Audit Telemetry
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setSettingsAgent(agent)}
+                              className="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                              title="Agent Settings"
+                            >
+                              <Settings className="h-4 w-4" style={{ color: 'var(--color-text-muted)' }} />
+                            </button>
+                            <button
+                              id={`btn-audit-${agent.address.substring(2, 8)}`}
+                              onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
+                              disabled={!agent.latestBlobId}
+                              className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                              style={{
+                                background: 'var(--color-brand-light)',
+                                color: 'var(--color-brand)',
+                                border: '1px solid #c7d3fd',
+                              }}
+                              onMouseEnter={e => {
+                                if (!(e.currentTarget as HTMLButtonElement).disabled) {
+                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-brand)';
+                                  (e.currentTarget as HTMLElement).style.color = '#fff';
+                                }
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-light)';
+                                (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';
+                              }}
+                            >
+                              Audit Telemetry
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -575,6 +586,15 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             </div>
           </div>
         </>
+      )}
+
+      {settingsAgent && (
+        <AgentSettingsModal
+          agentAddress={settingsAgent.address}
+          currentStake={settingsAgent.stakeAmount}
+          isActive={settingsAgent.active}
+          onClose={() => setSettingsAgent(null)}
+        />
       )}
     </div>
   );
