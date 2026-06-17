@@ -196,11 +196,14 @@ To generate highly authentic market activity without needing complex predictive 
 *   **Current Prototype Strength:** **High.** AURA implements a complete AgentFi loop: an on-chain atomic security boundary (Hot Potato `TradeTicket`), dynamic budget enforcement (`WalletPolicy`), collateral-backed reputation (`aura_registry`), a fully functional off-chain agent script (`run_demo.ts`), and decentralized storage integration (Walrus).
 *   **Is Production Hardening Required?** No. Hackathons reward technical novelty, architecture viability, and functional demos. Hardening items (like zkLogin, threshold key networks, and professional audits) are standard items for the "Future Roadmap".
 
-### 3. Prioritized Pre-Submission Roadmap
-To maximize our hackathon scoring potential before submitting, we prioritize the remaining work as follows:
-1.  **Step-by-Step Interactive Demo (High Priority):** Implement a command-line flag (e.g., `npm run demo -- --interactive`) that pauses between each step (Policy Creation ➔ Deposit ➔ Registration ➔ Success Trade ➔ Adversarial Reverts ➔ Slashing ➔ Revocation) and outputs explanation cards with Sui Explorer links.
-2.  **Telemetry Visualizer UI (Medium-High Priority):** A simple single-page Web application that queries the `Registry` on-chain, resolves the latest `walrus_history_id` blob, fetches it from the Walrus aggregator, and renders a clean visual dashboard showing the agent's recent trade decisions and SVI parameters.
-3.  **Video Walkthrough Recording (Medium Priority):** A 3-minute video showing the codebase, running the interactive demo, showing transaction digests in the Sui Testnet Explorer, and fetching the audit trace from Walrus.
+### 3. Live Demo Execution Flow (How to Present)
+AURA is architected with a strict separation of concerns: **Agents run as headless Node.js processes** (simulating external off-chain operators), while the **Dashboard strictly monitors** them on-chain as a read-only auditor. We do not run the agents in the browser.
+
+For your hackathon demo / video walkthrough, follow this flow:
+1. **Start the Frontend:** Open your Vercel URL (or `npm run dev` in `dashboard/`). Show the empty/initial state of the Audit Studio.
+2. **Launch the Autonomous Agents:** Open a terminal on your Mac, navigate to `sdk/`, and run `npx tsx run_multi_agent.ts`.
+3. **Show the Background Loop:** Explain that these are 3 separate "hedge funds" operating their own off-chain trading logic, injecting real historical DeepBook traces to simulate authentic trading, but constrained by the Move WalletPolicy.
+4. **Watch the UI Evolve (The "Aha!" Moment):** Switch back to the dashboard. As the terminal prints out success/failure outcomes and Walrus uploads, refresh the UI. The judges will watch the agents' reputations fracture dynamically (100% vs 90% vs 50%) and the "Audit Telemetry" buttons light up as Walrus blob IDs hit the blockchain.
 
 ---
 
