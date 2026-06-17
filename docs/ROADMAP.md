@@ -11,8 +11,17 @@
 | **Sui CLI** | ✅ Installed | `sui 1.73.1-ff1fe0ec4551` |
 | **Active Network** | ✅ Testnet | `sui client active-env` → `testnet` |
 | **Active Address** | ✅ Configured | `0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676` |
-| **Testnet SUI Balance** | ✅ Funded | **1.85 SUI** (1,850,000,000 MIST) — ready for gas & test deploys |
-| **Testnet dUSDC Balance** | ✅ Funded | **1000.00 DUSDC** (1,000,000,000 raw) — recovered, ready for trading |
+| **Testnet SUI Balance** | ✅ Funded | **0.10 SUI** (105,594,836 MIST) — gas remaining |
+| **Testnet dUSDC Balance** | ✅ Funded | **450.00 DUSDC** (450,000,000 raw) — recovered, ready for trading |
+
+## Wallet Profiles
+**Owner** (`0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676`)
+*   **Role**: Instantiates agents, funds initial capital.
+*   **Balance**: `~0.10 SUI` (Gas), `~450.00 dUSDC` (Capital).
+
+## Managing the Agent Roster
+1. **Starting Fresh (Resetting Agents to 0)**: To completely wipe the slate and start with 0 agents, simply republish the smart contracts (`sui client publish --skip-dependency-verification` inside `contracts_sui/`) and paste the new `Package ID` and `Registry ID` into the `.env` and `ROADMAP.md`. 
+2. **Filtering Agents**: If you simply want to hide agents on the dashboard that don't have telemetry, you can apply a standard React filter to the `agents` array in `AgentDashboard.tsx` before rendering: `agents.filter(a => a.latestBlobId !== null)`.
 | **Node.js** | ✅ Installed | Verified Node.js v18+ environment |
 | **`@mysten/sui` SDK** | ✅ Installed | Installed in `sdk/` package dependencies |
 
