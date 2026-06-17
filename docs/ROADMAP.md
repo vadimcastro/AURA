@@ -1,6 +1,6 @@
 # Roadmap & Dependencies
 
-**Progress: [████████████████████] 100% Complete (100/100)**
+**Progress: [█████████████░░░░░░░] 65% Complete (65/100) — Testnet Prototype Complete, Production Hardening Pending**
 
 ## ✅ Dev Environment Status
 
@@ -101,6 +101,17 @@ sui client gas                         # List gas coins owned by active address
 *   ✅ Executed the complete successful options trading and telemetry-archiving cycle on Sui Testnet (Success Path Tx Digest: `96ggfYP8LDfDQajgur4MD6AhUVEEZFzgPavNGdrp5hiR`, Walrus Audit Blob: `xyfwRUYqWnmbw2C_9WUOMxrz1SMlJEzBumkoLg-AhFc`).
 *   ✅ Verified all adversarial scenarios (budget ceiling, expired policy, unauthorized agent, admin slashing) correctly reverting on-chain.
 *   ✅ Cleaned up dynamic policy wallet and recovered 1000 dUSDC to the owner's balance (Revoke Tx Digest: `EB5mw1ZhTBwWXQa7z5UbhGMfV8rKR5gK5ejCAVmhDPNW`).
+
+---
+
+## 🛡️ Production Hardening Tasks (Pending for Prod-Grade Release)
+
+To upgrade AURA from a testnet prototype to a production-grade release:
+*   **zkLogin Authentication Integration:** Implement real user zkLogin signing flows for setting up and revoking policy wallets, keeping owner private keys completely off the server.
+*   **Real DeepBook Predict Mainnet Integration:** Transition from the testnet mock pool to direct mainnet integration with DeepBook Predict contracts.
+*   **Threshold Key Infrastructure (Seal SDK):** Migrate from mock local AES encryption to real distributed threshold keys derived from policies to encrypt and decrypt Walrus telemetry logs.
+*   **Authorized MemWal Integration:** Authenticate the off-chain bot via a valid MemWal token instead of the playground fallback.
+*   **Formal Security Audit:** Conduct a formal audit of Move smart contracts, specifically using the Move Prover to verify that the `TradeTicket` hot potato cannot be dropped or copied under any circumstances.
 
 ---
 
