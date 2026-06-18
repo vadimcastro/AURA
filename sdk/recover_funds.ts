@@ -1,4 +1,5 @@
 import { Transaction } from "@mysten/sui/transactions";
+import { EventId } from "@mysten/sui/client";
 import { 
   SUI_CLIENT, 
   AURA_PACKAGE_ID,
@@ -12,7 +13,7 @@ async function main() {
   console.log(`Sweeping testnet for abandoned policies for owner: ${ownerAddress}`);
 
   let hasNextPage = true;
-  let cursor: string | null = null;
+  let cursor: EventId | null = null;
   let policiesRecovered = 0;
 
   while (hasNextPage) {

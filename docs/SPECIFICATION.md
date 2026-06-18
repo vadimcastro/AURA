@@ -818,7 +818,8 @@ async function uploadToWalrus(encryptedPayload: Uint8Array): Promise<string> {
 }
 
 // Step 4: Commit blob_id on-chain to link audit trail to reputation
-async function commitBlobIdOnChain(blobId: string, agentAddress: string): Promise<string> {
+async function commitBlobIdOnChain(blobId: string, agentKeypair: Ed25519Keypair): Promise<string> {
+  const agentAddress = agentKeypair.toSuiAddress();
   const tx = new Transaction();
   // Convert blobId string to bytes for the Move vector<u8> parameter
   const blobIdBytes = new TextEncoder().encode(blobId);
@@ -836,7 +837,8 @@ async function commitBlobIdOnChain(blobId: string, agentAddress: string): Promis
 }
 
 // Full archiving pipeline — called after each trade cycle
-async function archiveTradeAudit(tradeResult: any, svi: any, policyWallet: string, agentAddress: string) {
+async function archiveTradeAudit(tradeResult: any, svi: any, policyWallet: string, agentKeypair: Ed25519Keypair) {
+  const agentAddress = agentKeypair.toSuiAddress();
   // 1. Build structured trace
   const trace = buildAuditTrace(tradeResult, svi, policyWallet, agentAddress);
 
@@ -856,7 +858,7 @@ async function archiveTradeAudit(tradeResult: any, svi: any, policyWallet: strin
   console.log(`📦 Walrus blob uploaded: ${blobId}`);
 
   // 5. Commit on-chain
-  const digest = await commitBlobIdOnChain(blobId, agentAddress);
+  const digest = await commitBlobIdOnChain(blobId, agentKeypair);
   console.log(`🔗 On-chain blob_id committed: ${digest}`);
 }
 ```

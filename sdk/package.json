@@ -6,8 +6,8 @@
   "main": "dist/predict_agent.js",
   "scripts": {
     "build": "tsc",
-    "start": "ts-node predict_agent.ts",
-    "test": "ts-node tests/run_tests.ts"
+    "start": "tsc && node dist/predict_agent.js",
+    "test": "tsc && node dist/tests/run_tests.js"
   },
   "dependencies": {
     "@mysten/sui": "^1.1.0",

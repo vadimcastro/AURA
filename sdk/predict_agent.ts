@@ -41,7 +41,9 @@ function popTrace(): DeepBookTrace | null {
       tracesCache = [];
     }
   }
-  return tracesCache.length > 0 ? tracesCache.shift()! : null;
+  const cache = tracesCache;
+  if (!cache) return null;
+  return cache.length > 0 ? cache.shift()! : null;
 }
 
 // ── Interfaces ─────────────────────────────────────────────────────────────
@@ -389,7 +391,7 @@ export async function executeTradeCycle(
  * Main loop that runs the trading agent on a periodic interval.
  */
 export function startAgentLoop(
-  agentAddress: string,
+  agentKeypair: Ed25519Keypair,
   policyObjectId: string,
   intervalMs: number = 60_000,
   options: { mockMode?: boolean; walrusMockFallback?: boolean } = {}
@@ -398,7 +400,7 @@ export function startAgentLoop(
   
   const loop = async () => {
     try {
-      await executeTradeCycle(agentAddress, policyObjectId, options);
+      await executeTradeCycle(agentKeypair, policyObjectId, options);
     } catch (error) {
       console.error("⚠️ Error in strategy loop iteration:", error);
     }

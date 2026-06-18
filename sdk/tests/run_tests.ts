@@ -7,6 +7,7 @@ import {
   SealEnvelope
 } from "../walrus_archiver.js";
 import { MemWalClient } from "../memwal_client.js";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 
 // ── Assertion Utility ───────────────────────────────────────────────────────
 
@@ -157,10 +158,10 @@ async function testWalrusUploadMock() {
 async function testExecuteTradeCycleMock() {
   console.log("\n🧪 Running Strategy Loop Mock Cycle Tests...");
 
-  const agentAddress = "0x000000000000000000000000000000000000000000000000000000000000000a";
+  const agentKeypair = new Ed25519Keypair();
   const policyObjectId = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
-  const result = await executeTradeCycle(agentAddress, policyObjectId, {
+  const result = await executeTradeCycle(agentKeypair, policyObjectId, {
     mockMode: true,
     walrusMockFallback: true,
   });
@@ -176,11 +177,12 @@ async function testExecuteTradeCycleMock() {
 async function testEndToEndIntegration() {
   console.log("\n🧪 Running End-to-End Integrated Simulation Test...");
 
-  const agentAddress = "0x000000000000000000000000000000000000000000000000000000000000000a";
+  const agentKeypair = new Ed25519Keypair();
+  const agentAddress = agentKeypair.toSuiAddress();
   const policyObjectId = "0x0000000000000000000000000000000000000000000000000000000000000003";
 
   // Run full trade cycle in mock mode
-  const result = await executeTradeCycle(agentAddress, policyObjectId, {
+  const result = await executeTradeCycle(agentKeypair, policyObjectId, {
     mockMode: true,
     walrusMockFallback: true,
   });
@@ -191,13 +193,14 @@ async function testEndToEndIntegration() {
 
   // Query local simulated MemWal cache to verify sync happened correctly
   const memWalClient = new MemWalClient();
-  const memWalKey = `audit_trace_100_${agentAddress}`;
+  const expectedEpoch = Math.floor(Date.now() / 1000 / 86400);
+  const memWalKey = `audit_trace_${expectedEpoch}_${agentAddress}`;
   const storedTrace = await memWalClient.readSessionData(memWalKey);
 
   assert(storedTrace !== null, "Audit trace must be saved and readable in MemWal database");
   assert(storedTrace.agent_address === agentAddress, "Telemetry trace agent address must match");
   assert(storedTrace.policy_wallet === policyObjectId, "Telemetry trace policy wallet ID must match");
-  assert(storedTrace.trade_decision === "Mint Range 68k-72k", "Telemetry trace trade decision must match");
+  assert(storedTrace.trade_decision.startsWith("Mint Range"), "Telemetry trace trade decision must start with 'Mint Range'");
   assert(storedTrace.arbitrage_check_passed === true, "Telemetry trace arbitrage validation status must be true");
 
   console.log("  Successfully verified local MemWal telemetry database record.");

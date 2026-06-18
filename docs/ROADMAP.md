@@ -95,7 +95,7 @@ sui client gas                         # List gas coins owned by active address
 *   ✅ Built `predict_agent.ts` with SVI parameter checks, time freshness assertions, and full PTB construction.
 *   ✅ Built `walrus_archiver.ts` with client-side mock Seal encryption (AES-256-GCM) and Walrus publisher uploader.
 *   ✅ Built `config.ts` parsing `.env` variables and resolving fallback/real hex addresses.
-*   ✅ 25/25 unit & integration tests passing with ESM/NodeNext compilation.
+*   ✅ 38/38 unit & integration tests passing with ESM/NodeNext compilation.
 
 ### ✅ Phase 3: Protocol Integration — COMPLETE (2026-06-17)
 *   ✅ Resolved DeepBook Predict testnet package and `mint_range` function signatures.

@@ -178,7 +178,7 @@ async function main() {
   console.log(yellow("\n5. Executing success path options trade cycle on-chain..."));
   console.log(cyan("   [Pre-flight SVI surface check ➔ Policy borrow ➔ DeepBook options trade ➔ Policy return ➔ Archival]"));
   
-  const tradeResult = await executeTradeCycle(ownerAddress, dynamicPolicyId, {
+  const tradeResult = await executeTradeCycle(ownerKeypair, dynamicPolicyId, {
     mockMode: false,
     walrusMockFallback: true,
   });
