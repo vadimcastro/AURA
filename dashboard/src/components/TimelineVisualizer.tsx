@@ -63,14 +63,28 @@ export const TimelineVisualizer: React.FC<TimelineVisualizerProps> = ({
       setError(null);
       setIsMocked(false);
 
+      const aggregators = [
+        WALRUS_AGGREGATOR,
+        'https://walrus-testnet-aggregator.nodes.guru',
+        'https://wal-aggregator-testnet.staketab.org',
+        'https://testnet-aggregator-walrus.kiliglab.io'
+      ].filter(Boolean) as string[];
+
       try {
-        const url = `${WALRUS_AGGREGATOR}/v1/${blobId}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as Omit<SealEnvelope, 'blobId'>;
+        const fetchPromises = aggregators.map(async (base) => {
+          // Add cache-busting timestamp to prevent Cloudflare from serving cached 404s
+          const url = `${base}/v1/${blobId}?t=${Date.now()}`;
+          const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+          if (!res.ok) throw new Error(`HTTP ${res.status} from ${base}`);
+          return (await res.json()) as Omit<SealEnvelope, 'blobId'>;
+        });
+
+        // Resolve whichever aggregator answers successfully first
+        const data = await Promise.any(fetchPromises);
+        
         if (active) setEnvelope({ ...data, blobId });
       } catch (err) {
-        console.warn('Walrus fetch failed, using demo mock:', err);
+        console.warn('All Walrus aggregators failed or timed out. Falling back to mock:', err);
         if (active) {
           setEnvelope(makeDemoEnvelope(blobId));
           setIsMocked(true);
