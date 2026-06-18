@@ -11,6 +11,7 @@ export interface SealEnvelope {
   timestamp:      string;
   blobId:         string;
   _note?:         string;
+  agentAddress?:  string;
 }
 
 interface TimelineVisualizerProps {
@@ -24,7 +25,7 @@ const WALRUS_AGGREGATOR =
   import.meta.env.VITE_WALRUS_AGGREGATOR || 'https://aggregator.walrus-testnet.walrus.space';
 
 // ─── Demo fallback ────────────────────────────────────────────────────────────
-const makeDemoEnvelope = (id: string): SealEnvelope => ({
+const makeDemoEnvelope = (id: string, agentAddress: string): SealEnvelope => ({
   policyObjectId: '0x319dd6c61b960465c27652dd2aff3638d3d00eeea4b6776f57d895f0134fae49',
   // Matches sdk/walrus_archiver.ts encryptWithSeal() which sets sealVersion: "1.0.0-mock"
   sealVersion:    '1.0.0-mock',
@@ -36,6 +37,7 @@ const makeDemoEnvelope = (id: string): SealEnvelope => ({
   timestamp:      new Date().toISOString(),
   blobId:         id,
   _note:          'Mocked from local fallback due to CORS/network constraints',
+  agentAddress,
 });
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -86,7 +88,7 @@ export const TimelineVisualizer: React.FC<TimelineVisualizerProps> = ({
       } catch (err) {
         console.warn('All Walrus aggregators failed or timed out. Falling back to mock:', err);
         if (active) {
-          setEnvelope(makeDemoEnvelope(blobId));
+          setEnvelope(makeDemoEnvelope(blobId, agentAddress));
           setIsMocked(true);
         }
       } finally {

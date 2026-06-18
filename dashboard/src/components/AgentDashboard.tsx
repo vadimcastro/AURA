@@ -244,16 +244,30 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
     const fetchOnChainEvents = async () => {
       try {
         if (!PACKAGE_ID) return [];
-        const events = await suiClient.queryEvents({
-          query: { MoveModule: { package: PACKAGE_ID, module: 'aura_registry' } },
-          limit: 10,
-          order: 'descending',
-        });
         
-        return events.data.map((ev) => {
+        // Fetch events in parallel for both modules (since Sui doesn't support 'Any' fullnode filter queries)
+        const [registryEvents, policyEvents] = await Promise.all([
+          suiClient.queryEvents({
+            query: { MoveModule: { package: PACKAGE_ID, module: 'aura_registry' } },
+            limit: 15,
+            order: 'descending',
+          }),
+          suiClient.queryEvents({
+            query: { MoveModule: { package: PACKAGE_ID, module: 'agent_wallet_policy' } },
+            limit: 15,
+            order: 'descending',
+          }),
+        ]);
+
+        const combined = [...registryEvents.data, ...policyEvents.data];
+        // Sort descending by timestampMs
+        combined.sort((a, b) => Number(b.timestampMs) - Number(a.timestampMs));
+
+        return combined.map((ev) => {
           const typeStr = ev.type;
           let type: 'trade' | 'borrow' | 'slash' | 'register' | 'deregister' = 'trade';
           let message = 'On-chain event recorded';
+          const agentAddr = (ev.parsedJson as any)?.agent || (ev.parsedJson as any)?.owner || ev.sender;
           
           if (typeStr.includes('AgentRegistered')) {
             type = 'register';
@@ -281,12 +295,32 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             type = 'deregister';
             const ret = (ev.parsedJson as any)?.stake_returned;
             message = `Agent deregistered and reclaimed ${ret ? ret / 1e9 : 0} SUI`;
+          } else if (typeStr.includes('PolicyCreated')) {
+            type = 'register';
+            const budget = (ev.parsedJson as any)?.budget_limit;
+            message = `Policy created with budget ${budget ? budget / 1e6 : 0} dUSDC`;
+          } else if (typeStr.includes('Deposited')) {
+            type = 'register';
+            const amt = (ev.parsedJson as any)?.amount;
+            message = `Deposited ${amt ? amt / 1e6 : 0} dUSDC budget`;
+          } else if (typeStr.includes('BorrowedForTrade')) {
+            type = 'borrow';
+            const amt = (ev.parsedJson as any)?.amount;
+            message = `Agent borrowed ${amt ? amt / 1e6 : 0} dUSDC for trade`;
+          } else if (typeStr.includes('TradeCompleted')) {
+            type = 'trade';
+            const refund = (ev.parsedJson as any)?.amount_returned;
+            message = `Trade returned ${refund ? refund / 1e6 : 0} dUSDC to policy`;
+          } else if (typeStr.includes('PolicyRevoked')) {
+            type = 'deregister';
+            const refund = (ev.parsedJson as any)?.refund_amount;
+            message = `Policy revoked; reclaimed ${refund ? refund / 1e6 : 0} dUSDC`;
           }
           
           return {
             id: ev.id.txDigest + '-' + ev.id.eventSeq,
             type,
-            agent: ev.sender,
+            agent: agentAddr,
             message,
             timestamp: new Date(Number(ev.timestampMs)).toISOString(),
             digest: ev.id.txDigest,
