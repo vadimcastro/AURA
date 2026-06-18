@@ -23,12 +23,7 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
   const agentAddress = agentKeypair.toSuiAddress();
   console.log(cyan(`\n🤖 Setting up [${agentName}] - Address: ${agentAddress}`));
 
-  // Fetch fresh dUSDC coin ID to avoid stale versions
   const ownerAddress = ownerKeypair.toSuiAddress();
-  const ownerCoins = await SUI_CLIENT.getCoins({ owner: ownerAddress, coinType: DUSDC_TYPE_TAG });
-  const coin = ownerCoins.data.find(c => parseInt(c.balance, 10) >= dusdcAmount);
-  if (!coin) throw new Error(`Owner has no dUSDC coin with balance >= ${dusdcAmount}`);
-  const dusdcCoinId = coin.coinObjectId;
 
   // 1. Send SUI and Create Policy
   const tx1 = new Transaction();
@@ -78,13 +73,49 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
 
   // 2. Deposit dUSDC
   const tx2 = new Transaction();
-  const [splitDusdc] = tx2.splitCoins(tx2.object(dusdcCoinId), [tx2.pure.u64(dusdcAmount)]);
+
+  // Query fresh dUSDC coins owned by the owner address to ensure correct versioning
+  const ownerCoins = await SUI_CLIENT.getCoins({ owner: ownerAddress, coinType: DUSDC_TYPE_TAG });
+  const usableCoins = ownerCoins.data.filter(c => parseInt(c.balance, 10) > 0);
+  usableCoins.sort((a, b) => parseInt(b.balance, 10) - parseInt(a.balance, 10));
+
+  let totalAvailable = 0;
+  const coinsToUse = [];
+  for (const c of usableCoins) {
+    totalAvailable += parseInt(c.balance, 10);
+    coinsToUse.push(c);
+    if (totalAvailable >= dusdcAmount) break;
+  }
+
+  if (totalAvailable < dusdcAmount) {
+    throw new Error(`Owner has insufficient dUSDC balance. Required: ${dusdcAmount}, Available: ${totalAvailable}`);
+  }
+
+  let depositCoinArg;
+  if (coinsToUse.length === 1) {
+    const coinObj = coinsToUse[0];
+    if (parseInt(coinObj.balance, 10) === dusdcAmount) {
+      depositCoinArg = tx2.object(coinObj.coinObjectId);
+    } else {
+      const [split] = tx2.splitCoins(tx2.object(coinObj.coinObjectId), [tx2.pure.u64(dusdcAmount)]);
+      depositCoinArg = split;
+    }
+  } else {
+    const primaryCoin = coinsToUse[0].coinObjectId;
+    tx2.mergeCoins(
+      tx2.object(primaryCoin),
+      coinsToUse.slice(1).map(c => tx2.object(c.coinObjectId))
+    );
+    const [split] = tx2.splitCoins(tx2.object(primaryCoin), [tx2.pure.u64(dusdcAmount)]);
+    depositCoinArg = split;
+  }
+
   tx2.moveCall({
     target: `${AURA_PACKAGE_ID}::agent_wallet_policy::deposit`,
     typeArguments: [DUSDC_TYPE_TAG],
     arguments: [
       tx2.object(policyId),
-      splitDusdc
+      depositCoinArg
     ]
   });
 
