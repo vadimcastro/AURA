@@ -900,7 +900,7 @@ Beyond the core hackathon deliverable, AURA's architecture is designed to expand
 ### A. General-Purpose Security Middleware Primitive
 The `WalletPolicy<T>` and `AgentRegistry` are intentionally generic — they are not coupled to DeepBook Predict or any specific strategy. Any third-party DeFi agent, market maker, or copy-trading vault on Sui can deploy AURA's policy wallet and register in the reputation registry to signal trust to their LPs. The `TradeTicket` hot potato pattern composes with any Move contract that accepts `Coin<T>`, making AURA a **plug-and-play security layer** rather than a monolithic application.
 
-### B. Visual Audit Studio Dashboard *(Future Work — Phase 5)*
+### B. Visual Audit Studio Dashboard *(Completed in Phase 5)*
 A lightweight Web frontend that makes Walrus audit data legible to users and LPs:
 *   **Real-time Timeline:** Queries Sui for agent metadata → resolves `blob_id` hashes → fetches audit payloads from Walrus aggregator.
 *   **Seal Decryption Interface:** User imports their private viewer key to decrypt and inspect the agent's historical SVI oracle checks, trade decisions, and model reasoning directly in the browser.
