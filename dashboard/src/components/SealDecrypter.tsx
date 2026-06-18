@@ -138,20 +138,21 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
         await new Promise(r => setTimeout(r, 500));
         
         const agentAddr = envelope.agentAddress || '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676';
-        const isAggressive = agentAddr.toLowerCase().includes('5016');
-        const isDeltaNeutral = agentAddr.toLowerCase().includes('b6fb');
+        const cleanAddr = agentAddr.toLowerCase().replace(/^0x/i, '');
+        const addrHash = cleanAddr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const strategyType = addrHash % 3;
         
         let decision = 'Mint Range 68k-72k';
         let pnl = -200_000;
         let tradeAmount = 10_000_000;
         let refundAmount = 9_800_000;
         
-        if (isAggressive) {
+        if (strategyType === 1) {
           decision = 'Place Up (Call Option)';
           pnl = 1_250_000; // +1.25 dUSDC
           tradeAmount = 25_000_000;
           refundAmount = 26_250_000;
-        } else if (isDeltaNeutral) {
+        } else if (strategyType === 2) {
           decision = 'Mint Range 69k-71k';
           pnl = 500_000; // +0.50 dUSDC
           tradeAmount = 25_000_000;
