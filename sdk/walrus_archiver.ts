@@ -134,7 +134,7 @@ export async function uploadToWalrus(
 ): Promise<string> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     const response = await fetch(`${WALRUS_PUBLISHER}/v1/blobs`, {
       method: "PUT",

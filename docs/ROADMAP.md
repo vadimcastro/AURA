@@ -1,6 +1,6 @@
 # Roadmap & Dependencies
 
-**Progress: [█████████████████░░░] 85% Complete (85/100) — Visual Audit Studio Complete, Production Hardening Pending**
+**Progress: [███████████████████░] 95% Complete (95/100) — Final alignment and config done, ready for Vercel deploy**
 
 ## ✅ Dev Environment Status
 
@@ -196,6 +196,15 @@ To generate highly authentic market activity without needing complex predictive 
 *   ✅ **Agent Filter:** Dynamically hidden broken legacy agents lacking telemetry from the main table.
 *   ✅ **Agent Settings Modal:** Designed a high-fidelity "simulated" modal allowing users to intuitively configure risk tolerance, deposit/withdraw dUSDC, and liquidate agents via convincing frontend logic.
 *   ✅ **Perfect Aesthetics:** Enforced strict CSS symmetry for primary table buttons, ensuring equal layout weights for optimal visual impact.
+
+### 🟡 Phase 6: Deployment, Live Demo Prep & Hackathon Submission — IN PROGRESS (2026-06-18)
+*   ✅ **Configuration Alignment:** Synced `dashboard/.env` default variables to target active Testnet contract IDs (`0x7cb6...` and `0x4a29...`).
+*   ✅ **Walrus Network Hardening:** Increased upload timeouts to 30s in `walrus_archiver.ts` and fetch timeouts to 30s in `TimelineVisualizer.tsx` to handle public testnet congestion.
+*   ✅ **Dynamic Coin Selection:** Refactored `setupAgent` in `run_multi_agent.ts` to dynamically fetch coin IDs, preventing transaction collision failures.
+*   ✅ **Live Simulation Verification:** Verified bootstrapping and continuous trading logs on Sui Testnet for all 3 agents (Conservative, Aggressive, Delta-Neutral).
+*   ✅ **Aesthetics Alignment:** Color-coded event badges (`register`/`deregister` -> Sky Blue, `borrow` -> Indigo, `slash`/`blacklist` -> Red, `trade` -> Green) for high-contrast scanning.
+*   🔲 **Production Deployment:** Bind GitHub repository to Vercel and host active Audit Studio at `auraregistry.vercel.app`.
+*   🔲 **Demo Recording & Submission:** Record walk-through demo video and draft final hackathon submission resources.
 
 ---
 

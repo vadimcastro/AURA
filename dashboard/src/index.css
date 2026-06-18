@@ -17,6 +17,10 @@
   --color-brand-light:  #eef1fe;
   --color-brand-dark:   #3451d1;
 
+  /* Info/Blue */
+  --color-info:         #0284c7;
+  --color-info-bg:      #f0f9ff;
+
   /* Semantic */
   --color-success:      #12b76a;
   --color-success-bg:   #ecfdf3;

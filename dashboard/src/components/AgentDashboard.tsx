@@ -441,8 +441,16 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                       >
                         <div className="flex items-start gap-3">
                           <div className="mt-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-bold shrink-0" style={{
-                            background: ev.type === 'slash' ? 'var(--color-danger-bg)' : ev.type === 'borrow' ? 'var(--color-brand-light)' : 'var(--color-success-bg)',
-                            color: ev.type === 'slash' ? 'var(--color-danger)' : ev.type === 'borrow' ? 'var(--color-brand)' : 'var(--color-success)'
+                            background: 
+                              ev.type === 'slash' ? 'var(--color-danger-bg)' : 
+                              ev.type === 'borrow' ? 'var(--color-brand-light)' : 
+                              (ev.type === 'register' || ev.type === 'deregister') ? 'var(--color-info-bg)' : 
+                              'var(--color-success-bg)',
+                            color: 
+                              ev.type === 'slash' ? 'var(--color-danger)' : 
+                              ev.type === 'borrow' ? 'var(--color-brand)' : 
+                              (ev.type === 'register' || ev.type === 'deregister') ? 'var(--color-info)' : 
+                              'var(--color-success)'
                           }}>
                             {ev.type}
                           </div>

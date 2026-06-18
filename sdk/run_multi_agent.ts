@@ -18,10 +18,17 @@ const magenta = (text: string) => `\x1b[35m${text}\x1b[0m`;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdcCoinId: string, dusdcAmount: number, suiGasAmount: number) {
+async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdcAmount: number, suiGasAmount: number) {
   const agentKeypair = new Ed25519Keypair();
   const agentAddress = agentKeypair.toSuiAddress();
   console.log(cyan(`\n🤖 Setting up [${agentName}] - Address: ${agentAddress}`));
+
+  // Fetch fresh dUSDC coin ID to avoid stale versions
+  const ownerAddress = ownerKeypair.toSuiAddress();
+  const ownerCoins = await SUI_CLIENT.getCoins({ owner: ownerAddress, coinType: DUSDC_TYPE_TAG });
+  const coin = ownerCoins.data.find(c => parseInt(c.balance, 10) >= dusdcAmount);
+  if (!coin) throw new Error(`Owner has no dUSDC coin with balance >= ${dusdcAmount}`);
+  const dusdcCoinId = coin.coinObjectId;
 
   // 1. Send SUI and Create Policy
   const tx1 = new Transaction();
@@ -117,15 +124,11 @@ async function main() {
   const ownerAddress = ownerKeypair.toSuiAddress();
   console.log(`Owner Address: ${ownerAddress}`);
 
-  const ownerCoins = await SUI_CLIENT.getCoins({ owner: ownerAddress, coinType: DUSDC_TYPE_TAG });
-  if (ownerCoins.data.length === 0) throw new Error("Owner has no dUSDC");
-  const dusdcCoinId = ownerCoins.data[0].coinObjectId;
-
   console.log(green("\n[Phase 1] Bootstrapping 3 distinct Agents..."));
   // Split 25 dUSDC per agent, 0.2 SUI for gas
-  const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", dusdcCoinId, 25_000_000, 100_000_000);
-  const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", dusdcCoinId, 25_000_000, 100_000_000);
-  const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", dusdcCoinId, 25_000_000, 100_000_000);
+  const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", 25_000_000, 100_000_000);
+  const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", 25_000_000, 100_000_000);
+  const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", 25_000_000, 100_000_000);
 
   console.log(green("\n[Phase 2] Starting Continuous Autonomous Trading Loops..."));
 
@@ -143,6 +146,7 @@ async function main() {
       try {
         await executeTradeCycle(agent.agentKeypair, agent.policyId, {
           mockMode: false,
+          walrusMockFallback: false,
           successOverride,
         });
       } catch (error) {
@@ -153,11 +157,11 @@ async function main() {
     }
   };
 
-  runLoop("Conservative", agent1, 20000); // Every 20s
-  await sleep(5000); // Stagger starts
-  runLoop("Aggressive", agent2, 15000); // Every 15s
-  await sleep(5000);
-  runLoop("Delta-Neutral", agent3, 25000); // Every 25s
+  runLoop("Conservative", agent1, 30000); // Every 30s
+  await sleep(10000); // Stagger starts
+  runLoop("Aggressive", agent2, 30000); // Every 30s
+  await sleep(10000);
+  runLoop("Delta-Neutral", agent3, 30000); // Every 30s
 }
 
 main().catch(console.error);

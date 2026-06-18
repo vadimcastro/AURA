@@ -65,7 +65,7 @@ export const TimelineVisualizer: React.FC<TimelineVisualizerProps> = ({
 
       try {
         const url = `${WALRUS_AGGREGATOR}/v1/${blobId}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as Omit<SealEnvelope, 'blobId'>;
         if (active) setEnvelope({ ...data, blobId });
