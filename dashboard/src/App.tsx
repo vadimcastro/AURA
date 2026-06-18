@@ -71,7 +71,7 @@ function App() {
         className="sticky top-1 z-40 border-b"
         style={{ background: 'rgba(248,249,252,0.85)', backdropFilter: 'blur(12px)', borderColor: 'var(--color-border)' }}
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
 
             {/* Logo */}
@@ -99,7 +99,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-24 pt-2">
+      <main className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-24 pt-2">
         {activeTab === 'landing' ? (
           <LandingPage onNavigate={(tab) => setActiveTab(tab as TabType)} />
         ) : (
@@ -134,7 +134,7 @@ function App() {
         className="border-t py-8 text-center"
         style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}
       >
-        <div className="mx-auto max-w-6xl px-4">
+        <div className="mx-auto max-w-[1600px] px-4">
           <p className="text-xs text-[var(--color-text-muted)]">© {new Date().getFullYear()} AURA Protocol. Immutably Secured AgentFi on Sui.</p>
           <p className="mt-1.5 text-[11px] font-mono text-[var(--color-text-muted)] opacity-60">
             Testnet Contract: 0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef

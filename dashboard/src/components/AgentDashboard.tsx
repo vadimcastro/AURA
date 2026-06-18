@@ -537,7 +537,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                               id={`btn-audit-${agent.address.substring(2, 8)}`}
                               onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
                               disabled={!agent.latestBlobId}
-                              className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-[130px] justify-center px-3.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                               style={{
                                 background: 'var(--color-brand-light)',
                                 color: 'var(--color-brand)',
@@ -558,7 +558,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                             </button>
                             <button
                               onClick={() => setSettingsAgent(agent)}
-                              className="px-3.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
+                              className="w-[130px] justify-center px-3.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
                               style={{
                                 background: 'var(--color-surface)',
                                 color: 'var(--color-text-secondary)',
