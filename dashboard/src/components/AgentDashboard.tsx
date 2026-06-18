@@ -47,39 +47,7 @@ export interface LiveEvent {
  */
 const reputationPct = (raw: number) => (raw / 1_000_000) * 100;
 
-/**
- * Generate a simulated event when no new on-chain events are detected to keep the dashboard active.
- */
-const generateSimulatedEvent = (agentList: AgentInfo[]): LiveEvent => {
-  if (!agentList || agentList.length === 0) {
-    return {
-      id: Math.random().toString(),
-      type: 'trade',
-      agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
-      message: 'Agent executed trade cycle - SUCCESS',
-      timestamp: new Date().toISOString(),
-      digest: 'mock-digest-' + Math.random().toString(16).substring(2, 10),
-      isMocked: true,
-    };
-  }
-  const agent = agentList[Math.floor(Math.random() * agentList.length)];
-  const actions = [
-    { type: 'borrow' as const, msg: `Borrowed 10 dUSDC from policy wallet for trade cycle` },
-    { type: 'trade' as const, msg: `Minted range options spread on DeepBook Predict` },
-    { type: 'trade' as const, msg: `Uploaded verifiable audit log to Walrus` },
-    { type: 'trade' as const, msg: `Agent record updated: SUCCESS (Reputation: ${(reputationPct(agent.reputation)).toFixed(1)}%)` },
-  ];
-  const act = actions[Math.floor(Math.random() * actions.length)];
-  return {
-    id: Math.random().toString(),
-    type: act.type,
-    agent: agent.address,
-    message: act.msg,
-    timestamp: new Date().toISOString(),
-    digest: 'mock-digest-' + Math.random().toString(16).substring(2, 10),
-    isMocked: true,
-  };
-};
+
 
 // ─── Agent stat card ─────────────────────────────────────────────────────────
 const StatTile: React.FC<{
@@ -332,39 +300,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
 
     const loadInitialEvents = async () => {
       const ocvs = await fetchOnChainEvents();
-      if (ocvs.length > 0) {
-        setLiveEvents(ocvs);
-      } else {
-        setLiveEvents([
-          {
-            id: '1',
-            type: 'register',
-            agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
-            message: 'Agent registered with 0.01 SUI stake',
-            timestamp: new Date(Date.now() - 60000).toISOString(),
-            digest: 'mock-tx-initial-1',
-            isMocked: true
-          },
-          {
-            id: '2',
-            type: 'borrow',
-            agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
-            message: 'Borrowed 10 dUSDC from policy wallet for trade cycle',
-            timestamp: new Date(Date.now() - 40000).toISOString(),
-            digest: 'mock-tx-initial-2',
-            isMocked: true
-          },
-          {
-            id: '3',
-            type: 'trade',
-            agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
-            message: 'Agent executed trade cycle - SUCCESS',
-            timestamp: new Date(Date.now() - 20000).toISOString(),
-            digest: 'mock-tx-initial-3',
-            isMocked: true
-          }
-        ]);
-      }
+      setLiveEvents(ocvs);
     };
 
     loadInitialEvents();
@@ -377,10 +313,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
         
         if (newEvents.length > 0) {
           return [...newEvents, ...prev].slice(0, 50);
-        } else {
-          const simulated = generateSimulatedEvent(agents);
-          return [simulated, ...prev].slice(0, 50);
         }
+        return prev;
       });
     }, 6000);
 
