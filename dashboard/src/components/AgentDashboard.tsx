@@ -26,6 +26,7 @@ export interface AgentInfo {
   active:         boolean;
   blacklistUntil: number;
   latestBlobId:   string | null;
+  registeredAt?:  number;
 }
 
 export interface LiveEvent {
@@ -109,6 +110,20 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
         const tableId = (registryObj.data?.content as any)?.fields?.agents?.fields?.id?.id;
         if (!tableId) throw new Error('Could not parse agents Table ID from Registry object.');
 
+        // 1.5 Fetch AgentRegistered events to find registration timestamps
+        const regEvents = await suiClient.queryEvents({
+          query: { MoveEventType: `${PACKAGE_ID}::aura_registry::AgentRegistered` },
+          limit: 50,
+          order: 'descending',
+        });
+        const registrationTimes = new Map<string, number>();
+        for (const ev of regEvents.data) {
+          const agent = (ev.parsedJson as any)?.agent;
+          if (agent) {
+            registrationTimes.set(agent.toLowerCase(), Number(ev.timestampMs));
+          }
+        }
+
         // 2. Paginate through dynamic fields to get all agent addresses
         let hasNextPage = true;
         let cursor: string | null = null;
@@ -185,6 +200,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               active,
               blacklistUntil,
               latestBlobId,
+              registeredAt: registrationTimes.get(address.toLowerCase()),
             });
           } catch (err) {
             console.warn(`Could not load record for agent ${address}:`, err);
@@ -221,8 +237,11 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           // Filter out agents without telemetry to preserve UX
           const filteredAgents = agentsData.filter(a => a.latestBlobId !== null);
           
-          // Sort: active first, then by descending reputation, then by descending totalTasks (tie-breaker)
+          // Sort: new agents (registered in last 1 hour) first, then active first, then by descending reputation, then by descending totalTasks
           filteredAgents.sort((a, b) => {
+            const aNew = a.registeredAt ? (Date.now() - a.registeredAt < 3600000) : false;
+            const bNew = b.registeredAt ? (Date.now() - b.registeredAt < 3600000) : false;
+            if (aNew !== bNew) return aNew ? -1 : 1;
             if (a.active !== b.active) return a.active ? -1 : 1;
             if (b.reputation !== a.reputation) return b.reputation - a.reputation;
             return b.totalTasks - a.totalTasks;
@@ -567,9 +586,16 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                             #{index + 1}
                           </div>
                           <div>
-                            <p className="font-mono text-[11px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                              {agent.address.substring(0, 8)}…{agent.address.slice(-4)}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-mono text-[11px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                                {agent.address.substring(0, 8)}…{agent.address.slice(-4)}
+                              </p>
+                              {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
+                                <span className="px-1.5 py-0.2 rounded text-[7px] font-bold uppercase bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe] shrink-0">
+                                  New
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                               {agent.successfulTasks} / {agent.totalTasks} successful
                             </p>
@@ -649,7 +675,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                       >
                         {/* Address */}
                         <td className="px-5 py-3.5 font-mono text-[11px]" style={{ color: 'var(--color-text-primary)' }}>
-                          {agent.address.substring(0, 14)}…{agent.address.slice(-6)}
+                          <div className="flex items-center gap-1.5">
+                            <span>{agent.address.substring(0, 14)}…{agent.address.slice(-6)}</span>
+                            {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
+                              <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe] shrink-0">
+                                New
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Status badge */}
