@@ -18,3 +18,19 @@
 ## D. Agent Key Compromise
 *   **The Issue:** The agent's ephemeral hot key is leaked or stolen, allowing an attacker to execute trades within the policy bounds.
 *   **The Resolution:** The blast radius is bounded by design: the attacker can only trade within the `budget_limit`, only against `allowed_contracts`, and only until `expiration_epoch`. The user can immediately call `revoke_policy` to destroy the policy and reclaim all funds. The short expiration window (typically 24h) limits the exposure period. Post-compromise, the user deploys a new policy with a fresh agent key.
+
+## E. Staking, Deregistration, and Slashing Mechanics
+*   **The SUI Stake Bond:** When an agent registers on the AURA Registry (`aura_registry.move`), they must lock a SUI stake bond (minimum `MIN_STAKE`, set to `10_000_000` MIST / 0.01 SUI). This stake serves as a performance bond/collateral.
+*   **Voluntary Deregistration:** If an agent wishes to exit the system (e.g., they have completed their trading lifecycle and earned high reputation), they call `deregister_agent()`. This returns the entire SUI stake bond back to the agent's hot-key address and deactivates their registry record.
+*   **Slashing vs. Poor Performance:** 
+    *   *Low Reputation:* If an agent is simply unprofitable but remains compliant with the `WalletPolicy` (trades only allowed contracts, stays within budget), they are **not** slashed. They can deregister and reclaim their SUI stake.
+    *   *Protocol Infraction:* If the agent commits a malicious infraction (e.g., failing to submit encrypted Walrus logs, attempting to breach budget bounds, or trading outside allowlisted contracts), the admin/DAO will intervene.
+*   **Front-Run-Slash Prevention:** To prevent a rogue agent from seeing a slash transaction in the mempool and front-running it by calling `deregister_agent()` to escape with their stake, AURA implements a timed suspension pattern:
+    1. The admin calls `blacklist_agent(agent, until_epoch)`.
+    2. During the blacklist period, the agent is blocked from trading and blocked from calling `deregister_agent()`.
+    3. The admin conducts an audit of the Walrus logs. If verified guilty, the admin executes `slash_bond(agent)`, which permanently confiscates the SUI stake and routes it to the client/policy owner to repay losses.
+*   **The "Liquidate" UI Option:** The "Liquidate" button in the frontend settings modal simulates revoking the policy wallet (`revoke_policy`) and returning the remaining quote capital (dUSDC) to the owner's main wallet. It is separate from the agent's SUI stake bond, which resides in the registry.
+
+## F. DeepBook Predict Strategy & Chart Data Accuracy
+*   **DeepBook Replay Simulation (Copy Trading):** AURA agents do not trade randomly. The ingest pipeline (`fetch_deepbook_traces.ts`) queries the Sui blockchain for actual historical DeepBook Predict user `MintRange` transactions (strikes, expiries, amounts) and caches them. The off-chain agent replays these authentic human trades, dynamically scaling whale traces (>1B) to 20 dUSDC and retail traces to 5 dUSDC, acting as an automated copy-trading simulator under on-chain policy bounds.
+*   **Dashboard Chart Data Accuracy:** The main dashboard chart displays illustrative/projected PnL curves. Because client-side browsers cannot easily index and compute historical PnL from raw blockchain transactions in real-time, the chart derives simulated PnL paths mathematically from the agent's current on-chain reputation score (representing projected capital growth or decay if their current win/loss ratio is maintained). A disclaimer is displayed on the dashboard to notify auditors.
