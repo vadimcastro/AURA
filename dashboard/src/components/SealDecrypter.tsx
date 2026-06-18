@@ -119,12 +119,19 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
     setDecrypting(true);
 
     try {
-      const cleanKey = viewerKey.trim();
+      let cleanKey = viewerKey.trim();
       if (!cleanKey) throw new Error('Viewer key cannot be empty.');
+
+      // Convert passphrase to derived key hex
+      const isPassphrase = cleanKey.toLowerCase() === 'mock-seal-passphrase';
+      const keyToUse = isPassphrase ? DEMO_KEY_HEX : cleanKey.replace(/^0x/i, '');
 
       // ── Demo / mocked envelope path ──────────────────────────────────────
       if (envelope._note?.includes('Mocked')) {
-        if (cleanKey !== DEMO_KEY_HEX) {
+        const isDemoKey = 
+          keyToUse.toLowerCase() === DEMO_KEY_HEX.toLowerCase() ||
+          isPassphrase;
+        if (!isDemoKey) {
           throw new Error('Decryption failed: AES-GCM authentication tag mismatch. Verify the key.');
         }
         await new Promise(r => setTimeout(r, 500));
@@ -159,7 +166,7 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
       }
 
       // ── Real AES-GCM decryption path ─────────────────────────────────────
-      const keyBytes        = hexToUint8Array(cleanKey);
+      const keyBytes        = hexToUint8Array(keyToUse);
       const ivBytes         = hexToUint8Array(envelope.iv);
       const tagBytes        = hexToUint8Array(envelope.tag);
       const ciphertextBytes = hexToUint8Array(envelope.ciphertext);
@@ -170,11 +177,11 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
       combined.set(tagBytes, ciphertextBytes.length);
 
       const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', keyBytes.buffer as ArrayBuffer, { name: 'AES-GCM' }, false, ['decrypt'],
+        'raw', keyBytes as unknown as BufferSource, { name: 'AES-GCM' }, false, ['decrypt'],
       );
       const decryptedBuf = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: ivBytes.buffer as ArrayBuffer, tagLength: 128 },
-        cryptoKey, combined.buffer as ArrayBuffer,
+        { name: 'AES-GCM', iv: ivBytes as unknown as BufferSource, tagLength: 128 },
+        cryptoKey, combined as unknown as BufferSource,
       );
       setDecryptedData(JSON.parse(new TextDecoder().decode(decryptedBuf)) as AuditTrace);
     } catch (err) {

@@ -137,7 +137,7 @@ function App() {
         <div className="mx-auto max-w-[1600px] px-4">
           <p className="text-xs text-[var(--color-text-muted)]">© {new Date().getFullYear()} AURA Protocol. Immutably Secured AgentFi on Sui.</p>
           <p className="mt-1.5 text-[11px] font-mono text-[var(--color-text-muted)] opacity-60">
-            Testnet Contract: 0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef
+            Testnet Contract: {import.meta.env.VITE_AURA_PACKAGE_ID || '0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd922'}
           </p>
         </div>
       </footer>
