@@ -1,13 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SuiClient } from '@mysten/sui/client';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
-  TrendingUp, Users, RefreshCw, Settings,
+  Users, RefreshCw, Settings, Terminal, Globe, Trophy,
 } from 'lucide-react';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
 import { AgentSettingsModal } from './AgentSettingsModal';
 
 // ─── Environment config ─────────────────────────────────────────────────────────────────
@@ -32,6 +28,17 @@ export interface AgentInfo {
   latestBlobId:   string | null;
 }
 
+export interface LiveEvent {
+  id: string;
+  type: 'trade' | 'borrow' | 'slash' | 'register' | 'deregister';
+  agent: string;
+  message: string;
+  timestamp: string;
+  digest: string;
+  isMocked: boolean;
+  blobId?: string;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -41,37 +48,37 @@ export interface AgentInfo {
 const reputationPct = (raw: number) => (raw / 1_000_000) * 100;
 
 /**
- * Generate deterministic-looking PnL index curves from agent stats.
- * Uses Math.sin seeded from the address so lines are stable across re-renders.
- * NOTE: This is purely illustrative — it is not real historical trading data.
+ * Generate a simulated event when no new on-chain events are detected to keep the dashboard active.
  */
-const generatePnLData = (agents: AgentInfo[]) => {
-  const DAYS = 10;
-  return Array.from({ length: DAYS }, (_, i) => {
-    const row: Record<string, number | string> = { name: `Day ${i + 1}` };
-    agents.forEach((agent) => {
-      // Derive a stable seed from the last 6 chars of the address
-      const seed = [...agent.address.slice(-6)].reduce(
-        (acc, c) => acc + c.charCodeAt(0), 0,
-      );
-      const repFactor  = reputationPct(agent.reputation) / 100; // 0..1
-      const slope      = (repFactor - 0.5) * 10;               // -5..+5 per day
-      const volatility = (1 - repFactor) * 6;                  // lower rep → higher vol
-
-      let pnl = 100;
-      for (let d = 0; d <= i; d++) {
-        pnl += slope + Math.sin(seed + d * 1.3) * volatility;
-      }
-      if (!agent.active) {
-        // Slashed agent shows a visible drawdown trend
-        pnl = Math.max(25, pnl - (DAYS - i) * 5);
-      }
-
-      const key = `${agent.address.substring(2, 8)}…`;
-      row[key] = parseFloat(pnl.toFixed(2));
-    });
-    return row;
-  });
+const generateSimulatedEvent = (agentList: AgentInfo[]): LiveEvent => {
+  if (!agentList || agentList.length === 0) {
+    return {
+      id: Math.random().toString(),
+      type: 'trade',
+      agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
+      message: 'Agent executed trade cycle - SUCCESS',
+      timestamp: new Date().toISOString(),
+      digest: 'mock-digest-' + Math.random().toString(16).substring(2, 10),
+      isMocked: true,
+    };
+  }
+  const agent = agentList[Math.floor(Math.random() * agentList.length)];
+  const actions = [
+    { type: 'borrow' as const, msg: `Borrowed 10 dUSDC from policy wallet for trade cycle` },
+    { type: 'trade' as const, msg: `Minted range options spread on DeepBook Predict` },
+    { type: 'trade' as const, msg: `Uploaded verifiable audit log to Walrus` },
+    { type: 'trade' as const, msg: `Agent record updated: SUCCESS (Reputation: ${(reputationPct(agent.reputation)).toFixed(1)}%)` },
+  ];
+  const act = actions[Math.floor(Math.random() * actions.length)];
+  return {
+    id: Math.random().toString(),
+    type: act.type,
+    agent: agent.address,
+    message: act.msg,
+    timestamp: new Date().toISOString(),
+    digest: 'mock-digest-' + Math.random().toString(16).substring(2, 10),
+    isMocked: true,
+  };
 };
 
 // ─── Agent stat card ─────────────────────────────────────────────────────────
@@ -103,8 +110,7 @@ interface AgentDashboardProps {
   onSelectAgent: (agentAddress: string, blobId: string | null) => void;
 }
 
-// Chart color palette — accessible, non-neon
-const CHART_COLORS = ['#4f6ef7', '#10b981', '#f59e0b', '#ef4444'];
+
 
 export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent }) => {
   const [agents, setAgents]       = useState<AgentInfo[]>([]);
@@ -113,6 +119,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
   const [refreshKey, setRefreshKey] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [settingsAgent, setSettingsAgent] = useState<AgentInfo | null>(null);
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -264,8 +271,121 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
     return () => { active = false; };
   }, [refreshKey]);
 
-  // Memoize chart data so it only recomputes when agents change
-  const pnlData = useMemo(() => generatePnLData(agents), [agents]);
+  useEffect(() => {
+    const fetchOnChainEvents = async () => {
+      try {
+        if (!PACKAGE_ID) return [];
+        const events = await suiClient.queryEvents({
+          query: { MoveModule: { package: PACKAGE_ID, module: `${PACKAGE_ID}::aura_registry` } },
+          limit: 10,
+          order: 'descending',
+        });
+        
+        return events.data.map((ev) => {
+          const typeStr = ev.type;
+          let type: 'trade' | 'borrow' | 'slash' | 'register' | 'deregister' = 'trade';
+          let message = 'On-chain event recorded';
+          
+          if (typeStr.includes('AgentRegistered')) {
+            type = 'register';
+            const stake = (ev.parsedJson as any)?.stake_amount;
+            message = `Agent registered with ${stake ? stake / 1e9 : 0.01} SUI stake`;
+          } else if (typeStr.includes('TaskRecorded')) {
+            type = 'trade';
+            const success = (ev.parsedJson as any)?.success;
+            const rep = (ev.parsedJson as any)?.reputation_score;
+            message = `Task completed: ${success ? 'SUCCESS' : 'FAILED'} (Reputation: ${rep ? (rep / 10000).toFixed(1) : 50}%)`;
+          } else if (typeStr.includes('WalrusHistoryUpdated')) {
+            type = 'trade';
+            const vec = (ev.parsedJson as any)?.blob_id;
+            const blobId = Array.isArray(vec) ? String.fromCharCode(...vec) : String(vec);
+            message = `Audit log committed. Blob ID: ${blobId.substring(0, 15)}...`;
+          } else if (typeStr.includes('AgentSlashed')) {
+            type = 'slash';
+            const amt = (ev.parsedJson as any)?.slashed_amount;
+            message = `Agent slashed by admin! Seized ${amt ? amt / 1e9 : 0} SUI`;
+          } else if (typeStr.includes('AgentBlacklisted')) {
+            type = 'slash';
+            const epoch = (ev.parsedJson as any)?.until_epoch;
+            message = `Agent blacklisted/suspended until epoch ${epoch}`;
+          } else if (typeStr.includes('AgentDeregistered')) {
+            type = 'deregister';
+            const ret = (ev.parsedJson as any)?.stake_returned;
+            message = `Agent deregistered and reclaimed ${ret ? ret / 1e9 : 0} SUI`;
+          }
+          
+          return {
+            id: ev.id.txDigest + '-' + ev.id.eventSeq,
+            type,
+            agent: ev.sender,
+            message,
+            timestamp: new Date(Number(ev.timestampMs)).toISOString(),
+            digest: ev.id.txDigest,
+            isMocked: false,
+          } as LiveEvent;
+        });
+      } catch (err) {
+        console.warn('Could not query on-chain events:', err);
+        return [];
+      }
+    };
+
+    const loadInitialEvents = async () => {
+      const ocvs = await fetchOnChainEvents();
+      if (ocvs.length > 0) {
+        setLiveEvents(ocvs);
+      } else {
+        setLiveEvents([
+          {
+            id: '1',
+            type: 'register',
+            agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
+            message: 'Agent registered with 0.01 SUI stake',
+            timestamp: new Date(Date.now() - 60000).toISOString(),
+            digest: 'mock-tx-initial-1',
+            isMocked: true
+          },
+          {
+            id: '2',
+            type: 'borrow',
+            agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
+            message: 'Borrowed 10 dUSDC from policy wallet for trade cycle',
+            timestamp: new Date(Date.now() - 40000).toISOString(),
+            digest: 'mock-tx-initial-2',
+            isMocked: true
+          },
+          {
+            id: '3',
+            type: 'trade',
+            agent: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
+            message: 'Agent executed trade cycle - SUCCESS',
+            timestamp: new Date(Date.now() - 20000).toISOString(),
+            digest: 'mock-tx-initial-3',
+            isMocked: true
+          }
+        ]);
+      }
+    };
+
+    loadInitialEvents();
+
+    const interval = setInterval(async () => {
+      const ocvs = await fetchOnChainEvents();
+      setLiveEvents((prev) => {
+        const existingDigests = new Set(prev.map(e => e.digest));
+        const newEvents = ocvs.filter(e => !existingDigests.has(e.digest));
+        
+        if (newEvents.length > 0) {
+          return [...newEvents, ...prev].slice(0, 50);
+        } else {
+          const simulated = generateSimulatedEvent(agents);
+          return [simulated, ...prev].slice(0, 50);
+        }
+      });
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [agents, refreshKey]);
 
   // Derived stats
   const totalAgents  = agents.length;
@@ -343,71 +463,161 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             />
           </div>
 
-          {/* Performance chart */}
-          <div
-            className="rounded-2xl p-6"
-            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-          >
-            <h3
-              className="text-[15px] font-semibold mb-1 flex items-center gap-2"
-              style={{ color: 'var(--color-text-primary)' }}
+          {/* Live grid section */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Live Trade Tracker */}
+            <div
+              className="lg:col-span-2 rounded-2xl p-6 flex flex-col justify-between"
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', minHeight: '380px' }}
             >
-              <TrendingUp className="h-4 w-4" style={{ color: 'var(--color-brand)' }} />
-              Reputation-Weighted Performance Index
-            </h3>
-            <p className="text-[12px] mb-5" style={{ color: 'var(--color-text-muted)' }}>
-              Illustrative PnL curves derived from on-chain reputation scores. Not real historical trade data.
-            </p>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={pnlData} margin={{ top: 4, right: 20, left: 0, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-soft)" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-                    axisLine={{ stroke: 'var(--color-border)' }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    domain={['auto', 'auto']}
-                    unit="%"
-                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={42}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--color-surface)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '10px',
-                      fontSize: '12px',
-                      color: 'var(--color-text-primary)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                    }}
-                  />
-                  <Legend
-                    verticalAlign="top"
-                    height={32}
-                    wrapperStyle={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}
-                  />
-                  {agents.map((agent, idx) => {
-                    const key = `${agent.address.substring(2, 8)}…`;
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="h-4 w-4" style={{ color: 'var(--color-brand)' }} />
+                    <h3 className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                      Live Activity & Telemetry Feed
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                      Live Monitoring Active
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Event Logs Container */}
+                <div 
+                  className="overflow-y-auto space-y-2.5 max-h-[280px] pr-1 scrollbar-thin"
+                >
+                  {liveEvents.length === 0 ? (
+                    <div className="py-12 flex items-center justify-center text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
+                      Waiting for events...
+                    </div>
+                  ) : (
+                    liveEvents.map((ev) => (
+                      <div 
+                        key={ev.id}
+                        className="p-3 rounded-xl border flex items-start justify-between gap-3 text-[12px] transition-all"
+                        style={{ 
+                          background: 'var(--color-surface-2)', 
+                          borderColor: 'var(--color-border-soft)'
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-bold shrink-0" style={{
+                            background: ev.type === 'slash' ? 'var(--color-danger-bg)' : ev.type === 'borrow' ? 'var(--color-brand-light)' : 'var(--color-success-bg)',
+                            color: ev.type === 'slash' ? 'var(--color-danger)' : ev.type === 'borrow' ? 'var(--color-brand)' : 'var(--color-success)'
+                          }}>
+                            {ev.type}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-[12px]" style={{ color: 'var(--color-text-primary)' }}>
+                              {ev.message}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1 text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                              <span className="font-mono">{ev.agent.substring(0, 8)}…{ev.agent.slice(-4)}</span>
+                              <span>·</span>
+                              <span>{new Date(ev.timestamp).toLocaleTimeString()}</span>
+                              {ev.digest && (
+                                <>
+                                  <span>·</span>
+                                  <a 
+                                    href={`https://suiscan.xyz/testnet/tx/${ev.digest}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="hover:underline font-mono"
+                                    style={{ color: 'var(--color-brand)' }}
+                                  >
+                                    {ev.digest.substring(0, 10)}…
+                                  </a>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          {ev.isMocked ? (
+                            <span className="inline-flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded border" style={{ color: 'var(--color-text-muted)', borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}>
+                              SIMULATED
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
+                              <Globe className="h-2.5 w-2.5" /> ON-CHAIN
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Performing Agents */}
+            <div
+              className="rounded-2xl p-6 flex flex-col justify-between"
+              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="h-4 w-4" style={{ color: '#f59e0b' }} />
+                  <h3 className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                    Top Performing Agents
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {agents.slice(0, 3).map((agent, index) => {
+                    const repPercent = reputationPct(agent.reputation);
+                    const isWinner = index === 0;
                     return (
-                      <Line
-                        key={agent.address}
-                        type="monotone"
-                        dataKey={key}
-                        stroke={agent.active ? CHART_COLORS[idx % CHART_COLORS.length] : '#d1d5db'}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 5 }}
-                        strokeDasharray={agent.active ? undefined : '5 4'}
-                      />
+                      <div 
+                        key={agent.address} 
+                        className="flex items-center justify-between p-3 rounded-xl border transition-all hover:scale-[1.01]"
+                        style={{ 
+                          background: isWinner ? 'rgba(245, 158, 11, 0.04)' : 'var(--color-surface)', 
+                          borderColor: isWinner ? 'rgba(245, 158, 11, 0.2)' : 'var(--color-border-soft)'
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold text-[13px] border" style={{
+                            background: index === 0 ? '#fbf2db' : index === 1 ? '#eef0f2' : '#fcf5eb',
+                            color: index === 0 ? '#b45309' : index === 1 ? '#4b5563' : '#b45309',
+                            borderColor: index === 0 ? '#f59e0b' : index === 1 ? '#d1d5db' : '#f59e0b'
+                          }}>
+                            #{index + 1}
+                          </div>
+                          <div>
+                            <p className="font-mono text-[11px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                              {agent.address.substring(0, 8)}…{agent.address.slice(-4)}
+                            </p>
+                            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                              {agent.successfulTasks} / {agent.totalTasks} successful
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="text-right">
+                          <span className="text-[13px] font-bold" style={{
+                            color: repPercent >= 70 ? 'var(--color-success)' : repPercent >= 40 ? 'var(--color-warning)' : 'var(--color-danger)'
+                          }}>
+                            {repPercent.toFixed(1)}%
+                          </span>
+                          <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--color-text-muted)' }}>Reputation</p>
+                        </div>
+                      </div>
                     );
                   })}
-                </LineChart>
-              </ResponsiveContainer>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t mt-4 border-dashed" style={{ borderColor: 'var(--color-border)' }}>
+                <p className="text-[11px] text-center" style={{ color: 'var(--color-text-muted)' }}>
+                  Stakes are automatically locked and delegated in AURA registry.
+                </p>
+              </div>
             </div>
           </div>
 
