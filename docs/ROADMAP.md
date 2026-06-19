@@ -197,7 +197,7 @@ To generate highly authentic market activity without needing complex predictive 
 *   ✅ **Agent Settings Modal:** Designed a high-fidelity "simulated" modal allowing users to intuitively configure risk tolerance, deposit/withdraw dUSDC, and liquidate agents via convincing frontend logic.
 *   ✅ **Perfect Aesthetics:** Enforced strict CSS symmetry for primary table buttons, ensuring equal layout weights for optimal visual impact.
 
-### ✅ Phase 6: Deployment, Live Demo Prep & Hackathon Submission — COMPLETE (2026-06-18)
+### ✅ Phase 6: Deployment & Configuration — COMPLETE (2026-06-18)
 *   ✅ **Configuration Alignment:** Synced `dashboard/.env` default variables to target active Testnet contract IDs (`0x7cb6...` and `0x4a29...`).
 *   ✅ **Walrus Network Hardening:** Increased upload timeouts to 30s in `walrus_archiver.ts` and fetch timeouts to 30s in `TimelineVisualizer.tsx` to handle public testnet congestion.
 *   ✅ **Dynamic Coin Selection & Merging:** Refactored `setupAgent` in `run_multi_agent.ts` to dynamically fetch and atomically merge fragmented dUSDC coins (`tx2.mergeCoins`) in a single transaction block.
@@ -207,7 +207,16 @@ To generate highly authentic market activity without needing complex predictive 
 *   ✅ **Decryption Sandbox Hardening:** Added `0x` hex cleaning, case-insensitive passphrase parsing (`mock-seal-passphrase` -> scrypt derived key), and direct TypedArray SubtleCrypto mapping to prevent array buffer offset issues.
 *   ✅ **Dynamic Mock Decryption:** Implemented deterministic modulo-3 address hashing to dynamically distribute realistic strategies (Conservative, Aggressive, Delta-Neutral) and budgets to freshly generated agents.
 *   ✅ **Rich Live Event Feed:** Fetched registry and policy events in parallel to display detailed borrowing, depositing, sashing, and deregistration events in the feed.
-*   🔲 **Demo Recording & Submission:** Ready to record the walkthrough demo video and submit the final hackathon package.
+
+### 🌐 Phase 6.2: E2E UI-Driven Wallet & Agent Management — PLANNED
+*   🔲 **dApp-Kit Integration:** Integrate `@mysten/dapp-kit` for full browser wallet connection (Backpack, Chrome Sui Wallet).
+*   🔲 **On-Chain Agent Builder Form:** Construct a "Register New Agent" form in the UI supporting:
+    *   **Risk Preset Slider**: Standard risk parameter scaling (Conservative / Balanced / Aggressive) with elegant, minimal visual steps.
+    *   **Copy Trading Selector**: Specific target agent address or SuiNS name input, defaulting to a list of available agents from the Top Performers registry directory.
+    *   *Constraint*: The preset slider and copy selector are mutually exclusive.
+*   🔲 **Ephemeral Key Management:** Generate and store agent keypairs in browser `localStorage` and expose "Export Private Key" (`suiprivkey...`) for external tool compatibility.
+*   🔲 **In-Browser Agent Execution Loop:** Implement an autonomous loop runner in the browser dashboard console using the agent's ephemeral key.
+*   🔲 **Interactive Policy Control & Liquidation:** Replace simulated settings controls with live on-chain PTBs for strategy updates (adjusting slider or changing copy target address/profile), depositing funds, and calling Move liquidation functions directly.
 
 ---
 
@@ -258,7 +267,9 @@ To deploy the completed Phase 5 dashboard to Vercel, configure the following set
 *   **Railway Account:** Prepared for deploying any optional caching microservices or indexer layers (if required by performance testing; we will prioritize a client-side-only architecture to minimize infrastructure complexity, but Railway is our backup hosting for server-side utilities).
 *   **Wallet Setup:** Ensure your local browser wallet (e.g., Sui Wallet) is configured for Testnet and has a small SUI balance for testing frontend policy creations.
 
-### Phase 6: Optimistic Slashing & Decentralized Dispute Resolution
+## 🚀 Phase 7: Optimistic Slashing (OS) & Sui Ecosystem Expansion — PLANNED
+
+### 1. Optimistic Slashing (OS) & Dispute Resolution
 To remove the single-point-of-failure admin key in the reputation registry, introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
 1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a small SUI bond and submitting a `Dispute` object on-chain referencing the suspect `blob_id`.
 2.  **Disclosure Window:** The agent operator has a configurable challenge period (e.g. 24 hours, enforced via `sui::clock`) to publish the Seal decryption key for the corresponding Walrus trace.
@@ -267,8 +278,22 @@ To remove the single-point-of-failure admin key in the reputation registry, intr
     *   If the key is published → a DAO committee (or on-chain oracle) verifies the decrypted trace against the policy bounds. Innocent → user's dispute bond is awarded to the operator. Guilty → operator's performance bond is slashed and distributed to the user.
 4.  **Griefing Resistance:** The dispute bond cost is calibrated to make frivolous disputes unprofitable — the disputer risks losing their bond if the agent is proven innocent.
 
-## 🔮 Future Polish (If Time Permits)
-- [ ] **Sui Wallet Browser Integration:** Integrate `@mysten/dapp-kit` to allow the Owner to connect a Chrome Sui Wallet. Replace the "simulated" Agent Settings Modal with real Sui Programmable Transaction Blocks that mutate the `AgentWalletPolicy` on-chain.
+### 2. Sui Native Infrastructure Integrations
+To expand AURA's full-stack capabilities, we will integrate with key Sui ecosystem services:
+*   **Sui Name Service (SuiNS)**: Integrate reverse-lookup APIs in the dashboard so that instead of raw hex addresses, agent profiles display readable domains (e.g., `alpha-trader.sui`), dramatically upgrading visual design and clarity.
+*   **Sui zkLogin**: Implement OAuth-based authentication (Google, Facebook, Apple) to remove the requirement of installing wallet extensions for Web2-native portfolio managers. This derives a secure, ephemeral Sui address automatically.
+*   **Sui Kiosk**: Package agent profiles and their historical trade audit logs into transferable NFTs with royalty enforcement. This allows creators of high-performing autonomous strategies to monetize their algorithms securely.
+*   **DeepBook v3 Native Routing**: Directly submit limit and market orders from the agent loop into Sui's core orderbook liquidity pool, replacing mock-execution routes.
+
+### 3. Gas Optimization Analysis
+Based on Sui CLI and Move VM runtime benchmarks, the current gas fee configurations are calibrated to the practical minimums:
+*   **Gas Cap (setGasBudget)**: Retained at `2,000,000` Mist (0.002 SUI) for agent PTBs. On Sui, execution charges are calculated based on actual bytecode instructions and objects mutated, refunding unused budget. While standard coin transfers require only `1,000,000` Mist, dynamic checks (like inspecting hot-potato tickets or parsing policy registries) require a safe ceiling to prevent aborts. Lowering the cap yields zero cost benefits while introducing high failure rates.
+*   **Agent Funding**: Configured at `100,000,000` Mist (0.1 SUI) for initial setup. This covers up to 50 active copy-trading execution cycles (roughly 25 minutes of continuous 30-second loop cycles) before requiring a top-up.
+
+## 🚀 Phase 8: Live Walkthrough Demo & Submission — PLANNED
+
+*   🔲 **Walkthrough Video Recording**: Record the live walk-through demo video showcasing the user-driven browser registration, copy-trading loop, telemetry decryption, and contract liquidation.
+*   🔲 **Hackathon Submission Compilation**: Package the final submission assets, links to the deployed Vercel dashboard, GitHub repository, and YouTube walkthrough video.
 
 ---
 

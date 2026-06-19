@@ -69,6 +69,7 @@ AURA/
 │   └── sources/
 │       ├── agent_wallet_policy.move   # Policy wallet + TradeTicket
 │       └── aura_registry.move         # Reputation registry + slashing
+├── dashboard/                         # React/Vite Audit Studio + Onboarding Dock UI
 └── sdk/
     ├── predict_agent.ts               # DeepBook Predict trading loop
     ├── walrus_archiver.ts             # Seal encryption + Walrus upload
@@ -112,6 +113,11 @@ sui client publish --gas-budget 100000000
 cd ../sdk
 npm install
 npx ts-node predict_agent.ts
+
+# Run the React/Vite Audit Studio Dashboard
+cd ../dashboard
+npm install
+npm run dev
 ```
 
 ---

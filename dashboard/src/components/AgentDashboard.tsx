@@ -3,6 +3,7 @@ import { SuiClient } from '@mysten/sui/client';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
   Users, RefreshCw, Settings, Terminal, Globe, Trophy,
+  X, Plus, Play, Square
 } from 'lucide-react';
 import { AgentSettingsModal } from './AgentSettingsModal';
 
@@ -89,6 +90,88 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
   const [isExpanded, setIsExpanded] = useState(false);
   const [settingsAgent, setSettingsAgent] = useState<AgentInfo | null>(null);
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
+
+  // Onboarding Dock States
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [newAgentName, setNewAgentName] = useState('');
+  const [newAgentDeposit, setNewAgentDeposit] = useState('25');
+  const [newAgentStrategyMode, setNewAgentStrategyMode] = useState<'preset' | 'copy'>('preset');
+  const [newAgentRiskLevel, setNewAgentRiskLevel] = useState<number>(50);
+  const [newAgentCopyTarget, setNewAgentCopyTarget] = useState('');
+  const [isDeploying, setIsDeploying] = useState(false);
+
+  const [localAgents, setLocalAgents] = useState<AgentInfo[]>([]);
+  const [activeLoops, setActiveLoops] = useState<Record<string, boolean>>({});
+
+  const allAgents = [...localAgents, ...agents];
+
+  // Helper to handle deploying a mock agent
+  const handleDeployAgent = () => {
+    if (!newAgentName.trim()) return;
+    setIsDeploying(true);
+
+    setTimeout(() => {
+      // Create a new mock agent address
+      const randomHex = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
+      const mockAddr = `0x${randomHex}96f2ba1443f676ffb6a8`;
+      const depositVal = parseFloat(newAgentDeposit) || 25;
+
+      const newAgent: AgentInfo = {
+        address: mockAddr,
+        reputation: 1000000, // 100.0% starting rep
+        totalTasks: 0,
+        successfulTasks: 0,
+        stakeAmount: 0.1, // 0.1 SUI gas / stake
+        active: true,
+        blacklistUntil: 0,
+        latestBlobId: 'mock-walrus-telemetry-fresh',
+        registeredAt: Date.now(),
+      };
+
+      setLocalAgents((prev) => [newAgent, ...prev]);
+
+      // Add registration trace events to the log
+      const registerEv: LiveEvent = {
+        id: `register-tx-${Date.now()}-1`,
+        type: 'register',
+        agent: mockAddr,
+        message: `Agent registered on-chain with 0.1 SUI collateral`,
+        timestamp: new Date().toISOString(),
+        digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
+        isMocked: true,
+      };
+
+      const policyEv: LiveEvent = {
+        id: `register-tx-${Date.now()}-2`,
+        type: 'register',
+        agent: mockAddr,
+        message: `Policy created: budget limit set to ${depositVal.toFixed(2)} dUSDC`,
+        timestamp: new Date().toISOString(),
+        digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
+        isMocked: true,
+      };
+
+      setLiveEvents((prev) => [policyEv, registerEv, ...prev]);
+      
+      // Auto toggle the execution loop
+      setActiveLoops(prev => ({ ...prev, [mockAddr]: true }));
+
+      setIsDeploying(false);
+      setShowOnboarding(false);
+      setNewAgentName('');
+      setNewAgentDeposit('25');
+      setNewAgentCopyTarget('');
+
+      // Scroll to Agents table
+      setTimeout(() => {
+        document.getElementById('agents-table-title')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }, 1500);
+  };
+
+  const handleToggleLoop = (addr: string) => {
+    setActiveLoops(prev => ({ ...prev, [addr]: !prev[addr] }));
+  };
 
   useEffect(() => {
     let active = true;
@@ -375,13 +458,64 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
     return () => clearInterval(interval);
   }, [agents, refreshKey]);
 
+  // Browser-based simulation loop for running agents
+  useEffect(() => {
+    const activeAddrs = Object.keys(activeLoops).filter(k => activeLoops[k]);
+    if (activeAddrs.length === 0) return;
+
+    const interval = setInterval(() => {
+      activeAddrs.forEach(addr => {
+        const ag = allAgents.find(a => a.address === addr);
+        if (!ag) return;
+
+        const isSuccess = Math.random() > 0.15; // 85% success
+        const decision = Math.random() > 0.5 ? "Place Up (Call Option)" : "Mint Range 68k-72k";
+        const tradeAmount = 10_000_000;
+        const refundAmount = isSuccess ? 10_500_000 : 9_500_000;
+        const pnl = refundAmount - tradeAmount;
+        
+        // Update local agents stats
+        setLocalAgents(prev => prev.map(a => {
+          if (a.address === addr) {
+            const nextTasks = a.totalTasks + 1;
+            const nextSuccess = a.successfulTasks + (isSuccess ? 1 : 0);
+            return {
+              ...a,
+              totalTasks: nextTasks,
+              successfulTasks: nextSuccess,
+              reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000)))
+            };
+          }
+          return a;
+        }));
+
+        // Add telemetry log
+        const blobId = 'mock-walrus-telemetry-' + Math.random().toString(36).substring(2, 10);
+        const newEv: LiveEvent = {
+          id: 'mock-tx-' + Date.now() + '-' + Math.random(),
+          type: 'trade',
+          agent: addr,
+          message: `Simulated trade cycle: ${decision} returned ${refundAmount / 1e6} dUSDC (${pnl >= 0 ? '+' : ''}${pnl / 1e6} dUSDC PnL)`,
+          timestamp: new Date().toISOString(),
+          digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (Sim)',
+          isMocked: true,
+          blobId
+        };
+        
+        setLiveEvents(prev => [newEv, ...prev].slice(0, 50));
+      });
+    }, 12000);
+
+    return () => clearInterval(interval);
+  }, [activeLoops, localAgents]);
+
   // Derived stats
-  const totalAgents  = agents.length;
-  const activeAgents = agents.filter(a => a.active).length;
+  const totalAgents  = allAgents.length;
+  const activeAgents = allAgents.filter(a => a.active).length;
   const avgRepPct    = totalAgents > 0
-    ? agents.reduce((acc, a) => acc + reputationPct(a.reputation), 0) / totalAgents
+    ? allAgents.reduce((acc, a) => acc + reputationPct(a.reputation), 0) / totalAgents
     : 0;
-  const totalStake   = agents.reduce((acc, a) => acc + a.stakeAmount, 0);
+  const totalStake   = allAgents.reduce((acc, a) => acc + a.stakeAmount, 0);
 
   return (
     <div className="space-y-7 py-4">
@@ -396,21 +530,169 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             Compare active trading agents, inspect reputation scores, and audit on-chain PnL telemetry.
           </p>
         </div>
-        <button
-          id="btn-sync-onchain"
-          onClick={() => setRefreshKey(k => k + 1)}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-60"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            color: 'var(--color-text-secondary)',
-          }}
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Sync On-Chain State
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowOnboarding(prev => !prev)}
+            className="flex items-center gap-2 px-4 py-2 text-[12px] font-bold rounded-xl transition-all cursor-pointer text-white bg-[var(--color-brand)] shadow-sm hover:opacity-90"
+          >
+            <Plus className="h-3.5 w-3.5" /> Register Agent
+          </button>
+          <button
+            id="btn-sync-onchain"
+            onClick={() => setRefreshKey(k => k + 1)}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-60"
+            style={{
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Sync On-Chain State
+          </button>
+        </div>
       </div>
+
+      {/* Onboarding Panel Form */}
+      {showOnboarding && (
+        <div 
+          className="p-6 rounded-2xl border transition-all duration-300 ease-in-out shadow-lg"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <div className="flex justify-between items-center mb-5 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+            <h3 className="text-[14px] font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">Register Copy-Trading Agent</h3>
+            <button onClick={() => setShowOnboarding(false)} className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Left: Base Parameters */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Agent Name</label>
+                <input 
+                  type="text" 
+                  value={newAgentName}
+                  onChange={e => setNewAgentName(e.target.value)}
+                  placeholder="e.g. Sui Vol Scout"
+                  className="w-full px-3.5 py-2 rounded-lg text-[13px] outline-none"
+                  style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Initial Funding (dUSDC)</label>
+                <input 
+                  type="number" 
+                  value={newAgentDeposit}
+                  onChange={e => setNewAgentDeposit(e.target.value)}
+                  placeholder="25.00"
+                  className="w-full px-3.5 py-2 rounded-lg text-[13px] outline-none"
+                  style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                />
+              </div>
+            </div>
+
+            {/* Right: Strategy Switcher & Options */}
+            <div className="space-y-4 md:border-l md:pl-6" style={{ borderColor: 'var(--color-border)' }}>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Strategy Selection</label>
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 border" style={{ borderColor: 'var(--color-border)' }}>
+                  <button
+                    type="button"
+                    onClick={() => setNewAgentStrategyMode('preset')}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'preset' ? 'bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500'}`}
+                  >
+                    Strategy Preset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewAgentStrategyMode('copy')}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'copy' ? 'bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500'}`}
+                  >
+                    Copy Profile
+                  </button>
+                </div>
+              </div>
+
+              {newAgentStrategyMode === 'preset' ? (
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between items-center text-[12px] font-semibold">
+                    <span className="text-neutral-500">Risk Setting:</span>
+                    <span className="font-mono text-neutral-900 dark:text-white px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded">
+                      {newAgentRiskLevel === 25 ? 'Conservative' : newAgentRiskLevel === 50 ? 'Balanced' : 'Aggressive'}
+                    </span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="25" 
+                    max="75" 
+                    step="25"
+                    value={newAgentRiskLevel}
+                    onChange={e => setNewAgentRiskLevel(parseInt(e.target.value))}
+                    className="w-full h-1 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                  />
+                  <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase">
+                    <span>Conservative</span>
+                    <span>Balanced</span>
+                    <span>Aggressive</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">Select Target Agent to Copy</label>
+                    <select
+                      value={newAgentCopyTarget}
+                      onChange={e => setNewAgentCopyTarget(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-lg text-[12px] outline-none"
+                      style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                    >
+                      <option value="">-- Choose from top rank --</option>
+                      {agents.map((a) => (
+                        <option key={a.address} value={a.address}>
+                          {a.address.substring(0, 12)}… ({reputationPct(a.reputation).toFixed(0)}% Rep)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase">Or Paste Custom Profile / SuiNS</label>
+                    <input 
+                      type="text" 
+                      value={newAgentCopyTarget}
+                      onChange={e => setNewAgentCopyTarget(e.target.value)}
+                      placeholder="Sui address or name.sui"
+                      className="w-full px-3 py-1.5 rounded-lg text-[12px] outline-none"
+                      style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+            <button 
+              onClick={() => setShowOnboarding(false)} 
+              disabled={isDeploying}
+              className="px-4 py-2 text-[12px] font-semibold text-neutral-500 hover:text-neutral-700 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleDeployAgent}
+              disabled={isDeploying}
+              className="px-5 py-2 text-[12px] font-bold rounded-lg text-white bg-[var(--color-brand)] transition-all cursor-pointer hover:opacity-90 disabled:opacity-50"
+            >
+              {isDeploying ? 'Deploying...' : 'Deploy Agent'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error banner */}
       {error && (
@@ -565,7 +847,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                 </div>
                 
                 <div className="space-y-4">
-                  {agents.slice(0, 3).map((agent, index) => {
+                  {allAgents.slice(0, 3).map((agent, index) => {
                     const repPercent = reputationPct(agent.reputation);
                     const isWinner = index === 0;
                     return (
@@ -633,11 +915,11 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               className="px-6 py-4 border-b flex items-center justify-between"
               style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
             >
-              <h3 className="text-[14px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              <h3 className="text-[14px] font-semibold" style={{ color: 'var(--color-text-primary)' }} id="agents-table-title">
                 Registered Agents Directory
               </h3>
               <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                {agents.length} agent{agents.length !== 1 ? 's' : ''}
+                {allAgents.length} agent{allAgents.length !== 1 ? 's' : ''}
               </span>
             </div>
             <div className="overflow-x-auto">
@@ -659,7 +941,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                   </tr>
                 </thead>
                 <tbody>
-                  {(isExpanded ? agents : agents.slice(0, 12)).map((agent) => {
+                  {(isExpanded ? allAgents : allAgents.slice(0, 12)).map((agent) => {
                     const repPct = reputationPct(agent.reputation);
                     const srPct  = agent.totalTasks > 0
                       ? ((agent.successfulTasks / agent.totalTasks) * 100).toFixed(1)
@@ -757,7 +1039,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                               id={`btn-audit-${agent.address.substring(2, 8)}`}
                               onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
                               disabled={!agent.latestBlobId}
-                              className="w-[130px] justify-center px-3.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="w-[125px] justify-center px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                               style={{
                                 background: 'var(--color-brand-light)',
                                 color: 'var(--color-brand)',
@@ -777,8 +1059,27 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                               Audit Telemetry
                             </button>
                             <button
+                              onClick={() => handleToggleLoop(agent.address)}
+                              className="w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
+                              style={{
+                                background: activeLoops[agent.address] ? 'rgba(16, 185, 129, 0.08)' : 'var(--color-surface)',
+                                color: activeLoops[agent.address] ? 'var(--color-success)' : 'var(--color-text-secondary)',
+                                borderColor: activeLoops[agent.address] ? 'var(--color-success)' : 'var(--color-border)'
+                              }}
+                            >
+                              {activeLoops[agent.address] ? (
+                                <>
+                                  <Square className="h-3 w-3 fill-current text-emerald-500" /> Active
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-3 w-3 fill-current text-neutral-400" /> Run Loop
+                                </>
+                              )}
+                            </button>
+                            <button
                               onClick={() => setSettingsAgent(agent)}
-                              className="w-[130px] justify-center px-3.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
+                              className="w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
                               style={{
                                 background: 'var(--color-surface)',
                                 color: 'var(--color-text-secondary)',
@@ -802,7 +1103,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                   })}
                 </tbody>
               </table>
-              {agents.length > 12 && (
+              {allAgents.length > 12 && (
                 <div
                   className="px-6 py-3 border-t flex justify-center"
                   style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
@@ -811,7 +1112,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="text-[12px] font-semibold text-[var(--color-brand)] hover:underline"
                   >
-                    {isExpanded ? 'Show fewer agents' : `Show all ${agents.length} agents`}
+                    {isExpanded ? 'Show fewer agents' : `Show all ${allAgents.length} agents`}
                   </button>
                 </div>
               )}
@@ -825,6 +1126,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           agentAddress={settingsAgent.address}
           currentStake={settingsAgent.stakeAmount}
           isActive={settingsAgent.active}
+          availableAgents={allAgents.map(a => ({
+            address: a.address,
+            label: a.address.substring(0, 10) + '… (' + reputationPct(a.reputation).toFixed(0) + '% Rep)'
+          }))}
           onClose={() => setSettingsAgent(null)}
         />
       )}
