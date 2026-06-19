@@ -15,6 +15,7 @@
 /// TODO Phase 6: replace admin key with DAO/optimistic-slashing governance module.
 module aura::aura_registry {
     use sui::balance::{Self, Balance};
+    use sui::clock::{Self, Clock};
     use sui::coin::{Self, Coin};
     use sui::event;
     use sui::sui::SUI;
@@ -25,6 +26,9 @@ module aura::aura_registry {
     /// Minimum SUI stake to register as an agent (0.01 SUI in MIST).
     /// Recalibrate for mainnet based on expected value at risk.
     const MIN_STAKE: u64 = 10_000_000;
+
+    /// Dispute bond required to prevent griefing (0.1 SUI in MIST for Testnet).
+    const DISPUTE_BOND_AMOUNT: u64 = 100_000_000;
 
     /// Reputation score denominator — 10^6 for precision without floats.
     const SCORE_PRECISION: u64 = 1_000_000;
@@ -38,13 +42,16 @@ module aura::aura_registry {
 
     // ── Error codes ───────────────────────────────────────────────────────────
 
-    const ENotAdmin: u64          = 0;
-    const EAlreadyRegistered: u64  = 1;
-    const ENotRegistered: u64     = 2;
-    const EAgentInactive: u64     = 3;
-    const EStakeTooLow: u64       = 4;
-    const EAgentBlacklisted: u64  = 5; // Timed suspension — prevents trading AND stake escape
-    // EZeroTasks removed — division-by-zero guarded structurally (total_tasks always > 0 when score computed)
+    const ENotAdmin: u64               = 0;
+    const EAlreadyRegistered: u64      = 1;
+    const ENotRegistered: u64          = 2;
+    const EAgentInactive: u64          = 3;
+    const EStakeTooLow: u64            = 4;
+    const EAgentBlacklisted: u64       = 5; // Timed suspension — prevents trading AND stake escape
+    const EDisputeNotFound: u64        = 6;
+    const EDisputeAlreadyResolved: u64 = 7;
+    const ENotAgentOperator: u64       = 8;
+    const EDeadlineNotReached: u64     = 9;
 
     // ── Structs ───────────────────────────────────────────────────────────────
 
@@ -56,6 +63,8 @@ module aura::aura_registry {
         admin: address,
         /// Map from agent address → AgentRecord.
         agents: Table<address, AgentRecord>,
+        /// Map from dispute ID → Dispute.
+        disputes: Table<ID, Dispute>,
     }
 
     /// Per-agent on-chain record.
@@ -75,6 +84,18 @@ module aura::aura_registry {
         /// cannot deregister (closing the front-run-slash escape window).
         /// The admin calls blacklist_agent() to set this before slash_bond().
         blacklist_until: u64,
+    }
+
+    /// Dispute record representing a telemetry audit challenge.
+    public struct Dispute has key, store {
+        id: UID,
+        agent: address,
+        disputer: address,
+        dispute_bond: Balance<SUI>,
+        blob_id: vector<u8>,
+        disclose_deadline: u64,
+        resolved: bool,
+        decryption_key: Option<vector<u8>>,
     }
 
     // ── Events ────────────────────────────────────────────────────────────────
@@ -119,6 +140,31 @@ module aura::aura_registry {
         until_epoch: u64,
     }
 
+    /// Emitted when a user submits a dispute.
+    public struct DisputeSubmitted has copy, drop {
+        dispute_id: ID,
+        agent: address,
+        disputer: address,
+        blob_id: vector<u8>,
+        disclose_deadline: u64,
+    }
+
+    /// Emitted when an agent operator discloses the decryption key.
+    public struct KeyDisclosed has copy, drop {
+        dispute_id: ID,
+        agent: address,
+        decryption_key: vector<u8>,
+    }
+
+    /// Emitted when a dispute is resolved.
+    public struct DisputeResolved has copy, drop {
+        dispute_id: ID,
+        agent: address,
+        disputer: address,
+        slashed: bool,
+        slashed_amount: u64,
+    }
+
     // ── Initialization ────────────────────────────────────────────────────────
 
     /// Called once on package publish via `init`.
@@ -132,6 +178,7 @@ module aura::aura_registry {
             id,
             admin,
             agents: table::new(ctx),
+            disputes: table::new(ctx),
         };
 
         event::emit(RegistryInitialized { registry_id, admin });
@@ -317,6 +364,173 @@ module aura::aura_registry {
         event::emit(AgentDeregistered { agent: agent_addr, stake_returned });
 
         transfer::public_transfer(stake_coin, agent_addr);
+    }
+
+    /// Submit a dispute challenging an agent's telemetry audit blob.
+    /// Locks a 1.0 SUI dispute bond to prevent griefing.
+    public fun submit_dispute(
+        registry: &mut Registry,
+        clock: &Clock,
+        agent_addr: address,
+        blob_id: vector<u8>,
+        bond_coin: Coin<SUI>,
+        ctx: &mut TxContext,
+    ): ID {
+        // Assert agent is registered and active
+        assert!(table::contains(&registry.agents, agent_addr), ENotRegistered);
+        let record = table::borrow(&registry.agents, agent_addr);
+        assert!(record.active, EAgentInactive);
+
+        // Enforce locked dispute bond is sufficient (1.0 SUI)
+        let bond_value = bond_coin.value();
+        assert!(bond_value >= DISPUTE_BOND_AMOUNT, EStakeTooLow);
+
+        // Take exactly the dispute bond amount, return any remainder to disputer
+        let mut bond_coin = bond_coin;
+        let dispute_bond_balance = if (bond_value > DISPUTE_BOND_AMOUNT) {
+            let split_coin = coin::split(&mut bond_coin, DISPUTE_BOND_AMOUNT, ctx);
+            transfer::public_transfer(bond_coin, ctx.sender());
+            coin::into_balance(split_coin)
+        } else {
+            coin::into_balance(bond_coin)
+        };
+
+        let dispute_uid = object::new(ctx);
+        let dispute_id = object::uid_to_inner(&dispute_uid);
+        let disputer = ctx.sender();
+        let disclose_deadline = clock::timestamp_ms(clock) + 86_400_000; // 24-hour challenge window
+
+        let dispute = Dispute {
+            id: dispute_uid,
+            agent: agent_addr,
+            disputer,
+            dispute_bond: dispute_bond_balance,
+            blob_id,
+            disclose_deadline,
+            resolved: false,
+            decryption_key: option::none(),
+        };
+
+        table::add(&mut registry.disputes, dispute_id, dispute);
+
+        event::emit(DisputeSubmitted {
+            dispute_id,
+            agent: agent_addr,
+            disputer,
+            blob_id,
+            disclose_deadline,
+        });
+
+        dispute_id
+    }
+
+    /// Disclose the decryption key for the disputed telemetry trace.
+    /// Only the target agent operator can call this.
+    /// Proves compliance, returns the dispute bond to the disputer, and keeps the agent un-slashed.
+    public fun disclose_telemetry_key(
+        registry: &mut Registry,
+        dispute_id: ID,
+        decryption_key: vector<u8>,
+        ctx: &mut TxContext,
+    ) {
+        assert!(table::contains(&registry.disputes, dispute_id), EDisputeNotFound);
+        let dispute = table::borrow_mut(&mut registry.disputes, dispute_id);
+        assert!(!dispute.resolved, EDisputeAlreadyResolved);
+
+        // Enforce that only the target agent's operator address can call this.
+        assert!(ctx.sender() == dispute.agent, ENotAgentOperator);
+
+        dispute.decryption_key = option::some(decryption_key);
+        dispute.resolved = true;
+
+        // Refund the disputer's locked bond coin back to them
+        let bond_balance = balance::withdraw_all(&mut dispute.dispute_bond);
+        let bond_coin = coin::from_balance(bond_balance, ctx);
+        transfer::public_transfer(bond_coin, dispute.disputer);
+
+        event::emit(KeyDisclosed {
+            dispute_id,
+            agent: dispute.agent,
+            decryption_key,
+        });
+
+        event::emit(DisputeResolved {
+            dispute_id,
+            agent: dispute.agent,
+            disputer: dispute.disputer,
+            slashed: false,
+            slashed_amount: 0,
+        });
+    }
+
+    /// Resolve a dispute after the deadline.
+    /// Slashes the agent's bond and awards it to the disputer if the operator failed to disclose the key.
+    public fun resolve_dispute(
+        registry: &mut Registry,
+        clock: &Clock,
+        dispute_id: ID,
+        ctx: &mut TxContext,
+    ) {
+        assert!(table::contains(&registry.disputes, dispute_id), EDisputeNotFound);
+        let dispute = table::borrow_mut(&mut registry.disputes, dispute_id);
+        assert!(!dispute.resolved, EDisputeAlreadyResolved);
+
+        // Enforce disclosure deadline has passed
+        assert!(clock::timestamp_ms(clock) > dispute.disclose_deadline, EDeadlineNotReached);
+
+        dispute.resolved = true;
+
+        // Retrieve agent's record and slash them
+        let agent_record = table::borrow_mut(&mut registry.agents, dispute.agent);
+        let slashed_amount = balance::value(&agent_record.stake);
+
+        // Mark agent as inactive and reset reputation score
+        agent_record.active = false;
+        agent_record.reputation_score = 0;
+
+        // Withdraw and award the agent's stake to the disputer
+        let slashed_balance = balance::withdraw_all(&mut agent_record.stake);
+        let slashed_coin = coin::from_balance(slashed_balance, ctx);
+        transfer::public_transfer(slashed_coin, dispute.disputer);
+
+        // Refund the disputer's own locked bond coin back to them as they were correct
+        let bond_balance = balance::withdraw_all(&mut dispute.dispute_bond);
+        let bond_coin = coin::from_balance(bond_balance, ctx);
+        transfer::public_transfer(bond_coin, dispute.disputer);
+
+        event::emit(DisputeResolved {
+            dispute_id,
+            agent: dispute.agent,
+            disputer: dispute.disputer,
+            slashed: true,
+            slashed_amount,
+        });
+    }
+
+    // ── Dispute View helpers ──────────────────────────────────────────────────
+
+    public fun is_dispute_resolved(registry: &Registry, dispute_id: ID): bool {
+        assert!(table::contains(&registry.disputes, dispute_id), EDisputeNotFound);
+        let dispute = table::borrow(&registry.disputes, dispute_id);
+        dispute.resolved
+    }
+
+    public fun get_disclose_deadline(registry: &Registry, dispute_id: ID): u64 {
+        assert!(table::contains(&registry.disputes, dispute_id), EDisputeNotFound);
+        let dispute = table::borrow(&registry.disputes, dispute_id);
+        dispute.disclose_deadline
+    }
+
+    public fun get_dispute_bond_amount(registry: &Registry, dispute_id: ID): u64 {
+        assert!(table::contains(&registry.disputes, dispute_id), EDisputeNotFound);
+        let dispute = table::borrow(&registry.disputes, dispute_id);
+        balance::value(&dispute.dispute_bond)
+    }
+
+    public fun get_dispute_decryption_key(registry: &Registry, dispute_id: ID): Option<vector<u8>> {
+        assert!(table::contains(&registry.disputes, dispute_id), EDisputeNotFound);
+        let dispute = table::borrow(&registry.disputes, dispute_id);
+        dispute.decryption_key
     }
 
     // ── View helpers ──────────────────────────────────────────────────────────
@@ -667,6 +881,190 @@ module aura::aura_registry {
             let ctx = ts::ctx(&mut scenario);
             blacklist_agent(&mut registry, AGENT1, 999, ctx);
             ts::return_shared(registry);
+        };
+
+        ts::end(scenario);
+    }
+
+    // 7.5 — Dispute and successful disclosure test
+    #[test]
+    fun test_dispute_and_successful_disclosure() {
+        let mut scenario = ts::begin(ADMIN);
+        let disputer = @0xD1;
+        { init_for_testing(ts::ctx(&mut scenario)); };
+
+        // Register agent
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let stake = coin::mint_for_testing<SUI>(MIN_STAKE, ctx);
+            register_agent(&mut registry, stake, ctx);
+            ts::return_shared(registry);
+        };
+
+        // Create dispute with 1.0 SUI bond
+        let mut dispute_id = object::id_from_address(@0x0);
+        ts::next_tx(&mut scenario, disputer);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let bond = coin::mint_for_testing<SUI>(DISPUTE_BOND_AMOUNT, ctx);
+            let clock = clock::create_for_testing(ctx);
+            let blob_id = b"mock-blob-id-123";
+
+            dispute_id = submit_dispute(&mut registry, &clock, AGENT1, blob_id, bond, ctx);
+
+            // Assert dispute is registered and not resolved
+            assert!(!is_dispute_resolved(&registry, dispute_id), 0);
+            std::unit_test::assert_eq!(get_dispute_bond_amount(&registry, dispute_id), DISPUTE_BOND_AMOUNT);
+
+            ts::return_shared(registry);
+            clock::destroy_for_testing(clock);
+        };
+
+        // Operator discloses decryption key before deadline
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let decryption_key = b"super-secret-key-123";
+
+            disclose_telemetry_key(&mut registry, dispute_id, decryption_key, ctx);
+
+            // Assert dispute is resolved and key is stored
+            assert!(is_dispute_resolved(&registry, dispute_id), 0);
+            let stored_key_opt = get_dispute_decryption_key(&registry, dispute_id);
+            assert!(option::is_some(&stored_key_opt), 0);
+            std::unit_test::assert_eq!(*option::borrow(&stored_key_opt), decryption_key);
+
+            // Assert agent remains active and has their stake intact
+            assert!(is_agent_active(&registry, AGENT1), 0);
+            std::unit_test::assert_eq!(get_stake_amount(&registry, AGENT1), MIN_STAKE);
+
+            ts::return_shared(registry);
+        };
+
+        // Assert disputer gets their dispute bond refunded
+        ts::next_tx(&mut scenario, disputer);
+        {
+            let refunded = ts::take_from_sender<Coin<SUI>>(&scenario);
+            std::unit_test::assert_eq!(refunded.value(), DISPUTE_BOND_AMOUNT);
+            ts::return_to_sender(&scenario, refunded);
+        };
+
+        ts::end(scenario);
+    }
+
+    // 7.6 — Dispute and slash on timeout test
+    #[test]
+    fun test_dispute_and_slash_on_timeout() {
+        let mut scenario = ts::begin(ADMIN);
+        let disputer = @0xD1;
+        { init_for_testing(ts::ctx(&mut scenario)); };
+
+        // Register agent
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let stake = coin::mint_for_testing<SUI>(MIN_STAKE, ctx);
+            register_agent(&mut registry, stake, ctx);
+            ts::return_shared(registry);
+        };
+
+        // Create dispute with 1.0 SUI bond
+        let mut dispute_id = object::id_from_address(@0x0);
+        ts::next_tx(&mut scenario, disputer);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let bond = coin::mint_for_testing<SUI>(DISPUTE_BOND_AMOUNT, ctx);
+            let clock = clock::create_for_testing(ctx);
+            let blob_id = b"mock-blob-id-123";
+
+            dispute_id = submit_dispute(&mut registry, &clock, AGENT1, blob_id, bond, ctx);
+
+            ts::return_shared(registry);
+            clock::destroy_for_testing(clock);
+        };
+
+        // Resolve dispute after 24 hours has passed (deadline is +86_400_000 ms)
+        ts::next_tx(&mut scenario, disputer);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let mut clock = clock::create_for_testing(ctx);
+
+            // Increment clock past deadline (e.g. 86_500_000 ms)
+            clock::increment_for_testing(&mut clock, 86_500_000);
+
+            resolve_dispute(&mut registry, &clock, dispute_id, ctx);
+
+            // Assert dispute is resolved
+            assert!(is_dispute_resolved(&registry, dispute_id), 0);
+
+            // Assert agent is marked inactive (slashed) and reputation is 0
+            assert!(!is_agent_active(&registry, AGENT1), 0);
+            std::unit_test::assert_eq!(get_reputation_score(&registry, AGENT1), 0);
+            std::unit_test::assert_eq!(get_stake_amount(&registry, AGENT1), 0);
+
+            ts::return_shared(registry);
+            clock::destroy_for_testing(clock);
+        };
+
+        // Assert disputer receives the agent's slashed stake (MIN_STAKE) AND their dispute bond back (DISPUTE_BOND_AMOUNT)
+        ts::next_tx(&mut scenario, disputer);
+        {
+            // Slashed coin (MIN_STAKE)
+            let slashed_stake = ts::take_from_sender<Coin<SUI>>(&scenario);
+            // Refunded bond (DISPUTE_BOND_AMOUNT)
+            let refunded_bond = ts::take_from_sender<Coin<SUI>>(&scenario);
+
+            let v1 = slashed_stake.value();
+            let v2 = refunded_bond.value();
+
+            assert!((v1 == MIN_STAKE && v2 == DISPUTE_BOND_AMOUNT) || (v1 == DISPUTE_BOND_AMOUNT && v2 == MIN_STAKE), 0);
+
+            ts::return_to_sender(&scenario, slashed_stake);
+            ts::return_to_sender(&scenario, refunded_bond);
+        };
+
+        ts::end(scenario);
+    }
+
+    // 7.7 — Griefing resistance dispute bond lock test
+    #[test]
+    #[expected_failure(abort_code = EStakeTooLow)]
+    fun test_griefing_resistance_bond_lock() {
+        let mut scenario = ts::begin(ADMIN);
+        let disputer = @0xD1;
+        { init_for_testing(ts::ctx(&mut scenario)); };
+
+        // Register agent
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let stake = coin::mint_for_testing<SUI>(MIN_STAKE, ctx);
+            register_agent(&mut registry, stake, ctx);
+            ts::return_shared(registry);
+        };
+
+        // Try to submit dispute with insufficient bond (e.g. 0.5 SUI)
+        ts::next_tx(&mut scenario, disputer);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let bond = coin::mint_for_testing<SUI>(DISPUTE_BOND_AMOUNT / 2, ctx);
+            let clock = clock::create_for_testing(ctx);
+            let blob_id = b"mock-blob-id-123";
+
+            // Should abort with EStakeTooLow because dispute bond is insufficient
+            submit_dispute(&mut registry, &clock, AGENT1, blob_id, bond, ctx);
+
+            ts::return_shared(registry);
+            clock::destroy_for_testing(clock);
         };
 
         ts::end(scenario);

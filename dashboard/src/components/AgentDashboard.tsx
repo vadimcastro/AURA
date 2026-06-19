@@ -79,11 +79,17 @@ const StatTile: React.FC<{
 // ─── Main component ───────────────────────────────────────────────────────────
 interface AgentDashboardProps {
   onSelectAgent: (agentAddress: string, blobId: string | null) => void;
+  activeSession?: {
+    address: string;
+    type: string;
+    name: string;
+    providerLabel: string;
+  } | null;
 }
 
 
 
-export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent }) => {
+export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, activeSession }) => {
   const [agents, setAgents]       = useState<AgentInfo[]>([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
@@ -130,7 +136,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
         reputation: 1000000, // 100.0% starting rep
         totalTasks: 0,
         successfulTasks: 0,
-        stakeAmount: 0.1, // 0.1 SUI gas / stake
+        stakeAmount: 0.01, // 0.01 SUI collateral on testnet
         active: true,
         blacklistUntil: 0,
         latestBlobId: 'mock-walrus-telemetry-fresh',
@@ -144,7 +150,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
         id: `register-tx-${Date.now()}-1`,
         type: 'register',
         agent: mockAddr,
-        message: `Agent registered on-chain with 0.1 SUI collateral`,
+        message: `Agent registered on-chain with 0.01 SUI collateral`,
         timestamp: new Date().toISOString(),
         digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
         isMocked: true,
@@ -239,20 +245,23 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
         // Pre-fill with Owner as an active "Agent" for the demo if empty
         uniqueAddresses.add('0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676');
 
-        // 3. Resolve each address from the dynamic Table fields
-        const agentsData: AgentInfo[] = [];
-        for (const address of uniqueAddresses) {
+        // 3. Resolve each address from the dynamic Table fields and fetch names via SuiNS in parallel
+        const agentsPromises = Array.from(uniqueAddresses).map(async (address) => {
           try {
-            const dynField = await suiClient.getDynamicFieldObject({
-              parentId: tableId,
-              name: { type: 'address', value: address },
-            });
-            if (dynField.data?.content?.dataType !== 'moveObject') continue;
+            const [dynField, nameRes] = await Promise.all([
+              suiClient.getDynamicFieldObject({
+                parentId: tableId,
+                name: { type: 'address', value: address },
+              }),
+              suiClient.resolveNameServiceNames({ address }).catch(() => null)
+            ]);
+
+            if (dynField.data?.content?.dataType !== 'moveObject') return null;
 
             const rf = (dynField.data.content.fields as Record<string, unknown> & {
               value?: { fields?: Record<string, unknown> };
             }).value?.fields;
-            if (!rf) continue;
+            if (!rf) return null;
 
             const rawScore       = parseInt(String(rf.reputation_score ?? '500000'), 10);
             const stakeRaw       = parseInt(String(rf.stake ?? '0'), 10);
@@ -267,12 +276,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             
             if (blobRaw) {
               if (Array.isArray(blobRaw)) {
-                // If the SDK flattens it into an array of numbers
                 latestBlobId = String.fromCharCode(...(blobRaw as number[]));
               } else if (typeof blobRaw === 'string') {
                 latestBlobId = blobRaw;
               } else {
-                // Older struct format fallback
                 const blobStruct = blobRaw as any;
                 if (blobStruct.type?.includes('Option') && Array.isArray(blobStruct.fields?.vec) && blobStruct.fields.vec.length > 0) {
                   const byteVec = blobStruct.fields.vec[0];
@@ -283,8 +290,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               }
             }
 
-            agentsData.push({
+            let name: string | undefined = undefined;
+            if (nameRes && nameRes.data && nameRes.data.length > 0) {
+              name = nameRes.data[0];
+            }
+
+            const agentInfo: AgentInfo = {
               address,
+              name,
               reputation: rawScore,
               totalTasks,
               successfulTasks,
@@ -293,11 +306,16 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               blacklistUntil,
               latestBlobId,
               registeredAt: registrationTimes.get(address.toLowerCase()),
-            });
+            };
+            return agentInfo;
           } catch (err) {
             console.warn(`Could not load record for agent ${address}:`, err);
+            return null;
           }
-        }
+        });
+
+        const resolvedAgents = await Promise.all(agentsPromises);
+        const agentsData: AgentInfo[] = resolvedAgents.filter((a): a is AgentInfo => a !== null);
 
         // Fallback demo data when registry returns nothing (e.g. fresh env)
         if (agentsData.length === 0) {
@@ -571,12 +589,34 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           className="p-6 rounded-2xl border transition-all duration-300 ease-in-out shadow-lg"
           style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
         >
-          <div className="flex justify-between items-center mb-5 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
-            <h3 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-primary)' }}>Register Copy-Trading Agent</h3>
-            <button onClick={() => setShowOnboarding(false)} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors cursor-pointer">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+          {!activeSession ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <ShieldAlert className="h-10 w-10 text-amber-500 mb-4 animate-bounce" />
+              <h4 className="text-[14px] font-bold uppercase tracking-wider text-[var(--color-text-primary)]">Account Connection Required</h4>
+              <p className="text-[12px] text-[var(--color-text-secondary)] mt-2 max-w-sm leading-relaxed">
+                You must connect a wallet or sign in with zkLogin to deploy strategy policies and register new agents on-chain. Use the button in the top right.
+              </p>
+              <button 
+                onClick={() => setShowOnboarding(false)}
+                className="mt-5 px-4 py-2 rounded-xl text-[12px] font-bold text-white bg-[var(--color-brand)] cursor-pointer hover:opacity-90 shadow-sm"
+              >
+                Got It
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-5 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                <h3 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-primary)' }}>Register Copy-Trading Agent</h3>
+                <button onClick={() => setShowOnboarding(false)} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors cursor-pointer">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Show active session detail */}
+              <div className="mb-4 p-3 rounded-xl border flex justify-between items-center bg-[var(--color-surface-2)] text-[12px] font-semibold" style={{ borderColor: 'var(--color-border)' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Deployer Identity:</span>
+                <span className="font-mono text-[var(--color-text-primary)]">{activeSession.name} ({activeSession.providerLabel})</span>
+              </div>
           
           <div className="grid gap-6 md:grid-cols-2">
             {/* Left: Base Parameters */}
@@ -711,6 +751,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               {isDeploying ? 'Deploying...' : 'Deploy Agent'}
             </button>
           </div>
+          </>
+          )}
         </div>
       )}
 

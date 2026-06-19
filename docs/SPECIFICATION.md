@@ -20,7 +20,7 @@ The architecture is structured into three decoupled layers:
 ```
 
 *   **Move Policy Wallet (Execution Boundary):** Prevents the bot from moving funds to unapproved addresses. It uses a **Hot Potato / TradeTicket** pattern to ensure funds are exclusively used for allowed protocols (like DeepBook Predict) within an atomic Programmable Transaction Block (PTB).
-    *   *Note:* The **User** interacts via **zkLogin** to authorize or revoke policies, while the **Agent** interacts using its **ephemeral hot key** to sign automated trading actions within the bounds of the delegated ticket.
+    *   *Note:* The **User** (Owner/Supervisor) interacts via standard browser wallets (using `@mysten/dapp-kit`) or zkLogin to deploy, fund, adjust, or revoke policies, while the **Agent** interacts using its **ephemeral hot key** to sign automated trading actions autonomously within the bounds of the delegated ticket.
 *   **Reputation Registry (Incentive Alignment):** Enforces skin-in-the-game collateral from bot operators, tracks performance history, and provides on-chain eligibility assertions.
 *   **Walrus / MemWal (Telemetry & Audit):** Archives transaction reasoning, oracle inputs, and historical traces off-chain in a verifiable, Seal-encrypted format.
 
@@ -908,7 +908,7 @@ A lightweight Web frontend that makes Walrus audit data legible to users and LPs
 *   **Seal Decryption Interface:** User imports their private viewer key to decrypt and inspect the agent's historical SVI oracle checks, trade decisions, and model reasoning directly in the browser.
 *   **Agent Comparison:** Side-by-side reputation scores, PnL curves, and audit trail density for multiple registered agents.
 
-### C. Optimistic Slashing & Decentralized Dispute Resolution *(Future Work — Phase 6)*
+### C. Optimistic Slashing & Decentralized Dispute Resolution *(Future Work — Phase 7)*
 To remove the single-point-of-failure admin key in the reputation registry, we introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
 1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a small SUI bond and submitting a `Dispute` object on-chain referencing the suspect `blob_id`.
 2.  **Disclosure Window:** The agent operator has a configurable challenge period (e.g. 24 hours, enforced via `sui::clock`) to publish the Seal decryption key for the corresponding Walrus trace.

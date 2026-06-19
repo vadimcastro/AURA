@@ -20,7 +20,7 @@
 *   **The Resolution:** The blast radius is bounded by design: the attacker can only trade within the `budget_limit`, only against `allowed_contracts`, and only until `expiration_epoch`. The user can immediately call `revoke_policy` to destroy the policy and reclaim all funds. The short expiration window (typically 24h) limits the exposure period. Post-compromise, the user deploys a new policy with a fresh agent key.
 
 ## E. Staking, Deregistration, and Slashing Mechanics
-*   **The SUI Stake Bond:** When an agent registers on the AURA Registry (`aura_registry.move`), they must lock a SUI stake bond (minimum `MIN_STAKE`, set to `10_000_000` MIST / 0.01 SUI). This stake serves as a performance bond/collateral.
+*   **The SUI Stake Bond:** When an agent registers on the AURA Registry (`aura_registry.move`), they must lock a SUI stake bond. In a production Mainnet environment, this is targeted at **0.5 SUI** to provide high-fidelity security. For the Hackathon Testnet prototype, the minimum stake (`MIN_STAKE`) is set to **0.01 SUI** (10,000,000 MIST) to prevent faucet exhaustion. This stake serves as a performance bond/collateral.
 *   **Voluntary Deregistration:** If an agent wishes to exit the system (e.g., they have completed their trading lifecycle and earned high reputation), they call `deregister_agent()`. This returns the entire SUI stake bond back to the agent's hot-key address and deactivates their registry record.
 *   **Slashing vs. Poor Performance:** 
     *   *Low Reputation:* If an agent is simply unprofitable but remains compliant with the `WalletPolicy` (trades only allowed contracts, stays within budget), they are **not** slashed. They can deregister and reclaim their SUI stake.

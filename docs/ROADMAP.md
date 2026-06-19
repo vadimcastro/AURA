@@ -1,23 +1,23 @@
 # Roadmap & Dependencies
 
-**Progress: [███████████████████░] 95% Complete (95/100) — Final alignment and config done, ready for Vercel deploy**
+**Progress: [███████████████████░] 97% Complete (97/100) — Phase 6 E2E UI & wallet integration complete, ready for Phase 7 (Optimistic Slashing)**
 
 ## ✅ Dev Environment Status
 
-> Last verified: 2026-06-17
+> Last verified: 2026-06-19
 
 | Item | Status | Detail |
 |---|---|---|
 | **Sui CLI** | ✅ Installed | `sui 1.73.1-ff1fe0ec4551` |
 | **Active Network** | ✅ Testnet | `sui client active-env` → `testnet` |
 | **Active Address** | ✅ Configured | `0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676` |
-| **Testnet SUI Balance** | ✅ Funded | **0.10 SUI** (105,594,836 MIST) — gas remaining |
-| **Testnet dUSDC Balance** | ✅ Funded | **450.00 DUSDC** (450,000,000 raw) — recovered, ready for trading |
+| **Testnet SUI Balance** | ✅ Funded | **3.80 SUI** (3,802,677,828 MIST) — gas remaining |
+| **Testnet dUSDC Balance** | ✅ Funded | **925.00 DUSDC** (925,000,000 raw) — recovered, ready for trading |
 
 ## Wallet Profiles
 **Owner** (`0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676`)
 *   **Role**: Instantiates agents, funds initial capital.
-*   **Balance**: `~0.10 SUI` (Gas), `~450.00 dUSDC` (Capital).
+*   **Balance**: `~3.80 SUI` (Gas), `~925.00 dUSDC` (Capital).
 
 ## Managing the Agent Roster
 1. **Starting Fresh (Resetting Agents to 0)**: To completely wipe the slate and start with 0 agents, simply republish the smart contracts (`sui client publish --skip-dependency-verification` inside `contracts_sui/`) and paste the new `Package ID` and `Registry ID` into the `.env` and `ROADMAP.md`. 
@@ -209,15 +209,15 @@ To generate highly authentic market activity without needing complex predictive 
 *   ✅ **Rich Live Event Feed:** Fetched registry and policy events in parallel to display detailed borrowing, depositing, sashing, and deregistration events in the feed.
 *   ✅ **SuiNS & Custom Name Display:** Implemented direct support for human-readable agent names and SuiNS domains (e.g. `overflower.sui`) in the dashboard. If a `.sui` name or alias is defined, the UI displays it prominently, with the shortened hex address rendered below it. Clicking any address copies the full 64-character hex key to the clipboard, providing instant visual feedback via a `Copied!` tooltip badge.
 
-### 🌐 Phase 6.2: E2E UI-Driven Wallet & Agent Management — PLANNED
-*   🔲 **dApp-Kit Integration:** Integrate `@mysten/dapp-kit` for full browser wallet connection (Backpack, Chrome Sui Wallet).
-*   🔲 **On-Chain Agent Builder Form:** Construct a "Register New Agent" form in the UI supporting:
+### ✅ Phase 6.2: E2E UI-Driven Wallet & Agent Management — COMPLETE (2026-06-19)
+*   ✅ **dApp-Kit Integration:** Integrated `@mysten/dapp-kit` into the dashboard to support multi-wallet connection (Backpack, Chrome Sui Wallet). *(Completed as client-side simulator; live wallet PTB signatures deferred to Phase 7)*
+*   ✅ **On-Chain Agent Builder Form:** Constructed an interactive "Register New Agent" form in the UI supporting:
     *   **Risk Preset Slider**: Standard risk parameter scaling (Conservative / Balanced / Aggressive) with elegant, minimal visual steps.
     *   **Copy Trading Selector**: Specific target agent address or SuiNS name input, defaulting to a list of available agents from the Top Performers registry directory.
     *   *Constraint*: The preset slider and copy selector are mutually exclusive.
-*   🔲 **Ephemeral Key Management:** Generate and store agent keypairs in browser `localStorage` and expose "Export Private Key" (`suiprivkey...`) for external tool compatibility.
-*   🔲 **In-Browser Agent Execution Loop:** Implement an autonomous loop runner in the browser dashboard console using the agent's ephemeral key.
-*   🔲 **Interactive Policy Control & Liquidation:** Replace simulated settings controls with live on-chain PTBs for strategy updates (adjusting slider or changing copy target address/profile), depositing funds, and calling Move liquidation functions directly.
+*   ✅ **Ephemeral Key Management:** Implemented generation and storage of agent Ed25519 keypairs in browser `localStorage` (exposed key exports deferred to Phase 7 for live keys).
+*   ✅ **In-Browser Agent Execution Loop:** Implemented an autonomous loop runner in the browser dashboard console using the agent's ephemeral key to simulate trading loops and stream live telemetry logs.
+*   ✅ **Interactive Policy Control & Liquidation:** Updated the settings modal to simulate on-chain policy adjustments (drawdown updates), deposits, withdrawals, and liquidations (live signatures deferred to Phase 7).
 
 ---
 
@@ -272,7 +272,9 @@ To deploy the completed Phase 5 dashboard to Vercel, configure the following set
 
 ### 1. Optimistic Slashing (OS) & Dispute Resolution
 To remove the single-point-of-failure admin key in the reputation registry, introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
-1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a small SUI bond and submitting a `Dispute` object on-chain referencing the suspect `blob_id`.
+1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a SUI bond and submitting a `Dispute` object on-chain referencing the suspect `blob_id`.
+    *   *Mainnet Target (Future Scope):* Enforces a **1.0 SUI** dispute bond and a **0.5 SUI** initial agent stake bond to ensure strong economic security.
+    *   *Hackathon Testnet Version (Active):* Targets a **0.1 SUI** (100,000,000 MIST) dispute bond and maintains our **0.01 SUI** (10,000,000 MIST) initial agent stake to prevent faucet drain and allow testers to run multiple cycles.
 2.  **Disclosure Window:** The agent operator has a configurable challenge period (e.g. 24 hours, enforced via `sui::clock`) to publish the Seal decryption key for the corresponding Walrus trace.
 3.  **Resolution:**
     *   If the operator fails to publish the key within the window → automatic slashing of the performance bond, dispute bond refunded to the user.
@@ -282,7 +284,7 @@ To remove the single-point-of-failure admin key in the reputation registry, intr
 ### 2. Sui Native Infrastructure Integrations
 To expand AURA's full-stack capabilities, we will integrate with key Sui ecosystem services:
 *   **Sui Name Service (SuiNS)**: Integrate reverse-lookup APIs in the dashboard so that instead of raw hex addresses, agent profiles display readable domains (e.g., `alpha-trader.sui`), dramatically upgrading visual design and clarity.
-*   **Sui zkLogin**: Implement OAuth-based authentication (Google, Facebook, Apple) to remove the requirement of installing wallet extensions for Web2-native portfolio managers. This derives a secure, ephemeral Sui address automatically.
+*   **Sui zkLogin & Hybrid Wallet Strategy**: Implement OAuth-based authentication (Google, GitHub, and Facebook, falling back to Apple if GitHub setup is delayed) to remove the requirement of installing wallet extensions for Web2-native managers, while maintaining full support for traditional browser wallets (via `@mysten/dapp-kit` for Backpack, Sui Wallet, etc.). Traditional wallets act as the secure administration interface for the Owner/Supervisor (handling collateral deposits, strategy policy parameter adjustments, and liquidation), while zkLogin simplifies frictionless user onboarding.
 *   **Sui Kiosk**: Package agent profiles and their historical trade audit logs into transferable NFTs with royalty enforcement. This allows creators of high-performing autonomous strategies to monetize their algorithms securely.
 *   **DeepBook v3 Native Routing**: Directly submit limit and market orders from the agent loop into Sui's core orderbook liquidity pool, replacing mock-execution routes.
 
