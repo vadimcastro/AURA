@@ -3,7 +3,7 @@ import { SuiJsonRpcClient as SuiClient } from '@mysten/sui/jsonRpc';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
   Users, RefreshCw, Settings, Terminal, Globe, Trophy,
-  X, Plus, Play, Square
+  X, Plus, Play, Square, Zap
 } from 'lucide-react';
 import { AgentSettingsModal } from './AgentSettingsModal';
 
@@ -109,6 +109,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
 
   const [localAgents, setLocalAgents] = useState<AgentInfo[]>([]);
   const [activeLoops, setActiveLoops] = useState<Record<string, boolean>>({});
+  const [autoStartLoop, setAutoStartLoop] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const copyToClipboard = (addr: string) => {
@@ -168,8 +169,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
 
       setLiveEvents((prev) => [policyEv, registerEv, ...prev]);
       
-      // Auto toggle the execution loop
-      setActiveLoops(prev => ({ ...prev, [mockAddr]: true }));
+      // Auto toggle the execution loop if checked
+      if (autoStartLoop) {
+        setActiveLoops(prev => ({ ...prev, [mockAddr]: true }));
+      }
 
       setIsDeploying(false);
       setShowOnboarding(false);
@@ -186,6 +189,47 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
 
   const handleToggleLoop = (addr: string) => {
     setActiveLoops(prev => ({ ...prev, [addr]: !prev[addr] }));
+  };
+
+  const handleStepTrade = (addr: string) => {
+    const ag = allAgents.find(a => a.address === addr);
+    if (!ag) return;
+
+    const isSuccess = Math.random() > 0.15; // 85% success
+    const decision = Math.random() > 0.5 ? "Place Up (Call Option)" : "Mint Range 68k-72k";
+    const tradeAmount = 10_000_000;
+    const refundAmount = isSuccess ? 10_500_000 : 9_500_000;
+    const pnl = refundAmount - tradeAmount;
+    
+    // Update local agents stats
+    setLocalAgents(prev => prev.map(a => {
+      if (a.address === addr) {
+        const nextTasks = a.totalTasks + 1;
+        const nextSuccess = a.successfulTasks + (isSuccess ? 1 : 0);
+        return {
+          ...a,
+          totalTasks: nextTasks,
+          successfulTasks: nextSuccess,
+          reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000)))
+        };
+      }
+      return a;
+    }));
+
+    // Add telemetry log
+    const blobId = 'mock-walrus-telemetry-' + Math.random().toString(36).substring(2, 10);
+    const newEv: LiveEvent = {
+      id: 'mock-tx-' + Date.now() + '-' + Math.random(),
+      type: 'trade',
+      agent: addr,
+      message: `Manual trade step executed: ${decision} returned ${refundAmount / 1e6} dUSDC (${pnl >= 0 ? '+' : ''}${pnl / 1e6} dUSDC PnL)`,
+      timestamp: new Date().toISOString(),
+      digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (Manual)',
+      isMocked: true,
+      blobId
+    };
+    
+    setLiveEvents(prev => [newEv, ...prev].slice(0, 50));
   };
 
   useEffect(() => {
@@ -733,6 +777,16 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
           </div>
 
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="flex items-center mr-auto gap-2 text-[12.5px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+              <input
+                type="checkbox"
+                id="auto-start-loop"
+                checked={autoStartLoop}
+                onChange={e => setAutoStartLoop(e.target.checked)}
+                className="h-4.5 w-4.5 rounded accent-[var(--color-brand)] cursor-pointer"
+              />
+              <label htmlFor="auto-start-loop" className="cursor-pointer">Auto-run loop</label>
+            </div>
             <button 
               onClick={() => setShowOnboarding(false)} 
               disabled={isDeploying}
@@ -1181,6 +1235,28 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                                 </>
                               )}
                             </button>
+                            {!activeLoops[agent.address] && (
+                              <button
+                                onClick={() => handleStepTrade(agent.address)}
+                                className="px-2.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1 transition-all cursor-pointer border"
+                                style={{
+                                  background: 'var(--color-surface)',
+                                  color: 'var(--color-text-secondary)',
+                                  borderColor: 'var(--color-border)'
+                                }}
+                                onMouseEnter={e => {
+                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
+                                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
+                                }}
+                                onMouseLeave={e => {
+                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
+                                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
+                                }}
+                                title="Execute a single simulated trade cycle immediately"
+                              >
+                                <Zap className="h-3.5 w-3.5 text-amber-500 fill-amber-500" /> Step
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
