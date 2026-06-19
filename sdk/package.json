@@ -6,7 +6,7 @@
   "main": "dist/predict_agent.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/predict_agent.js",
+    "start": "tsc && node dist/bot_runner.js",
     "test": "tsc && node dist/tests/run_tests.js",
     "recover": "tsc && node dist/recover_funds.js",
     "runner": "tsc && node dist/bot_runner.js"
