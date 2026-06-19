@@ -34,7 +34,7 @@ AURA solves all three with a protocol-level architecture built on Sui Move primi
 | Layer | Module | Purpose |
 |---|---|---|
 | **Execution Boundary** | `agent_wallet_policy.move` | Policy-enforced wallet using a Hot Potato / TradeTicket pattern. Funds can only flow to allowlisted contracts within atomic PTBs. |
-| **Incentive Alignment** | `aura_registry.move` | Reputation registry with SUI stake bonds, on-chain performance tracking, and admin-gated slashing. |
+| **Incentive Alignment** | `aura_registry.move`, `agent_nft.move` | Reputation registry with SUI stake bonds, optimistic slashing dispute games, and AgentNFT Kiosk wrapping. |
 | **Telemetry & Audit** | `walrus_archiver.ts` | Seal-encrypted audit traces archived to Walrus, with `blob_id` committed on-chain for verifiable history. |
 
 ---
@@ -45,9 +45,13 @@ AURA solves all three with a protocol-level architecture built on Sui Move primi
 
 - **💰 Budget Ceiling & Safety Floor** — Per-policy `budget_limit` caps cumulative spend. `min_balance_floor` prevents over-commitment. Clamped subtraction handles profitable trades without underflow.
 
-- **📊 On-Chain Reputation** — Agents stake SUI, performance is tracked via `record_task_outcome`, reputation score is calculated as `(successful / total) × 10^6`. Slashing is admin-gated (DAO/arbiter).
+- **📊 Optimistic Slashing Dispute Game** — Replaces trusted admin slashing. Users submit disputes by locking a dispute bond. Operators must disclose the decryption key within 24 hours. Failure automatically slashes the operator's performance bond and awards it to the challenger.
 
-- **🔐 Seal-Encrypted Audit Trails** — Trade reasoning is encrypted client-side via Seal, uploaded to Walrus, and the `blob_id` is committed on-chain. Disputes trigger threshold decryption for verification.
+- **🏬 Sui Kiosk Strategy NFT wrapping** — High-performing strategy records and reputations can be packaged into an `AgentNFT` and placed in a shared `sui::kiosk::Kiosk`, enabling secure strategy renting and tradeable algorithms.
+
+- **🔐 Seal-Encrypted Audit Trails** — Trade reasoning is encrypted client-side via Seal, uploaded to Walrus, and the `blob_id` is committed on-chain. Disputes trigger decryption for verification.
+
+- **🌐 Hybrid Onboarding (dApp-kit)** — Combines browser extension wallets (Backpack/Sui Wallet) via standard `@mysten/dapp-kit` context providers with Web2 social zkLogin (Google, GitHub, Apple) fallback.
 
 - **⏰ Expiration & Revocation** — Policies expire by epoch. Owner can `revoke_policy` at any time, destroying the shared object and reclaiming all funds.
 
@@ -68,7 +72,8 @@ AURA/
 │   ├── Move.toml
 │   └── sources/
 │       ├── agent_wallet_policy.move   # Policy wallet + TradeTicket
-│       └── aura_registry.move         # Reputation registry + slashing
+│       ├── aura_registry.move         # Reputation registry + slashing
+│       └── agent_nft.move             # Strategy NFT wrappers & Kiosk trade
 ├── dashboard/                         # React/Vite Audit Studio + Onboarding Dock UI
 └── sdk/
     ├── predict_agent.ts               # DeepBook Predict trading loop
@@ -84,7 +89,9 @@ AURA/
 |---|---|
 | **Sui Move** | Policy wallet, reputation registry, on-chain state |
 | **Programmable Transaction Blocks (PTBs)** | Atomic multi-step trade execution |
-| **zkLogin** | User authentication for policy management |
+| **zkLogin** | Social authentication for user onboarding |
+| **Sui Kiosk** | Algorithmic strategy NFT listing and trade platform |
+| **Sui Name Service (SuiNS)** | Readable name resolver for agent profiles |
 | **DeepBook Predict** | Volatility-surface-priced prediction market (SVI oracle) |
 | **Walrus** | Decentralized verifiable storage for audit trails |
 | **MemWal** | Persistent agent memory layer on Walrus |

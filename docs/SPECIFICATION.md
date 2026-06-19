@@ -908,11 +908,22 @@ A lightweight Web frontend that makes Walrus audit data legible to users and LPs
 *   **Seal Decryption Interface:** User imports their private viewer key to decrypt and inspect the agent's historical SVI oracle checks, trade decisions, and model reasoning directly in the browser.
 *   **Agent Comparison:** Side-by-side reputation scores, PnL curves, and audit trail density for multiple registered agents.
 
-### C. Optimistic Slashing & Decentralized Dispute Resolution *(Future Work — Phase 7)*
-To remove the single-point-of-failure admin key in the reputation registry, we introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
-1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a small SUI bond and submitting a `Dispute` object on-chain referencing the suspect `blob_id`.
-2.  **Disclosure Window:** The agent operator has a configurable challenge period (e.g. 24 hours, enforced via `sui::clock`) to publish the Seal decryption key for the corresponding Walrus trace.
-3.  **Resolution:**
-    *   If the operator fails to publish the key within the window → automatic slashing of the performance bond, dispute bond refunded to the user.
-    *   If the key is published → a DAO committee (or on-chain oracle) verifies the decrypted trace against the policy bounds. Innocent → user's dispute bond is awarded to the operator. Guilty → operator's performance bond is slashed and distributed to the user.
-4.  **Griefing Resistance:** The dispute bond cost is calibrated to make frivolous disputes unprofitable — the disputer risks losing their bond if the agent is proven innocent.
+### C. Optimistic Slashing & Decentralized Dispute Resolution *(Implemented in Phase 7)*
+To remove the single-point-of-failure admin key in the reputation registry, we have implemented an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
+1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a SUI bond (0.1 SUI for Testnet, 1.0 SUI for Mainnet) and calling `submit_dispute` to register a `Dispute` object on-chain referencing the suspect `blob_id`.
+2.  **Disclosure Window:** The agent operator has a 24-hour challenge period (enforced via `sui::clock` on-chain) to call `disclose_telemetry_key`, proving compliance by publishing the Seal decryption key for the challenged trace.
+3.  **Resolution Invariants**:
+    *   *Timeout Slash:* If the operator fails to publish the key within 24 hours → anyone can call `resolve_dispute` to automatically slash the operator's locked staked bond, award it to the disputer, and mark the agent inactive.
+    *   *Key Disclosed:* If the key is disclosed, the dispute is marked resolved, and the disputer's locked bond is refunded back to them.
+4.  **Griefing Resistance:** The required dispute bond (0.1 SUI / 1.0 SUI) prevents griefing of operators, ensuring that challengers must back their challenges with real economic value.
+
+### D. Sui Kiosk NFT Wrapping (`agent_nft.move`) *(Implemented in Phase 7)*
+To support the monetization of high-performing autonomous strategies, AURA enables operators to wrap their reputational identities into tradeable NFTs:
+1.  **`AgentNFT` Struct:** Implements the `key` and `store` abilities containing the operator's `agent_address`, strategy parameter `name`, `description`, `strategy_type` tag, the current snapshot of their `reputation_score`, and an `image_url` metadata reference.
+2.  **`mint_nft` Entry:** Verifies that the caller is an active, registered agent operator in the `Registry` and extracts their current reputation score snapshot.
+3.  **Sui Kiosk Integration:** The `create_kiosk_and_place` function creates a new `sui::kiosk::Kiosk` shared object, mints the `AgentNFT`, places it inside the Kiosk, and transfers the `KioskOwnerCap` capability to the operator. This enables strategy renting, listing, and trading with royalty enforcement.
+
+### E. Hybrid Wallet Connection Onboarding *(Implemented in Phase 7)*
+*   **Browser Wallet (dApp-kit):** Integrates `@mysten/dapp-kit` (version 1.1.1+) and `@tanstack/react-query` to support native browser wallet connections (Backpack, Sui Wallet, Surf). Traditional wallets act as the secure administration interface for the Owner/Supervisor (collateral deposit/withdrawal, policy updates, and liquidation).
+*   **zkLogin Socials:** Implements Google, GitHub, and Apple zkLogin connections in parallel to simplify friction-free social onboarding for Web2 operators.
+*   **Sui v2 SDK Compatibility:** Deployed client-side queries utilizing the new `SuiJsonRpcClient` and `JsonRpcHTTPTransport` connection patterns.

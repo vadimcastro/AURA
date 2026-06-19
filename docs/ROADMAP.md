@@ -260,15 +260,15 @@ To upgrade AURA from a testnet prototype to a production-grade release:
 #### 🔧 User Prerequisites & Hosting Setup (Vercel Deploy)
 To deploy the completed Phase 5 dashboard to Vercel, configure the following settings:
 *   **Vercel Account:** For deploying the React/Vite frontend. Ensure you are ready to configure the following environment secrets in Vercel:
-    *   `AURA_PACKAGE_ID`: `0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd922`
-    *   `REGISTRY_OBJECT_ID`: `0x4a293e9a18b3eeedfccdd179907ac132c4fe3b84489c9a9cb0a704261d72af5c`
+    *   `AURA_PACKAGE_ID`: `0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e`
+    *   `REGISTRY_OBJECT_ID`: `0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c`
     *   `SUI_RPC_URL`: `https://fullnode.testnet.sui.io:443`
     *   `WALRUS_AGGREGATOR`: `https://aggregator.walrus-testnet.walrus.space`
     *   *Root Directory:* In your Vercel Project Settings, set the **Root Directory** to `dashboard/` (which we will scaffold next) so Vercel builds only the frontend module.
 *   **Railway Account:** Prepared for deploying any optional caching microservices or indexer layers (if required by performance testing; we will prioritize a client-side-only architecture to minimize infrastructure complexity, but Railway is our backup hosting for server-side utilities).
 *   **Wallet Setup:** Ensure your local browser wallet (e.g., Sui Wallet) is configured for Testnet and has a small SUI balance for testing frontend policy creations.
 
-## 🚀 Phase 7: Optimistic Slashing (OS) & Sui Ecosystem Expansion — PLANNED
+## 🚀 Phase 7: Optimistic Slashing (OS) & Sui Ecosystem Expansion — COMPLETED
 
 ### 1. Optimistic Slashing (OS) & Dispute Resolution
 To remove the single-point-of-failure admin key in the reputation registry, introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
@@ -317,8 +317,9 @@ To transition from browser-tab simulation to continuous, persistent headless exe
 |---|---|---|
 | Sui CLI | `1.73.1` ✅ **Installed** | Contract compilation, publishing, and testnet interaction |
 | Move Edition | `edition = "2024.beta"` in `Move.toml` | Enables `public(package)`, struct field syntax |
-| `@mysten/sui` | `^1.x` (latest) | TypeScript SDK for PTB construction, signing, and RPC queries |
-| Sui Testnet RPC | `https://fullnode.testnet.sui.io:443` | Fullnode endpoint for `SuiClient` |
+| `@mysten/sui` | `^2.19.0` (latest) | TypeScript SDK for PTB construction, signing, and RPC queries |
+| `@mysten/dapp-kit` | `^1.1.1` (latest) | React components and hooks for standard browser wallets connection |
+| Sui Testnet RPC | `https://fullnode.testnet.sui.io:443` | Fullnode endpoint for JSON-RPC transport |
 | DeepBook Predict | Branch `predict-testnet-4-16` | Predict protocol contracts on testnet |
 | Predict Server | `https://predict-server.testnet.mystenlabs.com` | SVI oracle endpoint |
 | dUSDC Faucet | [Tally Form](https://tally.so/r/Xx102L) | Request testnet dUSDC tokens |
