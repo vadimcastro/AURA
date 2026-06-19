@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "tsc && node dist/predict_agent.js",
-    "test": "tsc && node dist/tests/run_tests.js"
+    "test": "tsc && node dist/tests/run_tests.js",
+    "recover": "tsc && node dist/recover_funds.js"
   },
   "dependencies": {
     "@mysten/sui": "^1.1.0",

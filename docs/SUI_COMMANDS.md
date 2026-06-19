@@ -94,7 +94,7 @@ sui client call \
 ```
 
 ### Revoke Policy (Reclaim Balance)
-Owner-only action to permanently destroy the policy and disburse all stored token balances back to the owner:
+Owner only: destroys the policy wallet and transfers all remaining balances back to the owner:
 ```bash
 sui client call \
   --package <AURA_PACKAGE_ID> \
@@ -107,15 +107,64 @@ sui client call \
 ```
 *(Note: A gas budget of 10,000,000 MIST / 0.01 SUI is sufficient for cleanup).*
 
-### Slash an Agent (Admin Only)
-Slashes the staked bond of a non-compliant or malicious agent, turning their active status to `false`:
+### Submit Telemetry Dispute
+Submits an optimistic dispute challenging an agent operator's telemetry trace. Requires locking a dispute bond (0.1 SUI testnet / 1.0 SUI mainnet):
 ```bash
 sui client call \
   --package <AURA_PACKAGE_ID> \
   --module aura_registry \
-  --function slash_bond \
-  --args <REGISTRY_OBJECT_ID> <AGENT_ADDRESS> \
-  --gas-budget 10000000 \
+  --function submit_dispute \
+  --args <REGISTRY_OBJECT_ID> <CLOCK_OBJECT_ID> <AGENT_ADDRESS> <BLOB_ID_BYTES> <BOND_COIN_OBJECT_ID> \
+  --gas-budget 20000000 \
+  --json
+```
+*Note: Clock object ID is `0x6` on Sui Testnet.*
+
+### Disclose Telemetry Key (Operator Resolution)
+Called by the agent operator to disclose the decryption key for the challenged trace within 24 hours, resolving the dispute and reclaiming their bond:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module aura_registry \
+  --function disclose_telemetry_key \
+  --args <REGISTRY_OBJECT_ID> <DISPUTE_ID> <DECRYPTION_KEY_BYTES> \
+  --gas-budget 20000000 \
+  --json
+```
+
+### Resolve Dispute (Timeout Slashing)
+Can be called by anyone after the 24-hour deadline has passed. If the operator failed to disclose the key, this slashes the operator's stake and awards it to the disputer:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module aura_registry \
+  --function resolve_dispute \
+  --args <REGISTRY_OBJECT_ID> <CLOCK_OBJECT_ID> <DISPUTE_ID> \
+  --gas-budget 20000000 \
+  --json
+```
+
+### Mint Strategy NFT
+Operator only: mints an `AgentNFT` representing their proven active registry reputation score snapshot:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module agent_nft \
+  --function mint_and_keep \
+  --args <REGISTRY_OBJECT_ID> <NAME_BYTES> <DESCRIPTION_BYTES> <STRATEGY_TYPE_BYTES> <IMAGE_URL_BYTES> \
+  --gas-budget 20000000 \
+  --json
+```
+
+### Create Kiosk and Place NFT
+Operator only: mints the `AgentNFT` and places it inside a new shared `sui::kiosk::Kiosk` object on-chain, routing the Owner Capability to the operator:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module agent_nft \
+  --function create_kiosk_and_place \
+  --args <REGISTRY_OBJECT_ID> <NAME_BYTES> <DESCRIPTION_BYTES> <STRATEGY_TYPE_BYTES> <IMAGE_URL_BYTES> \
+  --gas-budget 20000000 \
   --json
 ```
 
@@ -146,3 +195,90 @@ sui client call \
 *   **Symptom:** Calling `tx.build()` on an adversarial transaction throws an unhandled exception rather than producing transaction bytes for `dryRunTransactionBlock`.
 *   **Cause:** The new `@mysten/sui` v1.x SDK executes type-resolution and budget checks via internal dry-runs during the `tx.build()` phase. If the code aborts (e.g., budget exceeded or expired), the SDK throws an error immediately.
 *   **Fix:** Wrap the build and dry-run steps inside a `try-catch` block and parse the caught error message for `MoveAbort(..., expectedAbortCode)` to verify safety boundaries.
+
+### 5. SDK v2.x Client Migration & Deprecations
+*   **Symptom:** Upgrading to `@mysten/sui` v2.x removes `SuiClient` and `getFullnodeUrl` from `@mysten/sui/client`.
+*   **Explanation:** Mysten Labs relocated JSON-RPC transport helper functions to `@mysten/sui/jsonRpc`.
+*   **Fix:** Import the JSON-RPC compatible client class and configuration helper:
+    ```typescript
+    import { SuiJsonRpcClient as SuiClient, getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
+    ```
+
+### 6. `@mysten/dapp-kit` v1.x Transport Configuration
+*   **Symptom:** `Property 'transport' is missing in type '{ url: ... }'` when initializing network providers.
+*   **Explanation:** Modern dApp-kit provider configs require setting up an explicit network transport instance.
+*   **Fix:** Initialize `createNetworkConfig` using the `JsonRpcHTTPTransport` class and supply the required `network` parameter:
+    ```typescript
+    import { createNetworkConfig } from "@mysten/dapp-kit";
+    import { JsonRpcHTTPTransport, getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
+
+    const { networkConfig } = createNetworkConfig({
+      testnet: {
+        network: "testnet",
+        transport: new JsonRpcHTTPTransport({
+          url: getJsonRpcFullnodeUrl("testnet"),
+        }),
+      },
+    });
+    ```
+
+---
+
+## 📦 5. Core Package Installations
+
+### Frontend Dashboard Dependencies
+Run this command in the dashboard directory to install the modern dApp connection stack:
+```bash
+# dashboard/
+npm install @mysten/dapp-kit@^1.1.1 @mysten/sui@^2.19.0 @tanstack/react-query@^5.101.0
+```
+
+### SDK Dependencies
+Run this command in the SDK directory:
+```bash
+# sdk/
+npm install @mysten/sui@^1.1.0 dotenv@^16.4.5
+```
+
+---
+
+## ⚙️ 6. Environment & Deployment Configuration
+
+### Vercel Production Environment Variables
+When deploying the client dashboard to Vercel, verify these configuration environment variables are set in the Vercel project settings:
+*   `VITE_AURA_PACKAGE_ID`: `0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e`
+*   `VITE_REGISTRY_OBJECT_ID`: `0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c`
+*   `VITE_DEEPBOOK_PREDICT_PACKAGE_ID`: `0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e`
+*   `VITE_DEEPBOOK_POOL_ID`: `0xb1c2c42afc347fe432d27f238cb0c4d5adee5c91254b12666d93c18f800c31ff`
+*   `VITE_DUSDC_TYPE_TAG`: `0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC`
+
+### Local SDK Env Settings (`sdk/.env`)
+```env
+SUI_RPC_URL=https://fullnode.testnet.sui.io:443
+AURA_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
+REGISTRY_OBJECT_ID=0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c
+AGENT_PRIVATE_KEY=suiprivkey1qq...   # Active operator key
+```
+
+---
+
+## 🛡️ 7. Policy Funds Recovery Tool
+
+A TS recovery utility is available inside the SDK folder to sweep expired or abandoned policy wallets. It fetches `PolicyCreated` events matching the active operator key address and executes `revoke_policy` transactions to return funds.
+
+### Running the Sweeper
+Compile the SDK and trigger the recovery process:
+```bash
+cd sdk
+npm run recover
+```
+
+This utility sweeps:
+1. The active deployment package: `0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e`
+2. Preceding historical deployments: `0x7cb617c7...` and `0x74093b56...`
+
+To target a specific package ID exclusively, run:
+```bash
+npm run recover <TARGET_PACKAGE_ID>
+```
+

@@ -140,6 +140,67 @@ sui client call \
   --json
 ```
 
+### Submit Telemetry Dispute
+Submits an optimistic dispute challenging an agent operator's telemetry trace. Requires locking a dispute bond (0.1 SUI testnet / 1.0 SUI mainnet):
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module aura_registry \
+  --function submit_dispute \
+  --args <REGISTRY_OBJECT_ID> <CLOCK_OBJECT_ID> <AGENT_ADDRESS> <BLOB_ID_BYTES> <BOND_COIN_OBJECT_ID> \
+  --gas-budget 20000000 \
+  --json
+```
+*Note: Clock object ID is `0x6` on-chain.*
+
+### Disclose Telemetry Key (Operator Resolution)
+Called by the agent operator to disclose the decryption key for the challenged trace within 24 hours, resolving the dispute and reclaiming their bond:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module aura_registry \
+  --function disclose_telemetry_key \
+  --args <REGISTRY_OBJECT_ID> <DISPUTE_ID> <DECRYPTION_KEY_BYTES> \
+  --gas-budget 20000000 \
+  --json
+```
+
+### Resolve Dispute (Timeout Slashing)
+Can be called by anyone after the 24-hour deadline has passed. If the operator failed to disclose the key, this slashes the operator's stake and awards it to the disputer:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module aura_registry \
+  --function resolve_dispute \
+  --args <REGISTRY_OBJECT_ID> <CLOCK_OBJECT_ID> <DISPUTE_ID> \
+  --gas-budget 20000000 \
+  --json
+```
+
+### Mint Strategy NFT
+Operator only: mints an `AgentNFT` representing their proven active registry reputation score snapshot:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module agent_nft \
+  --function mint_and_keep \
+  --args <REGISTRY_OBJECT_ID> <NAME_BYTES> <DESCRIPTION_BYTES> <STRATEGY_TYPE_BYTES> <IMAGE_URL_BYTES> \
+  --gas-budget 20000000 \
+  --json
+```
+
+### Create Kiosk and Place NFT
+Operator only: mints the `AgentNFT` and places it inside a new shared `sui::kiosk::Kiosk` object on-chain, routing the Owner Capability to the operator:
+```bash
+sui client call \
+  --package <AURA_PACKAGE_ID> \
+  --module agent_nft \
+  --function create_kiosk_and_place \
+  --args <REGISTRY_OBJECT_ID> <NAME_BYTES> <DESCRIPTION_BYTES> <STRATEGY_TYPE_BYTES> <IMAGE_URL_BYTES> \
+  --gas-budget 20000000 \
+  --json
+```
+
 ---
 
 ## 🛠️ 4. SDK Integration & Troubleshooting Lessons
@@ -179,3 +240,98 @@ sui client call \
     }
   }
   ```
+
+### 5. SDK v2.x Client Migration & Deprecations
+* **Constraint:** Upgrading to `@mysten/sui` v2.x removes `SuiClient` and `getFullnodeUrl` from the `@mysten/sui/client` entrypoint.
+* **Explanation:** Mysten Labs deprecated the JSON-RPC interface in favor of gRPC. The JSON-RPC classes were relocated to `@mysten/sui/jsonRpc`.
+* **Fix:** Import client and URL helpers from the correct jsonRpc bundle:
+  ```typescript
+  import { SuiJsonRpcClient as SuiClient, getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
+  ```
+
+### 6. `@mysten/dapp-kit` v1.x Transport Configuration
+* **Constraint:** Mismatches between dApp-kit v1.x and `@mysten/sui` v2.x cause type errors: `Property 'transport' is missing in type '{ url: ... }'`.
+* **Explanation:** Modern dApp-kit requires setting up an explicit network transport instance rather than passing a raw URL string.
+* **Fix:** Configure `createNetworkConfig` using the `JsonRpcHTTPTransport` constructor and include the required `network` key:
+  ```typescript
+  import { createNetworkConfig } from "@mysten/dapp-kit";
+  import { JsonRpcHTTPTransport, getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
+
+  const { networkConfig } = createNetworkConfig({
+    testnet: {
+      network: "testnet",
+      transport: new JsonRpcHTTPTransport({
+        url: getJsonRpcFullnodeUrl("testnet"),
+      }),
+    },
+  });
+  ```
+
+---
+
+## 📦 5. Core Package Installations
+
+### Frontend Dashboard Packages
+Ensure clean compilation of the client dashboard with appropriate Sui dApp-kit and react-query dependencies:
+```bash
+# From dashboard/ directory:
+npm install @mysten/dapp-kit@^1.1.1 @mysten/sui@^2.19.0 @tanstack/react-query@^5.101.0
+```
+
+### SDK Packages
+Ensure correct Sui libraries are configured in the SDK:
+```bash
+# From sdk/ directory:
+npm install @mysten/sui@^1.1.0 dotenv@^16.4.5
+```
+
+---
+
+## ⚙️ 6. Environment & Deployment Setup
+
+### Vercel / Client Dashboard Production Env
+Set the following environment variables in Vercel or locally inside `dashboard/.env.local` to configure the dApp:
+```env
+VITE_AURA_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
+VITE_REGISTRY_OBJECT_ID=0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c
+VITE_DEEPBOOK_PREDICT_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
+VITE_DEEPBOOK_POOL_ID=0xb1c2c42afc347fe432d27f238cb0c4d5adee5c91254b12666d93c18f800c31ff
+VITE_DUSDC_TYPE_TAG=0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC
+```
+
+### SDK / Bot Runner Daemon Env
+Configure inside `sdk/.env` for off-chain automation and tests:
+```env
+SUI_RPC_URL=https://fullnode.testnet.sui.io:443
+AURA_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
+REGISTRY_OBJECT_ID=0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c
+AGENT_PRIVATE_KEY=suiprivkey1qq...   # Your operator seed
+```
+
+---
+
+## 🛡️ 7. Policy Funds Recovery & Sweeper Tool
+
+AURA supports a multi-deployment funds recovery script to reclaim all dUSDC locked inside historical or active policy wallets.
+
+### Reclaim Script Execution
+Run the following script to sweep and refund locked dUSDC and retrieve SUI gas storage rebates:
+```bash
+# Navigate to the SDK folder
+cd sdk
+
+# Compile and execute the recovery sweep
+npm run recover
+```
+
+This script:
+1. Checks and logs initial SUI gas and dUSDC balances of the active agent keypair.
+2. Automatically queries historical contract deployments (`0x7cb6...`, `0x7409...`) and the current deployment (`0xb03d...`) for all `PolicyCreated` events owned by the keypair.
+3. Submits `revoke_policy` transactions to dismantle empty/abandoned policy wallets, reclaiming SUI gas rebates and returning dUSDC balances to the keypair address.
+4. Outputs final SUI gas and dUSDC balances, showing the net funds successfully recovered.
+
+*Optional:* Reclaim from a specific package ID by providing it as a CLI parameter:
+```bash
+npm run recover 0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd922
+```
+
