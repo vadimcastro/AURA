@@ -219,6 +219,13 @@ To generate highly authentic market activity without needing complex predictive 
 *   ✅ **In-Browser Agent Execution Loop:** Implemented an autonomous loop runner in the browser dashboard console using the agent's ephemeral key to simulate trading loops and stream live telemetry logs.
 *   ✅ **Interactive Policy Control & Liquidation:** Updated the settings modal to simulate on-chain policy adjustments (drawdown updates), deposits, withdrawals, and liquidations (live signatures deferred to Phase 7).
 
+### ✅ Phase 6.3: Scheduled Simulation Trading, PnL Indicators, & Graceful Depletion Handling — COMPLETE (2026-06-19)
+*   ✅ **Parameterized Bot Runner:** Updated the off-chain keeper (`sdk/bot_runner.ts`) to default to 1-cycle one-shot termination to avoid infinite gas drain, while supporting custom cycle parameters (e.g. integer value or `"infinite"`).
+*   ✅ **Scheduled Simulation Durations:** Configured dropdown selection in the dashboard supporting Continuous, 1 Minute, and 3 Minute demo trading simulations running at 10-second intervals.
+*   ✅ **PnL Metrics:** Introduced reputation-based baseline PnL and transaction outcomes dynamically tracked as dUSDC metrics in card grids and tables.
+*   ✅ **Graceful Depletion Handling:** Simulated capital exhaustion directly in the browser state, automatically halting active simulation loops and emitting a `❌ Simulation halted: Agent has exhausted its policy wallet dUSDC budget` warning if funds reach zero.
+*   ✅ **Gas/Budget Revert Integration:** Explained the Move VM's `dryRunTransactionBlock` pre-flight checks and `borrow_for_trade` budget safety bounds in the technical manuals.
+
 ---
 
 

@@ -29,6 +29,7 @@ export interface AgentInfo {
   blacklistUntil: number;
   latestBlobId:   string | null;
   registeredAt?:  number;
+  budget?:        number;
 }
 
 export interface LiveEvent {
@@ -119,7 +120,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
 
   const [localAgents, setLocalAgents] = useState<AgentInfo[]>([]);
   const [activeLoops, setActiveLoops] = useState<Record<string, {
-    mode: 'continuous' | '1min' | '5min' | '15min';
+    mode: 'continuous' | '1min' | '3min';
     timeLeft: number;
     nextTradeIn: number;
     intervalSec: number;
@@ -225,11 +226,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
           if (a.address === addr) {
             const nextTasks = a.totalTasks + 1;
             const nextSuccess = a.successfulTasks + (isSuccess ? 1 : 0);
+            const currentBudget = a.budget !== undefined ? a.budget : 25.0;
+            const nextBudget = Math.max(0, currentBudget + (pnl / 1e6));
             return {
               ...a,
               totalTasks: nextTasks,
               successfulTasks: nextSuccess,
-              reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000)))
+              reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000))),
+              budget: nextBudget,
             };
           }
           return a;
@@ -239,11 +243,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
         if (!onChainAg) return prev;
         const nextTasks = onChainAg.totalTasks + 1;
         const nextSuccess = onChainAg.successfulTasks + (isSuccess ? 1 : 0);
+        const currentBudget = onChainAg.budget !== undefined ? onChainAg.budget : 25.0;
+        const nextBudget = Math.max(0, currentBudget + (pnl / 1e6));
         const updated: AgentInfo = {
           ...onChainAg,
           totalTasks: nextTasks,
           successfulTasks: nextSuccess,
-          reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000)))
+          reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000))),
+          budget: nextBudget,
         };
         return [updated, ...prev];
       }
@@ -270,6 +277,21 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
   };
 
   const handleStepTrade = (addr: string) => {
+    const ag = allAgents.find(a => a.address === addr);
+    const currentBudget = ag?.budget !== undefined ? ag.budget : 25.0;
+    if (currentBudget <= 0) {
+      const errorEv: LiveEvent = {
+        id: 'mock-tx-error-' + Date.now(),
+        type: 'slash',
+        agent: addr,
+        message: `❌ Execution blocked: Agent policy wallet has run out of dUSDC budget (0.00 dUSDC left).`,
+        timestamp: new Date().toISOString(),
+        digest: '0xERROR-BUDGET',
+        isMocked: true,
+      };
+      setLiveEvents(prev => [errorEv, ...prev].slice(0, 50));
+      return;
+    }
     executeTradeCycleLocal(addr, true);
   };
 
@@ -391,6 +413,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
               blacklistUntil,
               latestBlobId,
               registeredAt: registrationTimes.get(address.toLowerCase()),
+              budget: 25.0,
             };
             return agentInfo;
           } catch (err) {
@@ -415,6 +438,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
               active: true,
               blacklistUntil: 0,
               latestBlobId: 'xyfwRUYqWnmbw2C_9WUOMxrz1SMlJEzBumkoLg-AhFc',
+              budget: 22.0,
             },
             {
               address: '0x3bf937ee2e95a129d1c0b392abde62551cf16757041a96f2ba1443f676ffb6a8',
@@ -426,6 +450,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
               active: false,
               blacklistUntil: 0,
               latestBlobId: null,
+              budget: 0.0,
             },
           );
         }
@@ -586,6 +611,26 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
           const loop = nextState[addr];
           if (!loop) return;
 
+          // Check if agent's budget is empty
+          const currentAgent = allAgents.find(a => a.address === addr);
+          const currentBudget = currentAgent?.budget !== undefined ? currentAgent.budget : 25.0;
+          if (currentBudget <= 0) {
+            delete nextState[addr];
+            stateChanged = true;
+            
+            const outOfFundsEv: LiveEvent = {
+              id: 'mock-schedule-halt-' + Date.now() + '-' + Math.random(),
+              type: 'slash',
+              agent: addr,
+              message: `❌ Simulation halted: Agent has exhausted its policy wallet dUSDC budget (0.00 dUSDC left)! Please deposit funds to resume.`,
+              timestamp: new Date().toISOString(),
+              digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (OutFunds)',
+              isMocked: true,
+            };
+            setLiveEvents(evs => [outOfFundsEv, ...evs].slice(0, 50));
+            return;
+          }
+
           // 1. Decrement timers
           const nextTimeLeft = loop.timeLeft === Infinity ? Infinity : loop.timeLeft - 1;
           const nextTradeIn = loop.nextTradeIn - 1;
@@ -599,7 +644,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
               id: 'mock-schedule-end-' + Date.now() + '-' + Math.random(),
               type: 'deregister',
               agent: addr,
-              message: `Scheduled simulation finished successfully (${loop.mode === '1min' ? '1 Minute' : loop.mode === '5min' ? '5 Minutes' : '15 Minutes'} duration completed)`,
+              message: `Scheduled simulation finished successfully (${loop.mode === '1min' ? '1 Minute' : '3 Minutes'} duration completed)`,
               timestamp: new Date().toISOString(),
               digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (Sched)',
               isMocked: true,
@@ -616,7 +661,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
             executeTradeCycleLocal(
               addr, 
               false, 
-              loop.mode === 'continuous' ? 'Continuous' : loop.mode === '1min' ? '1 Min' : loop.mode === '5min' ? '5 Min' : '15 Min'
+              loop.mode === 'continuous' ? 'Continuous' : loop.mode === '1min' ? '1 Min' : '3 Min'
             );
           }
 
@@ -1212,6 +1257,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                           {(() => {
                             const pnlVal = getAgentPnL(agent);
                             const isPositive = pnlVal >= 0;
+                            const budgetVal = agent.budget !== undefined ? agent.budget : 25.0;
                             return (
                               <div className="flex items-center gap-1 select-none">
                                 {isPositive ? (
@@ -1222,6 +1268,9 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                                 <div className="flex flex-col">
                                   <span className={`font-bold font-mono text-[12.5px] ${isPositive ? 'text-[#12b76a]' : 'text-[#f04438]'}`}>
                                     {isPositive ? '+' : ''}{pnlVal.toFixed(2)}
+                                  </span>
+                                  <span className="text-[10px] text-[var(--color-text-muted)] font-medium">
+                                    Budget: {budgetVal.toFixed(2)} dUSDC
                                   </span>
                                 </div>
                               </div>
@@ -1350,9 +1399,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                                   </div>
                                   {[
                                     { label: 'Continuous', mode: 'continuous', desc: '12s interval, run forever', timeLeft: Infinity, intervalSec: 12 },
-                                    { label: '1 Minute (Demo)', mode: '1min', desc: '10s interval, 6 trades', timeLeft: 60, intervalSec: 10 },
-                                    { label: '5 Minutes', mode: '5min', desc: '20s interval, 15 trades', timeLeft: 300, intervalSec: 20 },
-                                    { label: '15 Minutes', mode: '15min', desc: '30s interval, 30 trades', timeLeft: 900, intervalSec: 30 },
+                                    { label: '1 Minute', mode: '1min', desc: '10s interval, 6 trades', timeLeft: 60, intervalSec: 10 },
+                                    { label: '3 Minutes', mode: '3min', desc: '10s interval, 18 trades', timeLeft: 180, intervalSec: 10 },
                                   ].map((opt) => (
                                     <button
                                       key={opt.mode}
