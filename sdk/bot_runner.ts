@@ -263,9 +263,41 @@ async function bootstrapAgent(
 }
 
 async function main() {
+  // Parse command line arguments
+  // Usage: npm run start [cycles] [intervalMs]
+  // e.g. npm run start 1 30000 (runs 1 cycle and exits)
+  // e.g. npm run start infinite 10000 (runs infinitely with 10s interval)
+  const argCycles = process.argv[2];
+  const argInterval = process.argv[3];
+
+  let maxCycles = 1; // default to 1 cycle
+  if (argCycles === "infinite") {
+    maxCycles = Infinity;
+  } else if (argCycles) {
+    const parsed = parseInt(argCycles, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      maxCycles = parsed;
+    }
+  }
+
+  let delayMs = 30000; // default 30s
+  if (argInterval) {
+    const parsed = parseInt(argInterval, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      delayMs = parsed;
+    }
+  }
+
   console.log(magenta("========================================================="));
-  console.log(magenta("🛡️  AURA Off-Chain Continuous Bot Runner Daemon           "));
+  console.log(magenta("🛡️  AURA Off-Chain Bot Runner                             "));
   console.log(magenta("=========================================================\n"));
+  console.log(`Execution Mode: ${maxCycles === Infinity ? "Continuous (Infinite)" : `${maxCycles} Cycle(s)`}`);
+  console.log(`Interval Delay: ${delayMs / 1000}s`);
+  if (maxCycles !== Infinity) {
+    console.log(yellow(`Process will auto-terminate after executing ${maxCycles} cycle(s).\n`));
+  } else {
+    console.log(`Press Ctrl+C to terminate runner.\n`);
+  }
 
   const ownerKeypair = getAgentKeypair();
   const ownerAddress = ownerKeypair.toSuiAddress();
@@ -284,14 +316,13 @@ async function main() {
   const agent2 = await bootstrapAgent(ownerKeypair, key2, "Aggressive Vol Trader", 25_000_000, 100_000_000);
   const agent3 = await bootstrapAgent(ownerKeypair, key3, "Delta-Neutral Bot", 25_000_000, 100_000_000);
 
-  console.log(green("\n🚀 Start Continuous Autonomous Trading Loops (30-second cycles)"));
-  console.log(`Press Ctrl+C to terminate runner.\n`);
+  console.log(green("\n🚀 Start Autonomous Trading Loops"));
 
-  const runLoop = async (name: string, agentKeypair: Ed25519Keypair, policyId: string, delayMs: number) => {
+  const runLoop = async (name: string, agentKeypair: Ed25519Keypair, policyId: string, delayMs: number, maxCycles: number) => {
     let iteration = 0;
-    while (true) {
+    while (iteration < maxCycles) {
       iteration++;
-      console.log(cyan(`\n[${new Date().toISOString()}] >>> [${name}] Waking up (Cycle #${iteration})`));
+      console.log(cyan(`\n[${new Date().toISOString()}] >>> [${name}] Waking up (Cycle #${iteration}/${maxCycles === Infinity ? "infinite" : maxCycles})`));
       
       let successOverride = true;
       if (name.includes("Aggressive")) {
@@ -316,17 +347,25 @@ async function main() {
         console.error(red(`[${name}] 💥 Fatal error in cycle:`), (error as Error).message);
       }
 
-      console.log(`[${name}] Sleeping for ${delayMs/1000}s...`);
-      await sleep(delayMs);
+      if (iteration < maxCycles) {
+        console.log(`[${name}] Sleeping for ${delayMs/1000}s...`);
+        await sleep(delayMs);
+      }
     }
+    console.log(green(`[${name}] Finished all ${maxCycles} cycles.`));
   };
 
-  // Stagger loops slightly to avoid transaction sequence collisions or gas conflicts
-  runLoop("Conservative Yield", agent1.agentKeypair, agent1.policyId, 30000);
-  await sleep(10000);
-  runLoop("Aggressive Vol", agent2.agentKeypair, agent2.policyId, 30000);
-  await sleep(10000);
-  runLoop("Delta-Neutral", agent3.agentKeypair, agent3.policyId, 30000);
+  // Stagger loop launches slightly to avoid immediate transaction collisions or gas conflicts
+  const p1 = runLoop("Conservative Yield", agent1.agentKeypair, agent1.policyId, delayMs, maxCycles);
+  await sleep(2000);
+  const p2 = runLoop("Aggressive Vol", agent2.agentKeypair, agent2.policyId, delayMs, maxCycles);
+  await sleep(2000);
+  const p3 = runLoop("Delta-Neutral", agent3.agentKeypair, agent3.policyId, delayMs, maxCycles);
+
+  await Promise.all([p1, p2, p3]);
+  console.log(magenta("\n========================================================="));
+  console.log(magenta("🛡️  AURA Off-Chain Bot Runner: All cycles complete. Exiting."));
+  console.log(magenta("========================================================="));
 }
 
 main().catch(err => {
