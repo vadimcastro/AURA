@@ -599,18 +599,18 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             <div className="space-y-4 md:border-l md:pl-6" style={{ borderColor: 'var(--color-border)' }}>
               <div className="space-y-2">
                 <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Strategy Selection</label>
-                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 border" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 border" style={{ borderColor: 'var(--color-border)' }}>
                   <button
                     type="button"
                     onClick={() => setNewAgentStrategyMode('preset')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'preset' ? 'bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'preset' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
                   >
                     Strategy Preset
                   </button>
                   <button
                     type="button"
                     onClick={() => setNewAgentStrategyMode('copy')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'copy' ? 'bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'copy' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
                   >
                     Copy Profile
                   </button>
@@ -621,7 +621,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                 <div className="space-y-3 pt-2">
                   <div className="flex justify-between items-center text-[12px] font-semibold">
                     <span className="text-neutral-500">Risk Setting:</span>
-                    <span className="font-mono text-neutral-900 dark:text-white px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded">
+                    <span className="font-mono text-neutral-900 px-2 py-0.5 bg-neutral-100 rounded">
                       {newAgentRiskLevel === 25 ? 'Conservative' : newAgentRiskLevel === 50 ? 'Balanced' : 'Aggressive'}
                     </span>
                   </div>
@@ -632,7 +632,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                     step="25"
                     value={newAgentRiskLevel}
                     onChange={e => setNewAgentRiskLevel(parseInt(e.target.value))}
-                    className="w-full h-1 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                    className="w-full h-1 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
                   />
                   <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase">
                     <span>Conservative</span>
@@ -1059,25 +1059,6 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                               Audit Telemetry
                             </button>
                             <button
-                              onClick={() => handleToggleLoop(agent.address)}
-                              className="w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
-                              style={{
-                                background: activeLoops[agent.address] ? 'rgba(16, 185, 129, 0.08)' : 'var(--color-surface)',
-                                color: activeLoops[agent.address] ? 'var(--color-success)' : 'var(--color-text-secondary)',
-                                borderColor: activeLoops[agent.address] ? 'var(--color-success)' : 'var(--color-border)'
-                              }}
-                            >
-                              {activeLoops[agent.address] ? (
-                                <>
-                                  <Square className="h-3 w-3 fill-current text-emerald-500" /> Active
-                                </>
-                              ) : (
-                                <>
-                                  <Play className="h-3 w-3 fill-current text-neutral-400" /> Run Loop
-                                </>
-                              )}
-                            </button>
-                            <button
                               onClick={() => setSettingsAgent(agent)}
                               className="w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
                               style={{
@@ -1095,6 +1076,24 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                               }}
                             >
                               <Settings className="h-3.5 w-3.5" /> Configure
+                            </button>
+                            <button
+                              onClick={() => handleToggleLoop(agent.address)}
+                              className={`w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] flex items-center gap-1.5 transition-all cursor-pointer border ${
+                                activeLoops[agent.address] 
+                                  ? 'font-bold text-white bg-[#12b76a] border-[#12b76a] shadow-md shadow-emerald-500/20 hover:opacity-95' 
+                                  : 'font-semibold text-[var(--color-brand)] bg-[rgba(79,110,247,0.04)] border-[var(--color-brand)]/20 hover:bg-[var(--color-brand)] hover:text-white hover:border-[var(--color-brand)]'
+                              }`}
+                            >
+                              {activeLoops[agent.address] ? (
+                                <>
+                                  <Square className="h-3 w-3 fill-current text-white animate-pulse" /> Active
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="h-3 w-3 fill-current" /> Run Loop
+                                </>
+                              )}
                             </button>
                           </div>
                         </td>

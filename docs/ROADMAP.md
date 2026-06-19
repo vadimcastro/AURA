@@ -290,6 +290,17 @@ Based on Sui CLI and Move VM runtime benchmarks, the current gas fee configurati
 *   **Gas Cap (setGasBudget)**: Retained at `2,000,000` Mist (0.002 SUI) for agent PTBs. On Sui, execution charges are calculated based on actual bytecode instructions and objects mutated, refunding unused budget. While standard coin transfers require only `1,000,000` Mist, dynamic checks (like inspecting hot-potato tickets or parsing policy registries) require a safe ceiling to prevent aborts. Lowering the cap yields zero cost benefits while introducing high failure rates.
 *   **Agent Funding**: Configured at `100,000,000` Mist (0.1 SUI) for initial setup. This covers up to 50 active copy-trading execution cycles (roughly 25 minutes of continuous 30-second loop cycles) before requiring a top-up.
 
+### 4. Real On-Chain Agent Execution & Backend Infrastructure
+To transition from browser-tab simulation to continuous, persistent headless execution of agent copy-trading loops, AURA will introduce a backend runner service:
+*   **Railway Hosted API Service**: Deploy a lightweight, secure Node.js API service on Railway exposing endpoints (such as `/api/agents/start` and `/api/agents/stop`) to control active agents.
+*   **Secure Ephemeral Key Management**:
+    *   *Option A (Encrypted Vault)*: The UI generates the agent Ed25519 keypair client-side and transmits the private key (encrypted via the Owner wallet's public key) to a secure storage vault managed by the Railway backend.
+    *   *Option B (Keyless Executor Delegation)*: The backend runner generates and manages the keypair directly, while the connected Owner wallet authorizes the key's address as a secondary executor inside the on-chain `WalletPolicy` Move contract (perfectly preserving the security boundary).
+*   **Headless Trading Workers**: When a loop is activated, Railway spins up a background worker process that runs a persistent Node task, pulling oracle updates, signing trading transactions, and archiving logs to Walrus.
+*   **WebSocket Telemetry Stream**: The Railway backend publishes live execution log streams via WebSocket (`wss://`) back to the browser dashboard console window, giving users full observability of their remote agent.
+
+---
+
 ## 🚀 Phase 8: Live Walkthrough Demo & Submission — PLANNED
 
 *   🔲 **Walkthrough Video Recording**: Record the live walk-through demo video showcasing the user-driven browser registration, copy-trading loop, telemetry decryption, and contract liquidation.

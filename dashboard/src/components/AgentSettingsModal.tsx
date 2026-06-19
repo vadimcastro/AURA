@@ -116,18 +116,18 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                     <h4 className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Execution Strategy</h4>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 border" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 border" style={{ borderColor: 'var(--color-border)' }}>
                   <button
                     type="button"
                     onClick={() => setStrategyMode('preset')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all ${strategyMode === 'preset' ? 'bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all ${strategyMode === 'preset' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
                   >
                     Trading Style Preset
                   </button>
                   <button
                     type="button"
                     onClick={() => setStrategyMode('copy')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all ${strategyMode === 'copy' ? 'bg-white dark:bg-neutral-700 shadow-sm text-neutral-900 dark:text-white' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all ${strategyMode === 'copy' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
                   >
                     Copy Trade Profile
                   </button>
@@ -138,9 +138,9 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
               {strategyMode === 'preset' ? (
                 /* Cleaner Risk Slider */
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center text-[12px] font-semibold text-neutral-700 dark:text-neutral-300">
+                  <div className="flex justify-between items-center text-[12px] font-semibold text-neutral-700">
                     <span>Target Risk Setting:</span>
-                    <span className="font-mono text-neutral-900 dark:text-white px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded">{getRiskLabel(riskLevel)}</span>
+                    <span className="font-mono text-neutral-900 px-2 py-0.5 bg-neutral-100 rounded">{getRiskLabel(riskLevel)}</span>
                   </div>
                   <div className="relative pt-1">
                     <input 
@@ -150,7 +150,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                       step="25"
                       value={riskLevel}
                       onChange={(e) => setRiskLevel(parseInt(e.target.value))}
-                      className="w-full h-1 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                      className="w-full h-1 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
                     />
                     <div className="flex justify-between mt-2 text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">
                       <span>Conservative</span>
@@ -182,9 +182,9 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                   </div>
 
                   <div className="relative flex py-2 items-center">
-                    <div className="flex-grow border-t border-neutral-200 dark:border-neutral-700"></div>
+                    <div className="flex-grow border-t border-neutral-200"></div>
                     <span className="flex-shrink mx-4 text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Or Paste Custom Profile</span>
-                    <div className="flex-grow border-t border-neutral-200 dark:border-neutral-700"></div>
+                    <div className="flex-grow border-t border-neutral-200"></div>
                   </div>
 
                   <div className="space-y-2">
@@ -202,10 +202,10 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
 
               {/* Danger Zone */}
               <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/10">
+                <div className="flex items-center justify-between p-3 rounded-xl border border-red-200 bg-red-50">
                   <div>
-                    <h4 className="text-[12px] font-bold text-red-700 dark:text-red-400">Danger Zone</h4>
-                    <p className="text-[11px] text-red-600 dark:text-red-500/80">Liquidate agent and return funds.</p>
+                    <h4 className="text-[12px] font-bold text-red-700">Danger Zone</h4>
+                    <p className="text-[11px] text-red-600">Liquidate agent and return funds.</p>
                   </div>
                   <button 
                     onClick={handleLiquidate}
