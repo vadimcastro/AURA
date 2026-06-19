@@ -18,6 +18,7 @@ const suiClient = new SuiClient({ url: SUI_RPC_URL });
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface AgentInfo {
   address:        string;
+  name?:          string;
   /** Raw on-chain reputation score (0 – 1_000_000 = 0 – 100%) */
   reputation:     number;
   totalTasks:     number;
@@ -102,6 +103,13 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
 
   const [localAgents, setLocalAgents] = useState<AgentInfo[]>([]);
   const [activeLoops, setActiveLoops] = useState<Record<string, boolean>>({});
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
+  const copyToClipboard = (addr: string) => {
+    navigator.clipboard.writeText(addr);
+    setCopiedAddress(addr);
+    setTimeout(() => setCopiedAddress(null), 1500);
+  };
 
   const allAgents = [...localAgents, ...agents];
 
@@ -118,6 +126,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
 
       const newAgent: AgentInfo = {
         address: mockAddr,
+        name: newAgentName.trim(),
         reputation: 1000000, // 100.0% starting rep
         totalTasks: 0,
         successfulTasks: 0,
@@ -295,6 +304,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           agentsData.push(
             {
               address: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
+              name: 'overflower.sui',
               reputation: 920_000,   // 92.0 %
               totalTasks: 48,
               successfulTasks: 44,
@@ -305,6 +315,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             },
             {
               address: '0x3bf937ee2e95a129d1c0b392abde62551cf16757041a96f2ba1443f676ffb6a8',
+              name: 'aura-prime.sui',
               reputation: 400_000,   // 40.0 %
               totalTasks: 20,
               successfulTasks: 8,
@@ -561,8 +572,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
         >
           <div className="flex justify-between items-center mb-5 pb-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
-            <h3 className="text-[14px] font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">Register Copy-Trading Agent</h3>
-            <button onClick={() => setShowOnboarding(false)} className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer">
+            <h3 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-primary)' }}>Register Copy-Trading Agent</h3>
+            <button onClick={() => setShowOnboarding(false)} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors cursor-pointer">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -571,19 +582,19 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             {/* Left: Base Parameters */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Agent Name</label>
+                <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Agent Name / SuiNS</label>
                 <input 
                   type="text" 
                   value={newAgentName}
                   onChange={e => setNewAgentName(e.target.value)}
-                  placeholder="e.g. Sui Vol Scout"
+                  placeholder="e.g. overflower.sui"
                   className="w-full px-3.5 py-2 rounded-lg text-[13px] outline-none"
                   style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
               </div>
               
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Initial Funding (dUSDC)</label>
+                <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Initial Funding (dUSDC)</label>
                 <input 
                   type="number" 
                   value={newAgentDeposit}
@@ -598,19 +609,19 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             {/* Right: Strategy Switcher & Options */}
             <div className="space-y-4 md:border-l md:pl-6" style={{ borderColor: 'var(--color-border)' }}>
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Strategy Selection</label>
-                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 border" style={{ borderColor: 'var(--color-border)' }}>
+                <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Strategy Selection</label>
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg border" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}>
                   <button
                     type="button"
                     onClick={() => setNewAgentStrategyMode('preset')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'preset' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'preset' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
                   >
                     Strategy Preset
                   </button>
                   <button
                     type="button"
                     onClick={() => setNewAgentStrategyMode('copy')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'copy' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${newAgentStrategyMode === 'copy' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
                   >
                     Copy Profile
                   </button>
@@ -620,8 +631,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               {newAgentStrategyMode === 'preset' ? (
                 <div className="space-y-3 pt-2">
                   <div className="flex justify-between items-center text-[12px] font-semibold">
-                    <span className="text-neutral-500">Risk Setting:</span>
-                    <span className="font-mono text-neutral-900 px-2 py-0.5 bg-neutral-100 rounded">
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Risk Setting:</span>
+                    <span className="font-mono px-2 py-0.5 rounded border" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>
                       {newAgentRiskLevel === 25 ? 'Conservative' : newAgentRiskLevel === 50 ? 'Balanced' : 'Aggressive'}
                     </span>
                   </div>
@@ -632,9 +643,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                     step="25"
                     value={newAgentRiskLevel}
                     onChange={e => setNewAgentRiskLevel(parseInt(e.target.value))}
-                    className="w-full h-1 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                    className="w-full h-1 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                    style={{ background: 'var(--color-border)' }}
                   />
-                  <div className="flex justify-between text-[9px] font-bold text-neutral-400 uppercase">
+                  <div className="flex justify-between text-[9px] font-bold uppercase" style={{ color: 'var(--color-text-muted)' }}>
                     <span>Conservative</span>
                     <span>Balanced</span>
                     <span>Aggressive</span>
@@ -643,7 +655,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
               ) : (
                 <div className="space-y-3 pt-1">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase">Select Target Agent to Copy</label>
+                    <label className="text-[10px] font-bold uppercase" style={{ color: 'var(--color-text-muted)' }}>Select Target Agent to Copy</label>
                     <select
                       value={newAgentCopyTarget}
                       onChange={e => setNewAgentCopyTarget(e.target.value)}
@@ -651,16 +663,21 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                       style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                     >
                       <option value="">-- Choose from top rank --</option>
-                      {agents.map((a) => (
-                        <option key={a.address} value={a.address}>
-                          {a.address.substring(0, 12)}… ({reputationPct(a.reputation).toFixed(0)}% Rep)
-                        </option>
-                      ))}
+                      {agents.map((a) => {
+                        const successRateStr = a.totalTasks > 0
+                          ? `${((a.successfulTasks / a.totalTasks) * 100).toFixed(0)}% (${a.successfulTasks}/${a.totalTasks})`
+                          : '0% (0/0)';
+                        return (
+                          <option key={a.address} value={a.address}>
+                            {a.name || a.address.substring(0, 12)}… ({reputationPct(a.reputation).toFixed(0)}% Rep · {successRateStr} Trades)
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-neutral-400 uppercase">Or Paste Custom Profile / SuiNS</label>
+                    <label className="text-[10px] font-bold uppercase" style={{ color: 'var(--color-text-muted)' }}>Or Paste Custom Profile / SuiNS</label>
                     <input 
                       type="text" 
                       value={newAgentCopyTarget}
@@ -679,7 +696,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
             <button 
               onClick={() => setShowOnboarding(false)} 
               disabled={isDeploying}
-              className="px-4 py-2 text-[12px] font-semibold text-neutral-500 hover:text-neutral-700 transition-colors cursor-pointer"
+              className="px-4 py-2 text-[12px] font-semibold transition-colors cursor-pointer"
+              style={{ color: 'var(--color-text-secondary)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-text-primary)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
             >
               Cancel
             </button>
@@ -956,12 +976,36 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
                         onMouseLeave={e => (e.currentTarget.style.background = '')}
                       >
                         {/* Address */}
-                        <td className="px-5 py-3.5 font-mono text-[11px]" style={{ color: 'var(--color-text-primary)' }}>
-                          <div className="flex items-center gap-1.5">
-                            <span>{agent.address.substring(0, 14)}…{agent.address.slice(-6)}</span>
-                            {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
-                              <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe] shrink-0">
-                                New
+                        <td className="px-5 py-3.5" style={{ color: 'var(--color-text-primary)' }}>
+                          <div className="flex flex-col gap-0.5 select-none">
+                            <span 
+                              onClick={() => copyToClipboard(agent.address)}
+                              className="cursor-pointer font-semibold transition-colors flex items-center gap-1.5"
+                              title="Click to copy full address"
+                            >
+                              {agent.name ? (
+                                <span className="text-[13px] font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand)]">{agent.name}</span>
+                              ) : (
+                                <span className="font-mono text-[11px] hover:text-[var(--color-brand)]">{agent.address.substring(0, 14)}…{agent.address.slice(-6)}</span>
+                              )}
+                              {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
+                                <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe] shrink-0">
+                                  New
+                                </span>
+                              )}
+                              {copiedAddress === agent.address && (
+                                <span className="px-1 py-0.5 rounded text-[8px] font-bold uppercase bg-[#ecfdf3] text-[#065f46] border border-[#a7f3d0] shrink-0 animate-pulse">
+                                  Copied!
+                                </span>
+                              )}
+                            </span>
+                            {agent.name && (
+                              <span 
+                                onClick={() => copyToClipboard(agent.address)}
+                                className="font-mono text-[10px] text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-brand)] transition-colors"
+                                title="Click to copy full address"
+                              >
+                                {agent.address.substring(0, 12)}…{agent.address.slice(-6)}
                               </span>
                             )}
                           </div>
@@ -1125,10 +1169,15 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent })
           agentAddress={settingsAgent.address}
           currentStake={settingsAgent.stakeAmount}
           isActive={settingsAgent.active}
-          availableAgents={allAgents.map(a => ({
-            address: a.address,
-            label: a.address.substring(0, 10) + '… (' + reputationPct(a.reputation).toFixed(0) + '% Rep)'
-          }))}
+          availableAgents={allAgents.map(a => {
+            const successRateStr = a.totalTasks > 0
+              ? `${((a.successfulTasks / a.totalTasks) * 100).toFixed(0)}% (${a.successfulTasks}/${a.totalTasks})`
+              : '0% (0/0)';
+            return {
+              address: a.address,
+              label: `${a.name || a.address.substring(0, 10) + '…'} (${reputationPct(a.reputation).toFixed(0)}% Rep · ${successRateStr} Trades)`
+            };
+          })}
           onClose={() => setSettingsAgent(null)}
         />
       )}

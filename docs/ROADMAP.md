@@ -207,6 +207,7 @@ To generate highly authentic market activity without needing complex predictive 
 *   ✅ **Decryption Sandbox Hardening:** Added `0x` hex cleaning, case-insensitive passphrase parsing (`mock-seal-passphrase` -> scrypt derived key), and direct TypedArray SubtleCrypto mapping to prevent array buffer offset issues.
 *   ✅ **Dynamic Mock Decryption:** Implemented deterministic modulo-3 address hashing to dynamically distribute realistic strategies (Conservative, Aggressive, Delta-Neutral) and budgets to freshly generated agents.
 *   ✅ **Rich Live Event Feed:** Fetched registry and policy events in parallel to display detailed borrowing, depositing, sashing, and deregistration events in the feed.
+*   ✅ **SuiNS & Custom Name Display:** Implemented direct support for human-readable agent names and SuiNS domains (e.g. `overflower.sui`) in the dashboard. If a `.sui` name or alias is defined, the UI displays it prominently, with the shortened hex address rendered below it. Clicking any address copies the full 64-character hex key to the clipboard, providing instant visual feedback via a `Copied!` tooltip badge.
 
 ### 🌐 Phase 6.2: E2E UI-Driven Wallet & Agent Management — PLANNED
 *   🔲 **dApp-Kit Integration:** Integrate `@mysten/dapp-kit` for full browser wallet connection (Backpack, Chrome Sui Wallet).

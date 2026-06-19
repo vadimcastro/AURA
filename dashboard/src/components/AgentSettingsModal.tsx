@@ -85,7 +85,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" style={{ color: 'var(--color-brand)' }} />
-                  <h4 className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Capital Management</h4>
+                  <h4 className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Capital Management</h4>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex-1 relative">
@@ -113,21 +113,21 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Activity className="h-4 w-4" style={{ color: 'var(--color-brand)' }} />
-                    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Execution Strategy</h4>
+                    <h4 className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>Execution Strategy</h4>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-neutral-100 border" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-lg border" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}>
                   <button
                     type="button"
                     onClick={() => setStrategyMode('preset')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all ${strategyMode === 'preset' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${strategyMode === 'preset' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
                   >
                     Trading Style Preset
                   </button>
                   <button
                     type="button"
                     onClick={() => setStrategyMode('copy')}
-                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all ${strategyMode === 'copy' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500'}`}
+                    className={`py-1.5 rounded-md text-[12px] font-semibold transition-all cursor-pointer ${strategyMode === 'copy' ? 'bg-[var(--color-surface)] shadow-sm text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
                   >
                     Copy Trade Profile
                   </button>
@@ -138,9 +138,9 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
               {strategyMode === 'preset' ? (
                 /* Cleaner Risk Slider */
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center text-[12px] font-semibold text-neutral-700">
+                  <div className="flex justify-between items-center text-[12px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
                     <span>Target Risk Setting:</span>
-                    <span className="font-mono text-neutral-900 px-2 py-0.5 bg-neutral-100 rounded">{getRiskLabel(riskLevel)}</span>
+                    <span className="font-mono px-2 py-0.5 rounded border" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{getRiskLabel(riskLevel)}</span>
                   </div>
                   <div className="relative pt-1">
                     <input 
@@ -150,9 +150,10 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                       step="25"
                       value={riskLevel}
                       onChange={(e) => setRiskLevel(parseInt(e.target.value))}
-                      className="w-full h-1 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                      className="w-full h-1 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
+                      style={{ background: 'var(--color-border)' }}
                     />
-                    <div className="flex justify-between mt-2 text-[10px] font-semibold text-neutral-400 uppercase tracking-wide">
+                    <div className="flex justify-between mt-2 text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>
                       <span>Conservative</span>
                       <span>Balanced</span>
                       <span>Aggressive</span>
@@ -163,7 +164,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                 /* Copy Trading Selector with Defaults */
                 <div className="space-y-3">
                   <div className="space-y-2">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--color-text-muted)' }}>
                       <Users className="h-3 w-3" /> Select Top Performing Agent to Copy
                     </label>
                     <select
@@ -175,16 +176,16 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                       <option value="">-- Choose from top rank --</option>
                       {filteredCopyAgents.map((a) => (
                         <option key={a.address} value={a.address}>
-                          {a.label} ({a.address.substring(0, 10)}…)
+                          {a.label}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="relative flex py-2 items-center">
-                    <div className="flex-grow border-t border-neutral-200"></div>
-                    <span className="flex-shrink mx-4 text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Or Paste Custom Profile</span>
-                    <div className="flex-grow border-t border-neutral-200"></div>
+                    <div className="flex-grow border-t" style={{ borderColor: 'var(--color-border)' }}></div>
+                    <span className="flex-shrink mx-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Or Paste Custom Profile</span>
+                    <div className="flex-grow border-t" style={{ borderColor: 'var(--color-border)' }}></div>
                   </div>
 
                   <div className="space-y-2">
@@ -202,15 +203,16 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
 
               {/* Danger Zone */}
               <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-red-200 bg-red-50">
+                <div className="flex items-center justify-between p-3 rounded-xl border" style={{ background: 'var(--color-danger-bg)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
                   <div>
-                    <h4 className="text-[12px] font-bold text-red-700">Danger Zone</h4>
-                    <p className="text-[11px] text-red-600">Liquidate agent and return funds.</p>
+                    <h4 className="text-[12px] font-bold" style={{ color: 'var(--color-danger)' }}>Danger Zone</h4>
+                    <p className="text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>Liquidate agent and return funds.</p>
                   </div>
                   <button 
                     onClick={handleLiquidate}
                     disabled={isSimulating}
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-white uppercase tracking-wide flex items-center gap-1 hover:opacity-90 transition-opacity bg-red-600 cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-white uppercase tracking-wide flex items-center gap-1 hover:opacity-90 transition-opacity cursor-pointer"
+                    style={{ background: 'var(--color-danger)' }}
                   >
                     <AlertTriangle className="h-3 w-3" /> Liquidate
                   </button>
