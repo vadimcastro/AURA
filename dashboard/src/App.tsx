@@ -5,6 +5,7 @@ import { TimelineVisualizer, type SealEnvelope } from './components/TimelineVisu
 import { SealDecrypter } from './components/SealDecrypter';
 import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe } from 'lucide-react';
 import type React from 'react';
+import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets } from '@mysten/dapp-kit';
 
 type TabType = 'landing' | 'agents';
 
@@ -23,11 +24,28 @@ function App() {
   const [selectedBlobId, setSelectedBlobId] = useState<string | null>(null);
   const [selectedEnvelope, setSelectedEnvelope] = useState<SealEnvelope | null>(null);
 
-  // Wallet / zkLogin Session state
-  const [session, setSession] = useState<WalletSession | null>(() => {
-    const saved = localStorage.getItem('aura_wallet_session');
+  // dApp-kit wallet hooks
+  const wallets = useWallets();
+  const { mutate: connectWallet } = useConnectWallet();
+  const currentAccount = useCurrentAccount();
+  const { mutate: disconnectWallet } = useDisconnectWallet();
+
+  // zkLogin Session state
+  const [zkSession, setZkSession] = useState<WalletSession | null>(() => {
+    const saved = localStorage.getItem('aura_zklogin_session');
     return saved ? JSON.parse(saved) : null;
   });
+
+  // Effective hybrid session: prioritize real connected wallet, fallback to zkLogin
+  const session: WalletSession | null = currentAccount
+    ? {
+        address: currentAccount.address,
+        type: 'wallet',
+        name: currentAccount.label || 'Browser Wallet',
+        providerLabel: 'Browser Wallet',
+      }
+    : zkSession;
+
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [connectingType, setConnectingType] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -36,15 +54,6 @@ function App() {
   useEffect(() => {
     window.location.hash = activeTab;
   }, [activeTab]);
-
-  const saveSession = (newSession: WalletSession | null) => {
-    setSession(newSession);
-    if (newSession) {
-      localStorage.setItem('aura_wallet_session', JSON.stringify(newSession));
-    } else {
-      localStorage.removeItem('aura_wallet_session');
-    }
-  };
 
   const handleSelectAgent = (agentAddress: string, blobId: string | null) => {
     setSelectedAgent(agentAddress);
@@ -62,19 +71,12 @@ function App() {
     }, 100);
   };
 
-  // Simulate authentication loading flow
-  const triggerSimulatedConnect = (type: WalletSession['type']) => {
+  // Simulate authentication loading flow for zkLogin
+  const triggerZkLoginConnect = (type: WalletSession['type']) => {
     setConnectingType(type);
     setTimeout(() => {
       let newSession: WalletSession;
-      if (type === 'wallet') {
-        newSession = {
-          address: '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
-          type,
-          name: 'vadim.sui',
-          providerLabel: 'Sui Wallet / Backpack',
-        };
-      } else if (type === 'zklogin_google') {
+      if (type === 'zklogin_google') {
         newSession = {
           address: '0xzkL_google_ded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
           type,
@@ -96,10 +98,20 @@ function App() {
           providerLabel: 'Apple zkLogin',
         };
       }
-      saveSession(newSession);
+      setZkSession(newSession);
+      localStorage.setItem('aura_zklogin_session', JSON.stringify(newSession));
       setConnectingType(null);
       setShowConnectModal(false);
     }, 1200);
+  };
+
+  const handleDisconnect = () => {
+    if (currentAccount) {
+      disconnectWallet();
+    }
+    setZkSession(null);
+    localStorage.removeItem('aura_zklogin_session');
+    setShowDropdown(false);
   };
 
   const navBtn = (tab: TabType, label: string, Icon: React.ComponentType<{ className?: string }>) => (
@@ -186,10 +198,7 @@ function App() {
                       </div>
                       <div className="border-t" style={{ borderColor: 'var(--color-border)' }} />
                       <button
-                        onClick={() => {
-                          saveSession(null);
-                          setShowDropdown(false);
-                        }}
+                        onClick={handleDisconnect}
                         className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
                       >
                         <LogOut className="h-3.5 w-3.5" />
@@ -238,14 +247,48 @@ function App() {
                   <p className="text-[10px] font-bold uppercase tracking-wider pl-1" style={{ color: 'var(--color-text-muted)' }}>
                     Traditional Web3 Wallets
                   </p>
-                  <button
-                    onClick={() => triggerSimulatedConnect('wallet')}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left"
-                    style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  >
-                    <Globe className="h-4 w-4 text-[var(--color-brand)]" />
-                    <span>Sui Wallet / Backpack</span>
-                  </button>
+                  {wallets.length === 0 ? (
+                    <a
+                      href="https://chrome.google.com/webstore/detail/sui-wallet/opffaplhgoihhhacieghomeooapaakcb"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left decoration-none block"
+                      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                    >
+                      <Globe className="h-4 w-4 text-[var(--color-brand)]" />
+                      <span>Install Sui Wallet</span>
+                    </a>
+                  ) : (
+                    wallets.map((wallet) => (
+                      <button
+                        key={wallet.name}
+                        onClick={() => {
+                          setConnectingType('wallet');
+                          connectWallet(
+                            { wallet },
+                            {
+                              onSuccess: () => {
+                                setConnectingType(null);
+                                setShowConnectModal(false);
+                              },
+                              onError: () => {
+                                setConnectingType(null);
+                              },
+                            }
+                          );
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left"
+                        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                      >
+                        {wallet.icon ? (
+                          <img src={wallet.icon} alt={wallet.name} className="h-4 w-4" />
+                        ) : (
+                          <Globe className="h-4 w-4 text-[var(--color-brand)]" />
+                        )}
+                        <span>{wallet.name}</span>
+                      </button>
+                    ))
+                  )}
                 </div>
 
                 {/* Social zkLogin */}
@@ -254,7 +297,7 @@ function App() {
                     Social Web2 zkLogin
                   </p>
                   <button
-                    onClick={() => triggerSimulatedConnect('zklogin_google')}
+                    onClick={() => triggerZkLoginConnect('zklogin_google')}
                     className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left"
                     style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   >
@@ -262,7 +305,7 @@ function App() {
                     <span>Sign in with Google</span>
                   </button>
                   <button
-                    onClick={() => triggerSimulatedConnect('zklogin_github')}
+                    onClick={() => triggerZkLoginConnect('zklogin_github')}
                     className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left"
                     style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   >
@@ -270,7 +313,7 @@ function App() {
                     <span>Sign in with GitHub</span>
                   </button>
                   <button
-                    onClick={() => triggerSimulatedConnect('zklogin_apple')}
+                    onClick={() => triggerZkLoginConnect('zklogin_apple')}
                     className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left"
                     style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                   >

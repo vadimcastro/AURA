@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SuiClient } from '@mysten/sui/client';
+import { SuiJsonRpcClient as SuiClient } from '@mysten/sui/jsonRpc';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
   Users, RefreshCw, Settings, Terminal, Globe, Trophy,
@@ -13,7 +13,7 @@ const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '';
 const SUI_RPC_URL       = import.meta.env.VITE_SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443';
 
 // Instantiate once at module level — SuiClient is safe as a singleton.
-const suiClient = new SuiClient({ url: SUI_RPC_URL });
+const suiClient = new SuiClient({ url: SUI_RPC_URL, network: 'testnet' });
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface AgentInfo {

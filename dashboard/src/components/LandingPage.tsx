@@ -50,13 +50,13 @@ const Step: React.FC<{ n: number; text: string }> = ({ n, text }) => (
 );
 
 /* ─── Landing Page ──────────────────────────────────────────── */
-import { SuiClient } from '@mysten/sui/client';
+import { SuiJsonRpcClient as SuiClient } from '@mysten/sui/jsonRpc';
 import { useEffect, useState } from 'react';
 
 const PACKAGE_ID = import.meta.env.VITE_AURA_PACKAGE_ID || '';
 // const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '';
 const SUI_RPC_URL = import.meta.env.VITE_SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443';
-const suiClient = new SuiClient({ url: SUI_RPC_URL });
+const suiClient = new SuiClient({ url: SUI_RPC_URL, network: 'testnet' });
 
 interface LandingPageProps { onNavigate: (tab: string) => void; }
 
@@ -71,7 +71,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         const eventType = `${PACKAGE_ID}::aura_registry::AgentRegistered`;
         const events = await suiClient.queryEvents({ query: { MoveEventType: eventType }, limit: 100 });
         const uniqueAddresses = new Set<string>();
-        events.data.forEach((evt) => {
+        events.data.forEach((evt: any) => {
           const agent = (evt.parsedJson as { agent?: string } | null)?.agent;
           if (agent) uniqueAddresses.add(agent);
         });
