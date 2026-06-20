@@ -30,9 +30,25 @@ sui client switch --env testnet
 Check active signing keys, balances, and gas coins:
 ```bash
 sui client active-address   # Show active signing address
-sui client balance          # Show SUI and custom coin (e.g., dUSDC) balances
+sui client balance          # Show SUI, WAL, and custom coin (e.g., dUSDC) balances
 sui client gas              # List individual SUI gas coin objects
 ```
+
+### Walrus Token Conversion (SUI to WAL)
+Walrus decentralized storage requires WAL tokens to buy storage allocations. Convert SUI testnet tokens to WAL using the Walrus CLI:
+1. **Install Walrus CLI (Testnet):**
+   ```bash
+   curl -sSf https://install.wal.app | sh -s -- -n testnet
+   ```
+   *Note: Ensure `/Users/vadim/.local/bin/` is added to your terminal environment `PATH`.*
+2. **Convert SUI to WAL:**
+   ```bash
+   walrus get-wal --context testnet
+   ```
+3. **Confirm balance update:**
+   ```bash
+   sui client balance
+   ```
 
 ---
 
