@@ -1047,8 +1047,12 @@ When onboarding Web2 users through social authentication (zkLogin via Google or 
 
 3. **Paymaster Economic Sustainability & Payback Loop:**
    * **How Gas is Funded:** Initially, the Operator/Platform funds a reserve SUI gas object on the Paymaster node to bootstrap Web2 onboarding.
-   * **Automatic Payback Mechanics:** Because every option swap or trade routed through AURA collects a small protocol fee cut (configured inside the Move `WalletPolicy` rules), the platform collects yield-bearing dUSDC/USDC margins. 
+   * **Sponsored Profits Premium Fee:** To cover Paymaster gas overhead and account risk, trades executed via sponsored transactions are subjected to a **2.0% protocol fee cut** on net profits, compared to the standard 0.5% self-funded fee.
+   * **Automatic Payback Mechanics:** Because every option swap or trade routed through AURA collects this protocol fee cut (configured inside the Move `WalletPolicy` rules), the platform collects yield-bearing dUSDC/USDC margins. 
    * **SUI Gas Re-balancing:** Periodically, or during standard policy settlement/withdrawal cycles, a portion of the accumulated protocol fees is swapped back to SUI via DeepBook and routed directly back to the Paymaster's gas object address. This automatically replenishes the paymaster node's SUI balance, closing the loop. Hence, users "pay it back" implicitly via trading fees generated from execution.
+   * **Handling Sponsored Losses (Circuit Breaker):** If an agent execution loop running under gas sponsorship experiences **3 consecutive negative-PnL cycles** (consecutive sponsored losses), the Operator Daemon triggers a dynamic safety lockout:
+     - The daemon immediately blocks the associated client IP from future sponsorship requests (sets `limitData.count = limitCount` to trigger 429 errors).
+     - The agent's autonomous trading loop is suspended, and an escalation request is submitted to the owner's HITL Inbox. This prevents non-deterministic logic from continuously draining the paymaster's gas balance during adverse market conditions or strategy misconfigurations.
 
 4. **Fiat-to-DeFi On-Ramps:**
    * **Mechanism:** To fund a `WalletPolicy` with capital (dUSDC/USDC), the AURA dashboard integrates standard Web2 payment gateways (such as Stripe Crypto Onramp, Transak, or MoonPay).

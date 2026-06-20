@@ -116,6 +116,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
   const [error, setError]         = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Auto-refresh on-chain agents list every 15 seconds to sync run loop updates dynamically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey((k) => k + 1);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
   const [settingsAgent, setSettingsAgent] = useState<AgentInfo | null>(null);
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
 

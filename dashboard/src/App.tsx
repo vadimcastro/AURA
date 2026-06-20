@@ -10,6 +10,8 @@ import { CloudOperatorPanel } from './components/CloudOperatorPanel';
 import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle, Settings } from 'lucide-react';
 import type React from 'react';
 import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets, useSuiClient } from '@mysten/dapp-kit';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { generateNonce, generateRandomness, computeZkLoginAddress } from '@mysten/sui/zklogin';
 
 type TabType = 'landing' | 'agents' | 'intent' | 'volatility' | 'escalations' | 'operator';
 
@@ -53,6 +55,77 @@ function App() {
   const suiClient = useSuiClient();
   const [suiBalance, setSuiBalance] = useState<string | null>(null);
   const [dusdcBalance, setDusdcBalance] = useState<string | null>(null);
+
+  // Parse OAuth redirect parameters
+  useEffect(() => {
+    // 1. Google OAuth ID Token (hash redirect)
+    const hash = window.location.hash;
+    if (hash.includes('id_token=')) {
+      try {
+        const params = new URLSearchParams(hash.substring(1));
+        const idToken = params.get('id_token');
+        if (idToken) {
+          const base64Url = idToken.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            window.atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const payload = JSON.parse(jsonPayload);
+          
+          const googleSub = payload.sub;
+          const email = payload.email || 'user@gmail.com';
+          
+          // Compute a real cryptographic zkLogin address on-chain from the claims using a stable salt
+          const salt = BigInt(123456789012345n);
+          const address = computeZkLoginAddress({
+            claimName: 'sub',
+            claimValue: googleSub,
+            iss: 'https://accounts.google.com',
+            aud: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+            userSalt: salt,
+            legacyAddress: false,
+          });
+
+          const newSession: WalletSession = {
+            address,
+            type: 'zklogin_google',
+            name: email,
+            providerLabel: 'Google zkLogin',
+          };
+          
+          setZkSession(newSession);
+          localStorage.setItem('aura_zklogin_session', JSON.stringify(newSession));
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      } catch (err) {
+        console.error('Failed to parse Google zkLogin payload:', err);
+      }
+    }
+
+    // 2. GitHub OAuth code (query parameter redirect)
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get('code');
+    if (code) {
+      try {
+        // Derive a deterministic mock address for demo from the code string
+        const mockAddress = `0xzkL_github_${code.substring(0, 10)}3bf937ee2e95a129d1c0b392abde625`;
+        const newSession: WalletSession = {
+          address: mockAddress,
+          type: 'zklogin_github',
+          name: 'vadimcastro',
+          providerLabel: 'GitHub zkLogin',
+        };
+        setZkSession(newSession);
+        localStorage.setItem('aura_zklogin_session', JSON.stringify(newSession));
+        window.history.replaceState(null, '', window.location.pathname);
+      } catch (err) {
+        console.error('Failed to process GitHub redirect code:', err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!session?.address) {
@@ -105,31 +178,38 @@ function App() {
     }, 100);
   };
 
-  // Simulate authentication loading flow for zkLogin
+  // Trigger real OAuth redirect for zkLogin / OAuth providers
   const triggerZkLoginConnect = (type: WalletSession['type']) => {
     setConnectingType(type);
-    setTimeout(() => {
-      let newSession: WalletSession;
-      if (type === 'zklogin_google') {
-        newSession = {
-          address: '0xzkL_google_ded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
-          type,
-          name: 'vadim.castro@gmail.com',
-          providerLabel: 'Google zkLogin',
-        };
-      } else {
-        newSession = {
-          address: '0xzkL_github_3bf937ee2e95a129d1c0b392abde62551cf16757041a96f2ba1443f676ffb6a8',
-          type,
-          name: 'vadimcastro',
-          providerLabel: 'GitHub zkLogin',
-        };
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+    const githubClientId = import.meta.env.VITE_GITHUB_CLIENT_ID || '';
+    const redirectUri = window.location.origin;
+
+    if (type === 'zklogin_google') {
+      try {
+        const keypair = Ed25519Keypair.generate();
+        localStorage.setItem('aura_ephemeral_privkey', keypair.getSecretKey());
+        
+        const randomness = generateRandomness();
+        localStorage.setItem('aura_randomness', randomness);
+        
+        const maxEpoch = 300000;
+        localStorage.setItem('aura_max_epoch', maxEpoch.toString());
+
+        const nonce = generateNonce(keypair.getPublicKey(), maxEpoch, randomness);
+        
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=id_token&scope=openid%20email%20profile&nonce=${nonce}`;
+        
+        window.location.href = authUrl;
+      } catch (err) {
+        console.error('Failed to trigger Google OAuth:', err);
+        setConnectingType(null);
       }
-      setZkSession(newSession);
-      localStorage.setItem('aura_zklogin_session', JSON.stringify(newSession));
-      setConnectingType(null);
-      setShowConnectModal(false);
-    }, 1200);
+    } else {
+      // GitHub OAuth redirect
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user`;
+      window.location.href = authUrl;
+    }
   };
 
   const handleDisconnect = () => {
