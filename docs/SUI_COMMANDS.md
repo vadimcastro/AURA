@@ -36,6 +36,7 @@ Walrus decentralized storage requires WAL tokens to buy storage allocations. Con
    ```bash
    walrus get-wal --context testnet
    ```
+   *Note: This command will convert 1.0 SUI into 1.0 WAL by default. 1.0 WAL is sufficient to rent storage for thousands of encrypted telemetry audit logs (since JSON traces are only ~2-5 KB each).*
 3. **Confirm balance update:**
    ```bash
    sui client balance
