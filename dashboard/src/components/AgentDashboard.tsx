@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SuiJsonRpcClient as SuiClient } from '@mysten/sui/jsonRpc';
+import { Transaction } from '@mysten/sui/transactions';
+import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
   Users, RefreshCw, Settings, Terminal, Globe, Trophy,
@@ -111,6 +113,7 @@ interface AgentDashboardProps {
 
 
 export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, activeSession }) => {
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const [agents, setAgents]       = useState<AgentInfo[]>([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState<string | null>(null);
@@ -201,84 +204,132 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
 
   const allAgents = [...localAgents, ...agents];
 
-  // Helper to handle deploying a mock agent
-  const handleDeployAgent = () => {
+  // Handle deploying a live agent on-chain (if wallet is connected) or a mock agent (if zkLogin/guest)
+  const handleDeployAgent = async () => {
     if (!newAgentName.trim()) return;
     setIsDeploying(true);
 
-    setTimeout(() => {
-      // Create a new mock agent address
-      const randomHex = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
-      const mockAddr = `0x${randomHex}96f2ba1443f676ffb6a8`;
-      const depositVal = parseFloat(newAgentDeposit) || 25;
+    const isWalletConnected = activeSession?.type === 'wallet';
 
-      const newAgent: AgentInfo = {
-        address: mockAddr,
-        name: newAgentName.trim(),
-        reputation: 1000000, // 100.0% starting rep
-        totalTasks: 0,
-        successfulTasks: 0,
-        stakeAmount: 0.01, // 0.01 SUI collateral on testnet
-        active: true,
-        blacklistUntil: 0,
-        latestBlobId: 'mock-walrus-telemetry-fresh',
-        registeredAt: Date.now(),
-        budget: depositVal,
-        strategyMode: newAgentStrategyMode,
-        riskLevel: newAgentRiskLevel,
-        copyTarget: newAgentCopyTarget || undefined,
-        totalPnl: 0,
-      };
+    if (isWalletConnected) {
+      try {
+        console.log("📡 Registering agent live on-chain on Sui Testnet...");
+        const tx = new Transaction();
+        
+        // 1. Split 0.01 SUI (10,000,000 Mist) from gas coin for agent collateral stake
+        const [stakeCoin] = tx.splitCoins(tx.gas, [10_000_000]);
+        
+        // 2. Register agent in our on-chain registry
+        tx.moveCall({
+          target: `${PACKAGE_ID}::aura_registry::register_agent`,
+          arguments: [
+            tx.object(REGISTRY_OBJECT_ID),
+            stakeCoin
+          ]
+        });
 
-      setLocalAgents((prev) => [newAgent, ...prev]);
+        // 3. Request wallet signature & execute on-chain
+        const result = await signAndExecuteTransaction({
+          transaction: tx,
+        });
 
-      // Add registration trace events to the log
-      const registerEv: LiveEvent = {
-        id: `register-tx-${Date.now()}-1`,
-        type: 'register',
-        agent: mockAddr,
-        message: `Agent registered on-chain with 0.01 SUI collateral`,
-        timestamp: new Date().toISOString(),
-        digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
-        isMocked: true,
-      };
+        console.log(`✅ On-chain agent registration succeeded. Digest: ${result.digest}`);
 
-      const policyEv: LiveEvent = {
-        id: `register-tx-${Date.now()}-2`,
-        type: 'register',
-        agent: mockAddr,
-        message: `Policy created: budget limit set to ${depositVal.toFixed(2)} dUSDC`,
-        timestamp: new Date().toISOString(),
-        digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
-        isMocked: true,
-      };
+        // Add real transaction event log
+        const registerEv: LiveEvent = {
+          id: `register-tx-${Date.now()}-1`,
+          type: 'register',
+          agent: activeSession.address,
+          message: `Agent registered live on-chain with 0.01 SUI collateral`,
+          timestamp: new Date().toISOString(),
+          digest: result.digest,
+          isMocked: false,
+        };
 
-      setLiveEvents((prev) => [policyEv, registerEv, ...prev]);
-      
-      // Auto toggle the execution loop if checked
-      if (autoStartLoop) {
-        setActiveLoops(prev => ({
-          ...prev,
-          [mockAddr]: {
-            mode: 'continuous',
-            timeLeft: Infinity,
-            nextTradeIn: 10,
-            intervalSec: 10,
-          }
-        }));
+        setLiveEvents((prev) => [registerEv, ...prev]);
+        setRefreshKey(k => k + 1); // Refresh directory to fetch the newly registered agent immediately
+      } catch (err) {
+        console.error("❌ On-chain agent registration failed:", err);
+        alert(`On-chain registration failed: ${(err as Error).message}`);
+      } finally {
+        setIsDeploying(false);
+        setShowOnboarding(false);
+        setNewAgentName('');
+        setNewAgentDeposit('25');
+        setNewAgentCopyTarget('');
       }
-
-      setIsDeploying(false);
-      setShowOnboarding(false);
-      setNewAgentName('');
-      setNewAgentDeposit('25');
-      setNewAgentCopyTarget('');
-
-      // Scroll to Agents table
+    } else {
+      // Fallback to simulated local mock agent for zkLogin or guest sessions (saves gas & UX hurdles)
       setTimeout(() => {
-        document.getElementById('agents-table-title')?.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-    }, 1500);
+        const randomHex = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
+        const mockAddr = `0x${randomHex}96f2ba1443f676ffb6a8`;
+        const depositVal = parseFloat(newAgentDeposit) || 25;
+
+        const newAgent: AgentInfo = {
+          address: mockAddr,
+          name: newAgentName.trim(),
+          reputation: 1000000,
+          totalTasks: 0,
+          successfulTasks: 0,
+          stakeAmount: 0.01,
+          active: true,
+          blacklistUntil: 0,
+          latestBlobId: 'mock-walrus-telemetry-fresh',
+          registeredAt: Date.now(),
+          budget: depositVal,
+          strategyMode: newAgentStrategyMode,
+          riskLevel: newAgentRiskLevel,
+          copyTarget: newAgentCopyTarget || undefined,
+          totalPnl: 0,
+        };
+
+        setLocalAgents((prev) => [newAgent, ...prev]);
+
+        const registerEv: LiveEvent = {
+          id: `register-tx-${Date.now()}-1`,
+          type: 'register',
+          agent: mockAddr,
+          message: `Agent registered on-chain with 0.01 SUI collateral`,
+          timestamp: new Date().toISOString(),
+          digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
+          isMocked: true,
+        };
+
+        const policyEv: LiveEvent = {
+          id: `register-tx-${Date.now()}-2`,
+          type: 'register',
+          agent: mockAddr,
+          message: `Policy created: budget limit set to ${depositVal.toFixed(2)} dUSDC`,
+          timestamp: new Date().toISOString(),
+          digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
+          isMocked: true,
+        };
+
+        setLiveEvents((prev) => [policyEv, registerEv, ...prev]);
+        
+        if (autoStartLoop) {
+          setActiveLoops(prev => ({
+            ...prev,
+            [mockAddr]: {
+              mode: 'continuous',
+              timeLeft: Infinity,
+              nextTradeIn: 10,
+              intervalSec: 10,
+            }
+          }));
+        }
+
+        setIsDeploying(false);
+        setShowOnboarding(false);
+        setNewAgentName('');
+        setNewAgentDeposit('25');
+        setNewAgentCopyTarget('');
+
+        setTimeout(() => {
+          document.getElementById('agents-table-title')?.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      }, 1500);
+    }
   };
 
   const executeTradeCycleLocal = (addr: string, isManual: boolean = false, modeLabel?: string) => {
