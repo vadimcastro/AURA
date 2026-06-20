@@ -289,23 +289,25 @@ npm install @mysten/sui@^1.1.0 dotenv@^16.4.5
 
 ## ⚙️ 6. Environment & Deployment Setup
 
-### Vercel / Client Dashboard Production Env
-Set the following environment variables in Vercel or locally inside `dashboard/.env.local` to configure the dApp:
+### Vercel / Client Dashboard Production Env (4 Variables)
+Set the following 4 environment variables in the Vercel dashboard or locally inside `dashboard/.env.local` to run the frontend app:
 ```env
 VITE_AURA_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
 VITE_REGISTRY_OBJECT_ID=0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c
-VITE_DEEPBOOK_PREDICT_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
-VITE_DEEPBOOK_POOL_ID=0xb1c2c42afc347fe432d27f238cb0c4d5adee5c91254b12666d93c18f800c31ff
-VITE_DUSDC_TYPE_TAG=0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC
+VITE_SUI_RPC_URL=https://fullnode.testnet.sui.io:443
+VITE_WALRUS_AGGREGATOR=https://aggregator.walrus-testnet.walrus.space
 ```
 
-### SDK / Bot Runner Daemon Env
+### Local SDK / Off-chain Daemon Env
 Configure inside `sdk/.env` for off-chain automation and tests:
 ```env
 SUI_RPC_URL=https://fullnode.testnet.sui.io:443
 AURA_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
 REGISTRY_OBJECT_ID=0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c
-AGENT_PRIVATE_KEY=suiprivkey1qq...   # Your operator seed
+AGENT_PRIVATE_KEY=suiprivkey1qq...                 # Active operator key
+DEEPBOOK_PREDICT_PACKAGE_ID=0xb03d26d64408c965e293...
+DEEPBOOK_POOL_ID=0xb1c2c42afc347fe432d27f238c...
+DUSDC_TYPE_TAG=0xe95040085976bfd54a1a072...
 ```
 
 ---

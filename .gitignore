@@ -44,6 +44,7 @@ sui.keystore
 # ── Local planning artifacts (task lists, notes, etc.) ───
 artifacts/
 deepbook_traces.json
+!dashboard/public/deepbook_traces.json
 sdk/npm_cache/
 dashboard/npm_cache/
 sdk/.memwal_cache/

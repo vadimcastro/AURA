@@ -133,35 +133,69 @@ import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 export async function executeTradeCycle(
   agentKeypair: Ed25519Keypair,
   policyObjectId: string,
-  options: { mockMode?: boolean; walrusMockFallback?: boolean; successOverride?: boolean } = {}
+  options: { 
+    mockMode?: boolean; 
+    walrusMockFallback?: boolean; 
+    successOverride?: boolean;
+    copyParams?: {
+      lowerStrike: number;
+      higherStrike: number;
+      expiry: number;
+      amount: number;
+    }
+  } = {}
 ): Promise<{ success: boolean; txDigest?: string; blobId?: string }> {
   const mockMode = options.mockMode ?? false;
   const walrusMockFallback = options.walrusMockFallback ?? true;
   const successOverride = options.successOverride ?? true;
   const agentAddress = agentKeypair.toSuiAddress();
-
+ 
   console.log(`🤖 Starting trade cycle for agent: ${agentAddress}`);
   console.log(`  Policy Wallet: ${policyObjectId}`);
 
-  // Step 1: Fetch SVI parameters
-  const svi = await fetchSVIParameters(true);
-  console.log("📊 SVI Volatility Parameters loaded:", svi);
+  let svi: SVIParameters;
+  let lowerStrike = 0;
+  let higherStrike = 0;
+  let expiry = 0;
+  let tradeAmount = 0;
+  const oracleId = process.env.DEEPBOOK_ORACLE_ID || "0x0000000000000000000000000000000000000000000000000000000000000006";
 
-  // Step 2: Freshness check (abort if SVI data is older than 15s)
-  const sviTimestamp = svi.timestamp ?? Date.now();
-  const timeDelta = Math.abs(Date.now() - sviTimestamp);
-  if (timeDelta > 15_000) {
-    console.error(`❌ SVI oracle data is stale (${(timeDelta / 1000).toFixed(1)}s delta). Aborting.`);
-    return { success: false };
+  if (options.copyParams) {
+    svi = {
+      a: 0.04,
+      b: 0.1,
+      rho: -0.4,
+      m: 0.01,
+      sigma: 0.15,
+      timestamp: Date.now(),
+    };
+    lowerStrike = options.copyParams.lowerStrike;
+    higherStrike = options.copyParams.higherStrike;
+    expiry = options.copyParams.expiry;
+    tradeAmount = options.copyParams.amount;
+    console.log(`📡 Live Copy Trading Override Ingested | Spread: ${lowerStrike}-${higherStrike} | Expiry: ${expiry} | Amount: ${tradeAmount / 1e6} dUSDC`);
+  } else {
+    // Step 1: Fetch SVI parameters
+    const fetchedSvi = await fetchSVIParameters(true);
+    console.log("📊 SVI Volatility Parameters loaded:", fetchedSvi);
+ 
+    // Step 2: Freshness check (abort if SVI data is older than 15s)
+    const sviTimestamp = fetchedSvi.timestamp ?? Date.now();
+    const timeDelta = Math.abs(Date.now() - sviTimestamp);
+    if (timeDelta > 15_000) {
+      console.error(`❌ SVI oracle data is stale (${(timeDelta / 1000).toFixed(1)}s delta). Aborting.`);
+      return { success: false };
+    }
+ 
+    // Step 3: Arbitrage check
+    if (!isArbitrageFree(fetchedSvi)) {
+      console.error("❌ Volatility surface contains arbitrage. Oracle manipulation detected! Aborting execution.");
+      return { success: false };
+    }
+    console.log("✅ Volatility surface verified arbitrage-free.");
+    svi = fetchedSvi;
   }
-
-  // Step 3: Arbitrage check
-  if (!isArbitrageFree(svi)) {
-    console.error("❌ Volatility surface contains arbitrage. Oracle manipulation detected! Aborting execution.");
-    return { success: false };
-  }
-  console.log("✅ Volatility surface verified arbitrage-free.");
-
+ 
   // Step 3.5: Verify if target pool exists on-chain
   let poolExists = false;
   if (!mockMode && !DEEPBOOK_POOL_ID.includes("placeholder") && DEEPBOOK_POOL_ID !== "0x0000000000000000000000000000000000000000000000000000000000000005") {
@@ -178,16 +212,30 @@ export async function executeTradeCycle(
       console.warn(`⚠️ Target pool ${DEEPBOOK_POOL_ID} not found or query failed. Falling back to mock/simulation mode.`);
     }
   }
-
+ 
   // Step 4: Construct Sui PTB
   const tx = new Transaction();
-  const trace = popTrace();
-  let tradeAmount = 0;
-  if (trace) {
-    // Normalize massive historical trades down to our 25 dUSDC testnet limits
-    // Whales (>1000) use 20 dUSDC, Retail use 5 dUSDC
-    const isWhale = trace.tradeAmount > 1000_000_000;
-    tradeAmount = isWhale ? 20_000_000 : 5_000_000;
+  if (!options.copyParams) {
+    const trace = popTrace();
+    if (trace) {
+      // Normalize massive historical trades down to our 25 dUSDC testnet limits
+      // Whales (>1000) use 20 dUSDC, Retail use 5 dUSDC
+      const isWhale = trace.tradeAmount > 1000_000_000;
+      tradeAmount = isWhale ? 20_000_000 : 5_000_000;
+      expiry = trace.expiry;
+      lowerStrike = trace.lowerStrike;
+      higherStrike = trace.higherStrike;
+      svi.sigma = trace.volatilityEstimate; // align SVI logic with the historical data
+      console.log(`📊 Ingested DeepBook User Trace: ${trace.id} | Amount: ${tradeAmount / 1_000_000} dUSDC | Spread: ${lowerStrike}-${higherStrike}`);
+    } else {
+      tradeAmount = 5_000_000;
+      // Dynamically calculate strikes (baseline 70,000 adjusted by SVI volatility)
+      const basePrice = 70000;
+      const spread = Math.floor(basePrice * svi.sigma); // e.g. 70000 * 0.15 = 10500
+      lowerStrike = basePrice - spread;
+      higherStrike = basePrice + spread;
+      expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
+    }
   }
 
   // 4.1 Verify reputation on-chain
@@ -209,29 +257,6 @@ export async function executeTradeCycle(
       tx.pure.address(DEEPBOOK_PREDICT_PACKAGE_ID),
     ],
   });
-
-  // 4.3 Execute trade range on DeepBook Predict
-  // Resolve actual mint_range signature arguments:
-  // target: `${DEEPBOOK_PREDICT_PACKAGE_ID}::predict_pool::mint_range`
-  // args: [pool, coin, oracle_id, expiry, lower_strike, higher_strike]
-  const oracleId = process.env.DEEPBOOK_ORACLE_ID || "0x0000000000000000000000000000000000000000000000000000000000000006";
-  let expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
-  let lowerStrike = 0;
-  let higherStrike = 0;
-
-  if (trace) {
-    expiry = trace.expiry;
-    lowerStrike = trace.lowerStrike;
-    higherStrike = trace.higherStrike;
-    svi.sigma = trace.volatilityEstimate; // align SVI logic with the historical data
-    console.log(`📊 Ingested DeepBook User Trace: ${trace.id} | Amount: ${tradeAmount / 1_000_000} dUSDC | Spread: ${lowerStrike}-${higherStrike}`);
-  } else {
-    // Dynamically calculate strikes (baseline 70,000 adjusted by SVI volatility)
-    const basePrice = 70000;
-    const spread = Math.floor(basePrice * svi.sigma); // e.g. 70000 * 0.15 = 10500
-    lowerStrike = basePrice - spread;
-    higherStrike = basePrice + spread;
-  }
 
   let remainingCoin;
   if (poolExists) {

@@ -7,6 +7,16 @@ export interface AgentSettingsModalProps {
   isActive: boolean;
   availableAgents?: { address: string; label: string }[];
   onClose: () => void;
+  initialStrategyMode?: 'preset' | 'copy';
+  initialRiskLevel?: number;
+  initialCopyTarget?: string;
+  onSave?: (settings: {
+    depositAmount?: number;
+    strategyMode: 'preset' | 'copy';
+    riskLevel: number;
+    copyTargetAddress: string;
+  }) => void;
+  onLiquidate?: () => void;
 }
 
 export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
@@ -14,11 +24,16 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
   currentStake,
   availableAgents = [],
   onClose,
+  initialStrategyMode = 'preset',
+  initialRiskLevel = 50,
+  initialCopyTarget = '',
+  onSave,
+  onLiquidate,
 }) => {
   const [depositAmount, setDepositAmount] = useState<string>('');
-  const [strategyMode, setStrategyMode] = useState<'preset' | 'copy'>('preset');
-  const [riskLevel, setRiskLevel] = useState<number>(50); // 25 = Conservative, 50 = Balanced, 75 = Aggressive
-  const [copyTargetAddress, setCopyTargetAddress] = useState<string>('');
+  const [strategyMode, setStrategyMode] = useState<'preset' | 'copy'>(initialStrategyMode);
+  const [riskLevel, setRiskLevel] = useState<number>(initialRiskLevel); // 25 = Conservative, 50 = Balanced, 75 = Aggressive
+  const [copyTargetAddress, setCopyTargetAddress] = useState<string>(initialCopyTarget);
   const [isSimulating, setIsSimulating] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -33,6 +48,14 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
     setTimeout(() => {
       setIsSimulating(false);
       setSuccessMsg('Policy updated on-chain successfully.');
+      if (onSave) {
+        onSave({
+          depositAmount: depositAmount ? parseFloat(depositAmount) : undefined,
+          strategyMode,
+          riskLevel,
+          copyTargetAddress,
+        });
+      }
       setTimeout(() => onClose(), 2000);
     }, 1500);
   };
@@ -42,6 +65,9 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
     setTimeout(() => {
       setIsSimulating(false);
       setSuccessMsg('Agent liquidated and funds returned to wallet.');
+      if (onLiquidate) {
+        onLiquidate();
+      }
       setTimeout(() => onClose(), 2000);
     }, 1500);
   };

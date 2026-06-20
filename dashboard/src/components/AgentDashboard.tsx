@@ -30,6 +30,10 @@ export interface AgentInfo {
   latestBlobId:   string | null;
   registeredAt?:  number;
   budget?:        number;
+  strategyMode?:  'preset' | 'copy';
+  riskLevel?:     number;
+  copyTarget?:    string;
+  totalPnl?:      number;
 }
 
 export interface LiveEvent {
@@ -55,6 +59,9 @@ const reputationPct = (raw: number) => (raw / 1_000_000) * 100;
  * Derives a dynamic PnL (dUSDC) based on successful/failed tasks + base seed reputation.
  */
 const getAgentPnL = (agent: AgentInfo): number => {
+  if (agent.totalPnl !== undefined) {
+    return agent.totalPnl;
+  }
   const tradePnl = (agent.successfulTasks * 0.5) - ((agent.totalTasks - agent.successfulTasks) * 0.5);
   const seed = parseInt(agent.address.substring(2, 8), 16) || 0;
   const initialPnl = agent.reputation > 0 ? (seed % 150) + 50.25 : 0;
@@ -125,6 +132,22 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
     nextTradeIn: number;
     intervalSec: number;
   }>>({});
+
+  const [traces, setTraces] = useState<any[]>([]);
+  const [traceIndex, setTraceIndex] = useState<number>(0);
+
+  useEffect(() => {
+    fetch('/deepbook_traces.json')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTraces(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('⚠️ Failed to load deepbook_traces.json in frontend:', err);
+      });
+  }, []);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const [autoStartLoop, setAutoStartLoop] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -159,6 +182,11 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
         blacklistUntil: 0,
         latestBlobId: 'mock-walrus-telemetry-fresh',
         registeredAt: Date.now(),
+        budget: depositVal,
+        strategyMode: newAgentStrategyMode,
+        riskLevel: newAgentRiskLevel,
+        copyTarget: newAgentCopyTarget || undefined,
+        totalPnl: 0,
       };
 
       setLocalAgents((prev) => [newAgent, ...prev]);
@@ -193,8 +221,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
           [mockAddr]: {
             mode: 'continuous',
             timeLeft: Infinity,
-            nextTradeIn: 12,
-            intervalSec: 12,
+            nextTradeIn: 10,
+            intervalSec: 10,
           }
         }));
       }
@@ -213,11 +241,83 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
   };
 
   const executeTradeCycleLocal = (addr: string, isManual: boolean = false, modeLabel?: string) => {
-    const isSuccess = Math.random() > 0.15; // 85% success
-    const decision = Math.random() > 0.5 ? "Place Up (Call Option)" : "Mint Range 68k-72k";
-    const tradeAmount = 10_000_000;
-    const refundAmount = isSuccess ? 10_500_000 : 9_500_000;
-    const pnl = refundAmount - tradeAmount;
+    // 1. Resolve agent configuration
+    const agent = allAgents.find(a => a.address === addr);
+    const strategyMode = agent?.strategyMode || 'preset';
+    const riskLevel = agent?.riskLevel !== undefined ? agent.riskLevel : 50;
+
+    // 2. Select deepbook trace
+    let trace = traces[traceIndex % traces.length];
+    if (!trace) {
+      trace = {
+        id: "trace-tx-fallback-" + Math.random().toString(36).substring(2, 6),
+        tradeAmount: 10000000,
+        lowerStrike: 68500,
+        higherStrike: 71500,
+        action: "MintRange",
+        volatilityEstimate: 0.12
+      };
+    }
+    // Update trace index
+    setTraceIndex(prev => (prev + 1) % (traces.length || 1));
+
+    // 3. Drive simulation based on settings and trace data
+    let isSuccess = false;
+    let decision = '';
+    let tradeAmount = trace.tradeAmount || 10_000_000;
+    let pnl = 0;
+
+    if (strategyMode === 'copy') {
+      // Copy trading: execute trace trade directly
+      const strikeLabel = trace.lowerStrike && trace.higherStrike 
+        ? `${(trace.lowerStrike / 1000).toFixed(1)}k-${(trace.higherStrike / 1000).toFixed(1)}k` 
+        : '69k-71k';
+      
+      if (trace.action === 'PlaceUp') {
+        decision = `Copy Target: Place Up (Call Option)`;
+      } else if (trace.action === 'PlaceDown') {
+        decision = `Copy Target: Place Down (Put Option)`;
+      } else {
+        decision = `Copy Target: Mint Range ${strikeLabel}`;
+      }
+
+      isSuccess = Math.random() > 0.15; // 85% standard success
+      const pnlPct = isSuccess ? 0.07 : -0.05;
+      pnl = Math.round(tradeAmount * pnlPct);
+    } else {
+      // Preset strategy: Conservative, Balanced, Aggressive based on risk slider
+      if (riskLevel <= 33) {
+        // Conservative
+        const strikeDiff = (trace.higherStrike - trace.lowerStrike) || 4000;
+        const targetLower = Math.round((trace.lowerStrike || 68000) - strikeDiff * 0.15);
+        const targetRight = Math.round((trace.higherStrike || 72000) + strikeDiff * 0.15);
+        decision = `Mint Safe Range ${(targetLower / 1000).toFixed(1)}k-${(targetRight / 1000).toFixed(1)}k`;
+        
+        isSuccess = Math.random() > 0.08; // 92% success rate
+        const pnlPct = isSuccess ? 0.035 : -0.015; // lower payout, small premium loss
+        pnl = Math.round(tradeAmount * pnlPct);
+      } else if (riskLevel <= 66) {
+        // Balanced
+        const strikeLabel = trace.lowerStrike && trace.higherStrike 
+          ? `${(trace.lowerStrike / 1000).toFixed(1)}k-${(trace.higherStrike / 1000).toFixed(1)}k` 
+          : '68k-72k';
+        decision = `Mint Range ${strikeLabel}`;
+        
+        isSuccess = Math.random() > 0.15; // 85% success rate
+        const pnlPct = isSuccess ? 0.065 : -0.04;
+        pnl = Math.round(tradeAmount * pnlPct);
+      } else {
+        // Aggressive
+        const isCall = Math.random() > 0.5;
+        decision = isCall ? `Place Up (Call Option)` : `Place Down (Put Option)`;
+        
+        isSuccess = Math.random() > 0.35; // 65% success rate
+        const pnlPct = isSuccess ? 0.22 : -0.10; // high payout, high loss
+        pnl = Math.round(tradeAmount * pnlPct);
+      }
+    }
+
+    const refundAmount = tradeAmount + pnl;
 
     setLocalAgents(prev => {
       const exists = prev.some(a => a.address === addr);
@@ -234,6 +334,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
               successfulTasks: nextSuccess,
               reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000))),
               budget: nextBudget,
+              totalPnl: (a.totalPnl || 0) + (pnl / 1e6),
             };
           }
           return a;
@@ -251,6 +352,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
           successfulTasks: nextSuccess,
           reputation: Math.min(1000000, Math.max(0, Math.round((nextSuccess / nextTasks) * 1000000))),
           budget: nextBudget,
+          totalPnl: (onChainAg.totalPnl || 0) + (pnl / 1e6),
         };
         return [updated, ...prev];
       }
@@ -258,9 +360,11 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
 
     const blobId = 'mock-walrus-telemetry-' + Math.random().toString(36).substring(2, 10);
     const label = isManual ? 'Manual' : (modeLabel ? `Sim - ${modeLabel}` : 'Sim');
+    
+    // Construct rich simulation status message showing trace alignment
     const message = isManual
-      ? `Manual trade step executed: ${decision} returned ${refundAmount / 1e6} dUSDC (${pnl >= 0 ? '+' : ''}${pnl / 1e6} dUSDC PnL)`
-      : `Simulated trade cycle [${modeLabel || 'Auto'}]: ${decision} returned ${refundAmount / 1e6} dUSDC (${pnl >= 0 ? '+' : ''}${pnl / 1e6} dUSDC PnL)`;
+      ? `Manual trade step executed [DeepBook Trace ${trace.id.substring(9, 14)}]: ${decision} returned ${(refundAmount / 1e6).toFixed(2)} dUSDC (${pnl >= 0 ? '+' : ''}${(pnl / 1e6).toFixed(2)} dUSDC PnL)`
+      : `Simulated trade cycle [${modeLabel || 'Auto'} - Trace ${trace.id.substring(9, 14)}]: ${decision} returned ${(refundAmount / 1e6).toFixed(2)} dUSDC (${pnl >= 0 ? '+' : ''}${(pnl / 1e6).toFixed(2)} dUSDC PnL)`;
 
     const newEv: LiveEvent = {
       id: 'mock-tx-' + Date.now() + '-' + Math.random(),
@@ -678,7 +782,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeLoops, agents]);
+  }, [activeLoops, agents, localAgents, executeTradeCycleLocal]);
 
   // Derived stats
   const totalAgents  = allAgents.length;
@@ -1398,7 +1502,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                                     Schedule Trade Loop
                                   </div>
                                   {[
-                                    { label: 'Continuous', mode: 'continuous', desc: '12s interval, run forever', timeLeft: Infinity, intervalSec: 12 },
+                                    { label: 'Continuous', mode: 'continuous', desc: '10s interval, run forever', timeLeft: Infinity, intervalSec: 10 },
                                     { label: '1 Minute', mode: '1min', desc: '10s interval, 6 trades', timeLeft: 60, intervalSec: 10 },
                                     { label: '3 Minutes', mode: '3min', desc: '10s interval, 18 trades', timeLeft: 180, intervalSec: 10 },
                                   ].map((opt) => (
@@ -1488,6 +1592,9 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
           agentAddress={settingsAgent.address}
           currentStake={settingsAgent.stakeAmount}
           isActive={settingsAgent.active}
+          initialStrategyMode={settingsAgent.strategyMode}
+          initialRiskLevel={settingsAgent.riskLevel}
+          initialCopyTarget={settingsAgent.copyTarget}
           availableAgents={allAgents.map(a => {
             const successRateStr = a.totalTasks > 0
               ? `${((a.successfulTasks / a.totalTasks) * 100).toFixed(0)}% (${a.successfulTasks}/${a.totalTasks})`
@@ -1498,6 +1605,68 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
             };
           })}
           onClose={() => setSettingsAgent(null)}
+          onSave={(settings) => {
+            const updateAgent = (prev: AgentInfo[]) => prev.map(a => {
+              if (a.address === settingsAgent.address) {
+                const updated = {
+                  ...a,
+                  strategyMode: settings.strategyMode,
+                  riskLevel: settings.riskLevel,
+                  copyTarget: settings.copyTargetAddress,
+                };
+                if (settings.depositAmount !== undefined) {
+                  updated.budget = (updated.budget || 25.0) + settings.depositAmount;
+                }
+                return updated;
+              }
+              return a;
+            });
+            setLocalAgents(updateAgent);
+            setAgents(updateAgent);
+
+            const updateEv: LiveEvent = {
+              id: `policy-update-tx-${Date.now()}`,
+              type: 'register',
+              agent: settingsAgent.address,
+              message: `Policy settings updated: Mode=${settings.strategyMode}, Risk=${settings.riskLevel}%, CopyTarget=${settings.copyTargetAddress || 'None'}${settings.depositAmount ? `, Deposited +${settings.depositAmount} dUSDC` : ''}`,
+              timestamp: new Date().toISOString(),
+              digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
+              isMocked: true,
+            };
+            setLiveEvents(prev => [updateEv, ...prev].slice(0, 50));
+          }}
+          onLiquidate={() => {
+            const liquidateAgent = (prev: AgentInfo[]) => prev.map(a => {
+              if (a.address === settingsAgent.address) {
+                return {
+                  ...a,
+                  active: false,
+                  budget: 0,
+                  totalPnl: (a.totalPnl || 0) - (a.budget || 25.0),
+                };
+              }
+              return a;
+            });
+            setLocalAgents(liquidateAgent);
+            setAgents(liquidateAgent);
+
+            setActiveLoops(prev => {
+              const next = { ...prev };
+              delete next[settingsAgent.address];
+              return next;
+            });
+
+            const liquidateEv: LiveEvent = {
+              id: `liquidate-tx-${Date.now()}`,
+              type: 'slash',
+              agent: settingsAgent.address,
+              message: `Agent liquidated: Policy wallet revoked, remaining budget swept to owner.`,
+              timestamp: new Date().toISOString(),
+              digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
+              isMocked: true,
+            };
+            setLiveEvents(prev => [liquidateEv, ...prev].slice(0, 50));
+          }}
         />
       )}
     </div>

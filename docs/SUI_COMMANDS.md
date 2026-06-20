@@ -244,21 +244,40 @@ npm install @mysten/sui@^1.1.0 dotenv@^16.4.5
 
 ## ⚙️ 6. Environment & Deployment Configuration
 
-### Vercel Production Environment Variables
-When deploying the client dashboard to Vercel, verify these configuration environment variables are set in the Vercel project settings:
+### Vercel / Client Dashboard Production Env (4 Variables)
+When deploying the client dashboard to Vercel (or configuring locally inside `dashboard/.env.local`), configure the following 4 environment variables:
 *   `VITE_AURA_PACKAGE_ID`: `0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e`
 *   `VITE_REGISTRY_OBJECT_ID`: `0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c`
-*   `VITE_DEEPBOOK_PREDICT_PACKAGE_ID`: `0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e`
-*   `VITE_DEEPBOOK_POOL_ID`: `0xb1c2c42afc347fe432d27f238cb0c4d5adee5c91254b12666d93c18f800c31ff`
-*   `VITE_DUSDC_TYPE_TAG`: `0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC`
+*   `VITE_SUI_RPC_URL`: `https://fullnode.testnet.sui.io:443`
+*   `VITE_WALRUS_AGGREGATOR`: `https://aggregator.walrus-testnet.walrus.space`
 
-### Local SDK Env Settings (`sdk/.env`)
+*Tip: You can import your local `dashboard/.env.local` file directly inside the Vercel project settings dashboard.*
+
+### Local SDK / Off-chain Daemon Env Settings (5+ Variables inside `sdk/.env`)
+The off-chain bot runners and live testnet copy trading scripts require full transaction execution configurations:
 ```env
 SUI_RPC_URL=https://fullnode.testnet.sui.io:443
 AURA_PACKAGE_ID=0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e
 REGISTRY_OBJECT_ID=0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c
-AGENT_PRIVATE_KEY=suiprivkey1qq...   # Active operator key
+AGENT_PRIVATE_KEY=suiprivkey1qq...                 # Active operator secret key seed
+DEEPBOOK_PREDICT_PACKAGE_ID=0xb03d26d64408c965e293... # DeepBook Predict contract address
+DEEPBOOK_POOL_ID=0xb1c2c42afc347fe432d27f238c...      # Active testnet prediction market pool
+DUSDC_TYPE_TAG=0xe95040085976bfd54a1a072...          # Coin type tag for prediction quote asset (dUSDC)
 ```
+
+---
+
+## 🚀 7. Live Copy Trading on Testnet
+
+AURA supports executing live, real-time copy trading transactions on the Sui Testnet. Rather than mock simulations, the copy trader fetches a target agent's encrypted strategy log from Walrus, decrypts the parameters using the Seal passphrases client-side, derives a unique executor agent wallet policy on-chain, and executes a corresponding DeepBook option trade directly.
+
+### Running Live Copy Trades
+Execute the following commands to run the copy trader against a target agent on-chain:
+```bash
+cd sdk
+npx tsx run_copy_trader.ts <TARGET_AGENT_ADDRESS>
+```
+*Note: Make sure your `sdk/.env` is configured with a valid operator private key that has SUI for gas and dUSDC in its wallet to fund the copy trader's budget.*
 
 ---
 

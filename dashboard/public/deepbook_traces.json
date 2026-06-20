@@ -1,0 +1,5002 @@
+[
+  {
+    "id": "trace-tx-r1tpbqsn",
+    "timestampMs": 1779142397844,
+    "tradeAmount": 34000000,
+    "lowerStrike": 60034,
+    "higherStrike": 80872,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1488518355472578
+  },
+  {
+    "id": "trace-tx-f573thei",
+    "timestampMs": 1779145176532,
+    "tradeAmount": 86000000,
+    "lowerStrike": 65060,
+    "higherStrike": 74776,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1388145996852921
+  },
+  {
+    "id": "trace-tx-08rjjaau",
+    "timestampMs": 1779146553866,
+    "tradeAmount": 82000000,
+    "lowerStrike": 67565,
+    "higherStrike": 72485,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.070292068933268
+  },
+  {
+    "id": "trace-tx-8siphkqs",
+    "timestampMs": 1779160033072,
+    "tradeAmount": 12000000,
+    "lowerStrike": 53113,
+    "higherStrike": 87583,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24621518665362158
+  },
+  {
+    "id": "trace-tx-q5vz3a5u",
+    "timestampMs": 1779165439590,
+    "tradeAmount": 29000000,
+    "lowerStrike": 63235,
+    "higherStrike": 77723,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20699143627476296
+  },
+  {
+    "id": "trace-tx-y8xiw2dy",
+    "timestampMs": 1779168278882,
+    "tradeAmount": 53000000,
+    "lowerStrike": 62118,
+    "higherStrike": 78396,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11628144677288454
+  },
+  {
+    "id": "trace-tx-59865mdz",
+    "timestampMs": 1779170396951,
+    "tradeAmount": 60000000,
+    "lowerStrike": 63987,
+    "higherStrike": 76705,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0908555542436317
+  },
+  {
+    "id": "trace-tx-2xqn7puy",
+    "timestampMs": 1779177649714,
+    "tradeAmount": 10000000,
+    "lowerStrike": 63559,
+    "higherStrike": 76239,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09057408103016973
+  },
+  {
+    "id": "trace-tx-6fqhpjm4",
+    "timestampMs": 1779179296331,
+    "tradeAmount": 79000000,
+    "lowerStrike": 63433,
+    "higherStrike": 76261,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18325857077280266
+  },
+  {
+    "id": "trace-tx-3z0kkeo6",
+    "timestampMs": 1779185374526,
+    "tradeAmount": 95000000,
+    "lowerStrike": 65947,
+    "higherStrike": 74077,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.058078883474211175
+  },
+  {
+    "id": "trace-tx-85t5xmdj",
+    "timestampMs": 1779196579249,
+    "tradeAmount": 28948000000,
+    "lowerStrike": 51811,
+    "higherStrike": 88769,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17599948410368355
+  },
+  {
+    "id": "trace-tx-ebkvbtfj",
+    "timestampMs": 1779203781596,
+    "tradeAmount": 20000000,
+    "lowerStrike": 62135,
+    "higherStrike": 77589,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11039908616903815
+  },
+  {
+    "id": "trace-tx-goj7ba82",
+    "timestampMs": 1779208156505,
+    "tradeAmount": 42000000,
+    "lowerStrike": 64492,
+    "higherStrike": 75562,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15817113512538983
+  },
+  {
+    "id": "trace-tx-xgxipbbm",
+    "timestampMs": 1779209788979,
+    "tradeAmount": 17000000,
+    "lowerStrike": 66868,
+    "higherStrike": 73866,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09999930319520628
+  },
+  {
+    "id": "trace-tx-qqy5mf7i",
+    "timestampMs": 1779218900961,
+    "tradeAmount": 38000000,
+    "lowerStrike": 52076,
+    "higherStrike": 86962,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24919452257034047
+  },
+  {
+    "id": "trace-tx-nwf8zyx4",
+    "timestampMs": 1779225413276,
+    "tradeAmount": 93000000,
+    "lowerStrike": 57219,
+    "higherStrike": 82713,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18211272223666747
+  },
+  {
+    "id": "trace-tx-l4azaqkb",
+    "timestampMs": 1779234247658,
+    "tradeAmount": 19000000,
+    "lowerStrike": 62221,
+    "higherStrike": 77617,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10997779921366019
+  },
+  {
+    "id": "trace-tx-7klhp13o",
+    "timestampMs": 1779238214227,
+    "tradeAmount": 45873000000,
+    "lowerStrike": 67721,
+    "higherStrike": 71465,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05349948753551595
+  },
+  {
+    "id": "trace-tx-wxf2mtjn",
+    "timestampMs": 1779241183262,
+    "tradeAmount": 13000000,
+    "lowerStrike": 57198,
+    "higherStrike": 81980,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17702592719288168
+  },
+  {
+    "id": "trace-tx-bfew94nm",
+    "timestampMs": 1779247573159,
+    "tradeAmount": 95000000,
+    "lowerStrike": 59017,
+    "higherStrike": 81435,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16014020437406568
+  },
+  {
+    "id": "trace-tx-pn74vphg",
+    "timestampMs": 1779254788057,
+    "tradeAmount": 13000000,
+    "lowerStrike": 54734,
+    "higherStrike": 85172,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.217426402706911
+  },
+  {
+    "id": "trace-tx-i40gbgj5",
+    "timestampMs": 1779257324121,
+    "tradeAmount": 16000000,
+    "lowerStrike": 68000,
+    "higherStrike": 72676,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06681482473151026
+  },
+  {
+    "id": "trace-tx-4ck2wq9c",
+    "timestampMs": 1779260008905,
+    "tradeAmount": 74000000,
+    "lowerStrike": 64978,
+    "higherStrike": 74680,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06931283979069339
+  },
+  {
+    "id": "trace-tx-zk7q84zb",
+    "timestampMs": 1779267278764,
+    "tradeAmount": 24000000,
+    "lowerStrike": 60581,
+    "higherStrike": 80353,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1412391265114441
+  },
+  {
+    "id": "trace-tx-ppx40nen",
+    "timestampMs": 1779270612270,
+    "tradeAmount": 42000000,
+    "lowerStrike": 56552,
+    "higherStrike": 84096,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1967510589592753
+  },
+  {
+    "id": "trace-tx-1mtdiwzj",
+    "timestampMs": 1779274179211,
+    "tradeAmount": 33675000000,
+    "lowerStrike": 56262,
+    "higherStrike": 84000,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13208935996547705
+  },
+  {
+    "id": "trace-tx-eavb9n7r",
+    "timestampMs": 1779289938490,
+    "tradeAmount": 36000000,
+    "lowerStrike": 54321,
+    "higherStrike": 86353,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22881173856058262
+  },
+  {
+    "id": "trace-tx-eytau2if",
+    "timestampMs": 1779292951732,
+    "tradeAmount": 51000000,
+    "lowerStrike": 59575,
+    "higherStrike": 80957,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15273758578945765
+  },
+  {
+    "id": "trace-tx-uudfhg4m",
+    "timestampMs": 1779293306741,
+    "tradeAmount": 24000000,
+    "lowerStrike": 63884,
+    "higherStrike": 75830,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17067533351510683
+  },
+  {
+    "id": "trace-tx-hfkpvwur",
+    "timestampMs": 1779295690833,
+    "tradeAmount": 16833000000,
+    "lowerStrike": 61284,
+    "higherStrike": 78170,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24125710357487612
+  },
+  {
+    "id": "trace-tx-5akhhkeh",
+    "timestampMs": 1779301864988,
+    "tradeAmount": 20955000000,
+    "lowerStrike": 50158,
+    "higherStrike": 89184,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18584612019766578
+  },
+  {
+    "id": "trace-tx-grt9p3x0",
+    "timestampMs": 1779307116565,
+    "tradeAmount": 35816000000,
+    "lowerStrike": 64282,
+    "higherStrike": 75802,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16457587671287793
+  },
+  {
+    "id": "trace-tx-iseqw41o",
+    "timestampMs": 1779317172034,
+    "tradeAmount": 96000000,
+    "lowerStrike": 64412,
+    "higherStrike": 75480,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07906729021643222
+  },
+  {
+    "id": "trace-tx-8q4n26ox",
+    "timestampMs": 1779320510037,
+    "tradeAmount": 33000000,
+    "lowerStrike": 56925,
+    "higherStrike": 84037,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.193669212987497
+  },
+  {
+    "id": "trace-tx-x1rh5s1n",
+    "timestampMs": 1779321371127,
+    "tradeAmount": 37000000,
+    "lowerStrike": 56578,
+    "higherStrike": 83230,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19037527418371286
+  },
+  {
+    "id": "trace-tx-edmisqmf",
+    "timestampMs": 1779330648834,
+    "tradeAmount": 32359000000,
+    "lowerStrike": 49843,
+    "higherStrike": 89277,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18778861117235307
+  },
+  {
+    "id": "trace-tx-4pv20zs3",
+    "timestampMs": 1779332282417,
+    "tradeAmount": 77000000,
+    "lowerStrike": 61629,
+    "higherStrike": 78121,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23560613994731433
+  },
+  {
+    "id": "trace-tx-1i9c629a",
+    "timestampMs": 1779333004875,
+    "tradeAmount": 44313000000,
+    "lowerStrike": 67112,
+    "higherStrike": 72730,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08027658632616833
+  },
+  {
+    "id": "trace-tx-yjvc199o",
+    "timestampMs": 1779333251116,
+    "tradeAmount": 36000000,
+    "lowerStrike": 61116,
+    "higherStrike": 79328,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13008633284976884
+  },
+  {
+    "id": "trace-tx-uo25ap29",
+    "timestampMs": 1779334484090,
+    "tradeAmount": 51000000,
+    "lowerStrike": 53419,
+    "higherStrike": 86549,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23665508661452872
+  },
+  {
+    "id": "trace-tx-3c3mi7wl",
+    "timestampMs": 1779353131160,
+    "tradeAmount": 55000000,
+    "lowerStrike": 55307,
+    "higherStrike": 83839,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20381223826019718
+  },
+  {
+    "id": "trace-tx-mimcwb5p",
+    "timestampMs": 1779358253531,
+    "tradeAmount": 19000000,
+    "lowerStrike": 63471,
+    "higherStrike": 76337,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09191049671705043
+  },
+  {
+    "id": "trace-tx-49hd5vr8",
+    "timestampMs": 1779358995839,
+    "tradeAmount": 84000000,
+    "lowerStrike": 63333,
+    "higherStrike": 76127,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0913892729036083
+  },
+  {
+    "id": "trace-tx-p43wg8zj",
+    "timestampMs": 1779364366571,
+    "tradeAmount": 91000000,
+    "lowerStrike": 61899,
+    "higherStrike": 77289,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21986519714232028
+  },
+  {
+    "id": "trace-tx-yxpm065j",
+    "timestampMs": 1779385288279,
+    "tradeAmount": 32000000,
+    "lowerStrike": 65802,
+    "higherStrike": 74176,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11963936986131843
+  },
+  {
+    "id": "trace-tx-5xivlkv7",
+    "timestampMs": 1779394821919,
+    "tradeAmount": 11000000,
+    "lowerStrike": 63867,
+    "higherStrike": 77069,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1886278881838746
+  },
+  {
+    "id": "trace-tx-ny96oebs",
+    "timestampMs": 1779396540243,
+    "tradeAmount": 90000000,
+    "lowerStrike": 56140,
+    "higherStrike": 83728,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19705726781630123
+  },
+  {
+    "id": "trace-tx-gl99jwb4",
+    "timestampMs": 1779413524372,
+    "tradeAmount": 37129000000,
+    "lowerStrike": 46477,
+    "higherStrike": 92909,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22110575110305736
+  },
+  {
+    "id": "trace-tx-jiktbdpd",
+    "timestampMs": 1779429458823,
+    "tradeAmount": 67000000,
+    "lowerStrike": 60210,
+    "higherStrike": 79454,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13746539562594728
+  },
+  {
+    "id": "trace-tx-moyus7yt",
+    "timestampMs": 1779429941199,
+    "tradeAmount": 68000000,
+    "lowerStrike": 65958,
+    "higherStrike": 73758,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.055720158306301976
+  },
+  {
+    "id": "trace-tx-lccwekqb",
+    "timestampMs": 1779432334278,
+    "tradeAmount": 75000000,
+    "lowerStrike": 52618,
+    "higherStrike": 86770,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2439539310406333
+  },
+  {
+    "id": "trace-tx-ioot47ze",
+    "timestampMs": 1779433316555,
+    "tradeAmount": 51000000,
+    "lowerStrike": 59097,
+    "higherStrike": 80153,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15040339815146048
+  },
+  {
+    "id": "trace-tx-4xyy2hxm",
+    "timestampMs": 1779436731496,
+    "tradeAmount": 79000000,
+    "lowerStrike": 64619,
+    "higherStrike": 75571,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07823536270671681
+  },
+  {
+    "id": "trace-tx-sixk4uo2",
+    "timestampMs": 1779437676998,
+    "tradeAmount": 89000000,
+    "lowerStrike": 63144,
+    "higherStrike": 76430,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18981892218947477
+  },
+  {
+    "id": "trace-tx-1ey1fye8",
+    "timestampMs": 1779445973286,
+    "tradeAmount": 44000000,
+    "lowerStrike": 58927,
+    "higherStrike": 80717,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15565311566666162
+  },
+  {
+    "id": "trace-tx-phg4cwl6",
+    "timestampMs": 1779462349077,
+    "tradeAmount": 31060000000,
+    "lowerStrike": 51490,
+    "higherStrike": 88166,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1746493114088119
+  },
+  {
+    "id": "trace-tx-m6pg49vy",
+    "timestampMs": 1779465760520,
+    "tradeAmount": 51000000,
+    "lowerStrike": 57674,
+    "higherStrike": 81632,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1711313821231291
+  },
+  {
+    "id": "trace-tx-0v5vgq03",
+    "timestampMs": 1779467170074,
+    "tradeAmount": 97000000,
+    "lowerStrike": 55370,
+    "higherStrike": 84240,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20621896315689114
+  },
+  {
+    "id": "trace-tx-bzd5mvjp",
+    "timestampMs": 1779474709191,
+    "tradeAmount": 21000000,
+    "lowerStrike": 56286,
+    "higherStrike": 84564,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20198754111187134
+  },
+  {
+    "id": "trace-tx-92ijdiw9",
+    "timestampMs": 1779484236967,
+    "tradeAmount": 72000000,
+    "lowerStrike": 58144,
+    "higherStrike": 82140,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17140185196319835
+  },
+  {
+    "id": "trace-tx-b5cr388p",
+    "timestampMs": 1779491880776,
+    "tradeAmount": 49000000,
+    "lowerStrike": 53367,
+    "higherStrike": 86925,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23970150079542774
+  },
+  {
+    "id": "trace-tx-rppoi16g",
+    "timestampMs": 1779500562889,
+    "tradeAmount": 18000000,
+    "lowerStrike": 64120,
+    "higherStrike": 76876,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18222921588584917
+  },
+  {
+    "id": "trace-tx-tgj99mh9",
+    "timestampMs": 1779503243672,
+    "tradeAmount": 51000000,
+    "lowerStrike": 60995,
+    "higherStrike": 79941,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13534181658041783
+  },
+  {
+    "id": "trace-tx-mbcmg7nt",
+    "timestampMs": 1779507763849,
+    "tradeAmount": 11000000,
+    "lowerStrike": 67452,
+    "higherStrike": 72292,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06916937411579396
+  },
+  {
+    "id": "trace-tx-75gzx7p7",
+    "timestampMs": 1779510962695,
+    "tradeAmount": 1387000000,
+    "lowerStrike": 64359,
+    "higherStrike": 75501,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15919664057355382
+  },
+  {
+    "id": "trace-tx-r3x9qmr1",
+    "timestampMs": 1779518010718,
+    "tradeAmount": 35000000,
+    "lowerStrike": 65367,
+    "higherStrike": 74975,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13726413118959535
+  },
+  {
+    "id": "trace-tx-hm2ejgil",
+    "timestampMs": 1779524868414,
+    "tradeAmount": 17000000,
+    "lowerStrike": 59401,
+    "higherStrike": 80513,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15080272735792993
+  },
+  {
+    "id": "trace-tx-rmn121pa",
+    "timestampMs": 1779527289814,
+    "tradeAmount": 23000000,
+    "lowerStrike": 65496,
+    "higherStrike": 74076,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12257222117073525
+  },
+  {
+    "id": "trace-tx-axlbjljz",
+    "timestampMs": 1779530703874,
+    "tradeAmount": 21000000,
+    "lowerStrike": 65030,
+    "higherStrike": 75630,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15145039807431104
+  },
+  {
+    "id": "trace-tx-30rhshy0",
+    "timestampMs": 1779531556167,
+    "tradeAmount": 21000000,
+    "lowerStrike": 62765,
+    "higherStrike": 76513,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09821288689151997
+  },
+  {
+    "id": "trace-tx-d3l02148",
+    "timestampMs": 1779540205500,
+    "tradeAmount": 95000000,
+    "lowerStrike": 62447,
+    "higherStrike": 76941,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20707742579741306
+  },
+  {
+    "id": "trace-tx-emobff00",
+    "timestampMs": 1779543433259,
+    "tradeAmount": 79000000,
+    "lowerStrike": 58586,
+    "higherStrike": 80912,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1594844811310248
+  },
+  {
+    "id": "trace-tx-0kzs5si7",
+    "timestampMs": 1779547016348,
+    "tradeAmount": 87000000,
+    "lowerStrike": 53043,
+    "higherStrike": 87219,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24412082443605315
+  },
+  {
+    "id": "trace-tx-aj2o8m6t",
+    "timestampMs": 1779552846563,
+    "tradeAmount": 53000000,
+    "lowerStrike": 57466,
+    "higherStrike": 82082,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17583753634600835
+  },
+  {
+    "id": "trace-tx-s67aui8q",
+    "timestampMs": 1779559603018,
+    "tradeAmount": 75000000,
+    "lowerStrike": 56379,
+    "higherStrike": 84117,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19813026151885704
+  },
+  {
+    "id": "trace-tx-s30lja6v",
+    "timestampMs": 1779573642675,
+    "tradeAmount": 14000000,
+    "lowerStrike": 64467,
+    "higherStrike": 75285,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07728349524046732
+  },
+  {
+    "id": "trace-tx-9t7ol0j9",
+    "timestampMs": 1779576888115,
+    "tradeAmount": 11000000,
+    "lowerStrike": 57249,
+    "higherStrike": 82787,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18242678212392932
+  },
+  {
+    "id": "trace-tx-wzq8phsj",
+    "timestampMs": 1779578345201,
+    "tradeAmount": 6502000000,
+    "lowerStrike": 64629,
+    "higherStrike": 74973,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14777618743863724
+  },
+  {
+    "id": "trace-tx-1bjhd327",
+    "timestampMs": 1779586531972,
+    "tradeAmount": 34000000,
+    "lowerStrike": 63758,
+    "higherStrike": 76994,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1890889686434321
+  },
+  {
+    "id": "trace-tx-cttbncnb",
+    "timestampMs": 1779594279850,
+    "tradeAmount": 50000000,
+    "lowerStrike": 63602,
+    "higherStrike": 77168,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19380827507848658
+  },
+  {
+    "id": "trace-tx-02yatl46",
+    "timestampMs": 1779597130523,
+    "tradeAmount": 97000000,
+    "lowerStrike": 53214,
+    "higherStrike": 86706,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23923631672646517
+  },
+  {
+    "id": "trace-tx-9jw4s6b4",
+    "timestampMs": 1779602962783,
+    "tradeAmount": 20000000,
+    "lowerStrike": 64834,
+    "higherStrike": 75916,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07916674322687954
+  },
+  {
+    "id": "trace-tx-0ko5bot7",
+    "timestampMs": 1779605696931,
+    "tradeAmount": 38083000000,
+    "lowerStrike": 63763,
+    "higherStrike": 75473,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16730796477045273
+  },
+  {
+    "id": "trace-tx-71etmhvb",
+    "timestampMs": 1779617564783,
+    "tradeAmount": 68000000,
+    "lowerStrike": 59447,
+    "higherStrike": 80941,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15353379663146538
+  },
+  {
+    "id": "trace-tx-fowe0ymd",
+    "timestampMs": 1779624205198,
+    "tradeAmount": 27000000,
+    "lowerStrike": 65331,
+    "higherStrike": 73873,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06102710480888596
+  },
+  {
+    "id": "trace-tx-kxmoxu8a",
+    "timestampMs": 1779630526744,
+    "tradeAmount": 40000000,
+    "lowerStrike": 58770,
+    "higherStrike": 81572,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16287633220881553
+  },
+  {
+    "id": "trace-tx-pgr7ykoc",
+    "timestampMs": 1779630549977,
+    "tradeAmount": 93000000,
+    "lowerStrike": 61535,
+    "higherStrike": 79005,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24957853863501073
+  },
+  {
+    "id": "trace-tx-x3ycnmmn",
+    "timestampMs": 1779631649675,
+    "tradeAmount": 30000000,
+    "lowerStrike": 55731,
+    "higherStrike": 84477,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20533914232015898
+  },
+  {
+    "id": "trace-tx-zfzxbwlf",
+    "timestampMs": 1779633805441,
+    "tradeAmount": 44000000,
+    "lowerStrike": 54044,
+    "higherStrike": 86486,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2317301954448146
+  },
+  {
+    "id": "trace-tx-e14ldqyu",
+    "timestampMs": 1779636037568,
+    "tradeAmount": 49000000,
+    "lowerStrike": 55096,
+    "higherStrike": 85252,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2154119214691731
+  },
+  {
+    "id": "trace-tx-vipzl81t",
+    "timestampMs": 1779640829483,
+    "tradeAmount": 75000000,
+    "lowerStrike": 55019,
+    "higherStrike": 85171,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21537935228644173
+  },
+  {
+    "id": "trace-tx-rzezn7hc",
+    "timestampMs": 1779645374473,
+    "tradeAmount": 96000000,
+    "lowerStrike": 64747,
+    "higherStrike": 75305,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07541786048067334
+  },
+  {
+    "id": "trace-tx-8xoe85e2",
+    "timestampMs": 1779653241049,
+    "tradeAmount": 20000000,
+    "lowerStrike": 66000,
+    "higherStrike": 73830,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11185781213128328
+  },
+  {
+    "id": "trace-tx-pkvm2so8",
+    "timestampMs": 1779657913032,
+    "tradeAmount": 9027000000,
+    "lowerStrike": 49186,
+    "higherStrike": 89882,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19379695042405182
+  },
+  {
+    "id": "trace-tx-q5i7bqus",
+    "timestampMs": 1779667033728,
+    "tradeAmount": 87000000,
+    "lowerStrike": 53487,
+    "higherStrike": 87093,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2400565170088263
+  },
+  {
+    "id": "trace-tx-nxdcvz4s",
+    "timestampMs": 1779667407924,
+    "tradeAmount": 54000000,
+    "lowerStrike": 64900,
+    "higherStrike": 75734,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15478446615099756
+  },
+  {
+    "id": "trace-tx-l8fcbr16",
+    "timestampMs": 1779669970608,
+    "tradeAmount": 57000000,
+    "lowerStrike": 64687,
+    "higherStrike": 75625,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15625769586577845
+  },
+  {
+    "id": "trace-tx-8fu7pnps",
+    "timestampMs": 1779676580674,
+    "tradeAmount": 17000000,
+    "lowerStrike": 57519,
+    "higherStrike": 82409,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17779674403692536
+  },
+  {
+    "id": "trace-tx-ccqrvscx",
+    "timestampMs": 1779677737575,
+    "tradeAmount": 48000000,
+    "lowerStrike": 65740,
+    "higherStrike": 74786,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12922954038354162
+  },
+  {
+    "id": "trace-tx-db33emrh",
+    "timestampMs": 1779681031806,
+    "tradeAmount": 48000000,
+    "lowerStrike": 62866,
+    "higherStrike": 77236,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10265282411647601
+  },
+  {
+    "id": "trace-tx-0o26ilhi",
+    "timestampMs": 1779685547362,
+    "tradeAmount": 49100000000,
+    "lowerStrike": 64776,
+    "higherStrike": 76206,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16328603140635758
+  },
+  {
+    "id": "trace-tx-k6o25ar5",
+    "timestampMs": 1779691756166,
+    "tradeAmount": 21123000000,
+    "lowerStrike": 57510,
+    "higherStrike": 81694,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11517111532069789
+  },
+  {
+    "id": "trace-tx-mw63kw1a",
+    "timestampMs": 1779692433821,
+    "tradeAmount": 12143000000,
+    "lowerStrike": 51265,
+    "higherStrike": 88415,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17691096748021878
+  },
+  {
+    "id": "trace-tx-nogrgbz8",
+    "timestampMs": 1779696383533,
+    "tradeAmount": 93000000,
+    "lowerStrike": 63796,
+    "higherStrike": 77164,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19097399424238654
+  },
+  {
+    "id": "trace-tx-36ezb1ud",
+    "timestampMs": 1779702597831,
+    "tradeAmount": 35000000,
+    "lowerStrike": 59453,
+    "higherStrike": 79815,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1454483087372827
+  },
+  {
+    "id": "trace-tx-fiu2808m",
+    "timestampMs": 1779703545018,
+    "tradeAmount": 14000000,
+    "lowerStrike": 58260,
+    "higherStrike": 81164,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1636065745317945
+  },
+  {
+    "id": "trace-tx-10bvpqxp",
+    "timestampMs": 1779706044843,
+    "tradeAmount": 72000000,
+    "lowerStrike": 59220,
+    "higherStrike": 80878,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.154707603352561
+  },
+  {
+    "id": "trace-tx-wzq9pty7",
+    "timestampMs": 1779715182041,
+    "tradeAmount": 51000000,
+    "lowerStrike": 66056,
+    "higherStrike": 73068,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05008612706654179
+  },
+  {
+    "id": "trace-tx-izwve1id",
+    "timestampMs": 1779720332147,
+    "tradeAmount": 72000000,
+    "lowerStrike": 67646,
+    "higherStrike": 73088,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07774399233302749
+  },
+  {
+    "id": "trace-tx-6wly7i5n",
+    "timestampMs": 1779720574849,
+    "tradeAmount": 59000000,
+    "lowerStrike": 54083,
+    "higherStrike": 86565,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23202283279977837
+  },
+  {
+    "id": "trace-tx-u1khjp6y",
+    "timestampMs": 1779720649235,
+    "tradeAmount": 25000000,
+    "lowerStrike": 62149,
+    "higherStrike": 77759,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11151250314299577
+  },
+  {
+    "id": "trace-tx-axmyba75",
+    "timestampMs": 1779722341426,
+    "tradeAmount": 78000000,
+    "lowerStrike": 56238,
+    "higherStrike": 83576,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19528523362773004
+  },
+  {
+    "id": "trace-tx-h1ysi24v",
+    "timestampMs": 1779724664653,
+    "tradeAmount": 45000000,
+    "lowerStrike": 62428,
+    "higherStrike": 77816,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21982896333017843
+  },
+  {
+    "id": "trace-tx-aa236ly1",
+    "timestampMs": 1779726746521,
+    "tradeAmount": 50000000,
+    "lowerStrike": 53447,
+    "higherStrike": 87473,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24305116719274117
+  },
+  {
+    "id": "trace-tx-l9zg4zrt",
+    "timestampMs": 1779728953062,
+    "tradeAmount": 55000000,
+    "lowerStrike": 60823,
+    "higherStrike": 78265,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2491799040470178
+  },
+  {
+    "id": "trace-tx-tdcq4r87",
+    "timestampMs": 1779738362322,
+    "tradeAmount": 90000000,
+    "lowerStrike": 63835,
+    "higherStrike": 76533,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18140842184045913
+  },
+  {
+    "id": "trace-tx-5oin9qnq",
+    "timestampMs": 1779744672859,
+    "tradeAmount": 36780000000,
+    "lowerStrike": 44172,
+    "higherStrike": 95410,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24399275588189123
+  },
+  {
+    "id": "trace-tx-oohc1e93",
+    "timestampMs": 1779746181454,
+    "tradeAmount": 48000000,
+    "lowerStrike": 65552,
+    "higherStrike": 73900,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0596409673280516
+  },
+  {
+    "id": "trace-tx-a2zpz17x",
+    "timestampMs": 1779746920587,
+    "tradeAmount": 14000000,
+    "lowerStrike": 65166,
+    "higherStrike": 75282,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07226780125703176
+  },
+  {
+    "id": "trace-tx-17izpfuj",
+    "timestampMs": 1779747793658,
+    "tradeAmount": 51000000,
+    "lowerStrike": 65531,
+    "higherStrike": 74219,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06206696999394515
+  },
+  {
+    "id": "trace-tx-l3l8yoc1",
+    "timestampMs": 1779752419458,
+    "tradeAmount": 79000000,
+    "lowerStrike": 66283,
+    "higherStrike": 74087,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0557489534226606
+  },
+  {
+    "id": "trace-tx-mpm6yaty",
+    "timestampMs": 1779754576538,
+    "tradeAmount": 72000000,
+    "lowerStrike": 63595,
+    "higherStrike": 76519,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09231944421402805
+  },
+  {
+    "id": "trace-tx-5nccxp88",
+    "timestampMs": 1779755226996,
+    "tradeAmount": 31000000,
+    "lowerStrike": 63838,
+    "higherStrike": 75628,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16845680407187524
+  },
+  {
+    "id": "trace-tx-sbivg5su",
+    "timestampMs": 1779755300150,
+    "tradeAmount": 34000000,
+    "lowerStrike": 66215,
+    "higherStrike": 72993,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09683737235195361
+  },
+  {
+    "id": "trace-tx-5zegj05d",
+    "timestampMs": 1779765004469,
+    "tradeAmount": 15000000,
+    "lowerStrike": 65368,
+    "higherStrike": 74384,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06440944757914846
+  },
+  {
+    "id": "trace-tx-x5pk1moo",
+    "timestampMs": 1779772015022,
+    "tradeAmount": 19000000,
+    "lowerStrike": 54379,
+    "higherStrike": 86343,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2283204060901966
+  },
+  {
+    "id": "trace-tx-di8n4noo",
+    "timestampMs": 1779774632980,
+    "tradeAmount": 52000000,
+    "lowerStrike": 65303,
+    "higherStrike": 75645,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14776841863445292
+  },
+  {
+    "id": "trace-tx-ac6rk63z",
+    "timestampMs": 1779776453616,
+    "tradeAmount": 38000000,
+    "lowerStrike": 64930,
+    "higherStrike": 75398,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1495617844730766
+  },
+  {
+    "id": "trace-tx-1ejm4q1m",
+    "timestampMs": 1779779304881,
+    "tradeAmount": 63000000,
+    "lowerStrike": 64751,
+    "higherStrike": 75721,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15672900186511773
+  },
+  {
+    "id": "trace-tx-2ipxyf51",
+    "timestampMs": 1779786756025,
+    "tradeAmount": 37000000,
+    "lowerStrike": 58807,
+    "higherStrike": 80529,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15516365811530075
+  },
+  {
+    "id": "trace-tx-by79szbn",
+    "timestampMs": 1779789776120,
+    "tradeAmount": 37000000,
+    "lowerStrike": 58886,
+    "higherStrike": 80140,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15182239567145972
+  },
+  {
+    "id": "trace-tx-hdaaxw35",
+    "timestampMs": 1779799306601,
+    "tradeAmount": 79000000,
+    "lowerStrike": 61376,
+    "higherStrike": 78118,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23918876189196958
+  },
+  {
+    "id": "trace-tx-sw0uemw9",
+    "timestampMs": 1779800357830,
+    "tradeAmount": 94000000,
+    "lowerStrike": 56618,
+    "higherStrike": 83676,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19328502019491822
+  },
+  {
+    "id": "trace-tx-y8bb1vhk",
+    "timestampMs": 1779801309246,
+    "tradeAmount": 48780000000,
+    "lowerStrike": 50514,
+    "higherStrike": 90422,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19004666489463778
+  },
+  {
+    "id": "trace-tx-hr8diveq",
+    "timestampMs": 1779804989564,
+    "tradeAmount": 31000000,
+    "lowerStrike": 52276,
+    "higherStrike": 87114,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24885167406136482
+  },
+  {
+    "id": "trace-tx-ll5rymz2",
+    "timestampMs": 1779811240059,
+    "tradeAmount": 37000000,
+    "lowerStrike": 62518,
+    "higherStrike": 76568,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1003599483354343
+  },
+  {
+    "id": "trace-tx-vyzhkf0u",
+    "timestampMs": 1779828672427,
+    "tradeAmount": 60000000,
+    "lowerStrike": 67837,
+    "higherStrike": 71881,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05777977135999242
+  },
+  {
+    "id": "trace-tx-1smtpy3n",
+    "timestampMs": 1779834095301,
+    "tradeAmount": 47000000,
+    "lowerStrike": 66114,
+    "higherStrike": 72888,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09678546774092958
+  },
+  {
+    "id": "trace-tx-1a8q48ju",
+    "timestampMs": 1779849032262,
+    "tradeAmount": 70000000,
+    "lowerStrike": 56833,
+    "higherStrike": 82637,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18431850618683693
+  },
+  {
+    "id": "trace-tx-skqrlmki",
+    "timestampMs": 1779855280058,
+    "tradeAmount": 18000000,
+    "lowerStrike": 60530,
+    "higherStrike": 80404,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1419708839920074
+  },
+  {
+    "id": "trace-tx-g8nxoq17",
+    "timestampMs": 1779856037706,
+    "tradeAmount": 56000000,
+    "lowerStrike": 60588,
+    "higherStrike": 78978,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13135770039799147
+  },
+  {
+    "id": "trace-tx-j5h43b5r",
+    "timestampMs": 1779856264147,
+    "tradeAmount": 30000000,
+    "lowerStrike": 62728,
+    "higherStrike": 77476,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10535316962840367
+  },
+  {
+    "id": "trace-tx-ucy3b2mh",
+    "timestampMs": 1779877973763,
+    "tradeAmount": 9357000000,
+    "lowerStrike": 44333,
+    "higherStrike": 96103,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24652844644016952
+  },
+  {
+    "id": "trace-tx-ufh7zbyy",
+    "timestampMs": 1779887294689,
+    "tradeAmount": 28000000,
+    "lowerStrike": 54249,
+    "higherStrike": 85669,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22443909401806883
+  },
+  {
+    "id": "trace-tx-ck3tynnr",
+    "timestampMs": 1779888796472,
+    "tradeAmount": 68000000,
+    "lowerStrike": 53979,
+    "higherStrike": 85509,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22522707293909527
+  },
+  {
+    "id": "trace-tx-1z4lnpbs",
+    "timestampMs": 1779891602005,
+    "tradeAmount": 13000000,
+    "lowerStrike": 54276,
+    "higherStrike": 85962,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22634267002599862
+  },
+  {
+    "id": "trace-tx-lbor6c7c",
+    "timestampMs": 1779900281746,
+    "tradeAmount": 89000000,
+    "lowerStrike": 65518,
+    "higherStrike": 74758,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06600866052072459
+  },
+  {
+    "id": "trace-tx-z9x3ggn6",
+    "timestampMs": 1779905455082,
+    "tradeAmount": 43888000000,
+    "lowerStrike": 51773,
+    "higherStrike": 88241,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1736626446727753
+  },
+  {
+    "id": "trace-tx-brn1v453",
+    "timestampMs": 1779909731839,
+    "tradeAmount": 80000000,
+    "lowerStrike": 67423,
+    "higherStrike": 72303,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06974089394194732
+  },
+  {
+    "id": "trace-tx-4yu7f6bk",
+    "timestampMs": 1779922560104,
+    "tradeAmount": 90000000,
+    "lowerStrike": 56808,
+    "higherStrike": 83384,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18983791355323348
+  },
+  {
+    "id": "trace-tx-cowc7xwu",
+    "timestampMs": 1779926464276,
+    "tradeAmount": 73000000,
+    "lowerStrike": 63050,
+    "higherStrike": 76208,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18799311594346108
+  },
+  {
+    "id": "trace-tx-r5pgzerz",
+    "timestampMs": 1779929120000,
+    "tradeAmount": 37000000,
+    "lowerStrike": 59955,
+    "higherStrike": 80067,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14366982094480277
+  },
+  {
+    "id": "trace-tx-pqm8x5hf",
+    "timestampMs": 1779932262243,
+    "tradeAmount": 57000000,
+    "lowerStrike": 59999,
+    "higherStrike": 80075,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1434043362808454
+  },
+  {
+    "id": "trace-tx-smpnbz6u",
+    "timestampMs": 1779934687514,
+    "tradeAmount": 74000000,
+    "lowerStrike": 63749,
+    "higherStrike": 77133,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19120969345638777
+  },
+  {
+    "id": "trace-tx-sgony0a7",
+    "timestampMs": 1779940104203,
+    "tradeAmount": 38000000,
+    "lowerStrike": 65415,
+    "higherStrike": 74073,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12369689896249739
+  },
+  {
+    "id": "trace-tx-1xtmllbe",
+    "timestampMs": 1779943659976,
+    "tradeAmount": 66000000,
+    "lowerStrike": 64045,
+    "higherStrike": 75353,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1615571701843243
+  },
+  {
+    "id": "trace-tx-w86aou7c",
+    "timestampMs": 1779944722270,
+    "tradeAmount": 72000000,
+    "lowerStrike": 66015,
+    "higherStrike": 74599,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06132797482434456
+  },
+  {
+    "id": "trace-tx-2kyjj1qb",
+    "timestampMs": 1779947420351,
+    "tradeAmount": 94000000,
+    "lowerStrike": 64085,
+    "higherStrike": 75019,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07810987491803056
+  },
+  {
+    "id": "trace-tx-dcpjk330",
+    "timestampMs": 1779949098586,
+    "tradeAmount": 35000000,
+    "lowerStrike": 64492,
+    "higherStrike": 75974,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16403589784147338
+  },
+  {
+    "id": "trace-tx-en4qt5iy",
+    "timestampMs": 1779949316247,
+    "tradeAmount": 28000000,
+    "lowerStrike": 63197,
+    "higherStrike": 76183,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09276187636151374
+  },
+  {
+    "id": "trace-tx-lqth9gj6",
+    "timestampMs": 1779951772992,
+    "tradeAmount": 41000000,
+    "lowerStrike": 64668,
+    "higherStrike": 75542,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07768243285795949
+  },
+  {
+    "id": "trace-tx-ia869wr4",
+    "timestampMs": 1779965541465,
+    "tradeAmount": 62000000,
+    "lowerStrike": 60100,
+    "higherStrike": 79544,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13889647869489058
+  },
+  {
+    "id": "trace-tx-9z6baxur",
+    "timestampMs": 1779980671651,
+    "tradeAmount": 65000000,
+    "lowerStrike": 62953,
+    "higherStrike": 76181,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09449338104540901
+  },
+  {
+    "id": "trace-tx-txbnhofe",
+    "timestampMs": 1779980758724,
+    "tradeAmount": 44000000,
+    "lowerStrike": 63876,
+    "higherStrike": 75806,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08521986613376234
+  },
+  {
+    "id": "trace-tx-z6vupufu",
+    "timestampMs": 1779987622765,
+    "tradeAmount": 82000000,
+    "lowerStrike": 65930,
+    "higherStrike": 74198,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.059057683782927195
+  },
+  {
+    "id": "trace-tx-ardrjzah",
+    "timestampMs": 1779989433137,
+    "tradeAmount": 46000000,
+    "lowerStrike": 61408,
+    "higherStrike": 77904,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23566976596470673
+  },
+  {
+    "id": "trace-tx-mmplddil",
+    "timestampMs": 1779993601359,
+    "tradeAmount": 86000000,
+    "lowerStrike": 63500,
+    "higherStrike": 77396,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0992624105157106
+  },
+  {
+    "id": "trace-tx-ychyyogg",
+    "timestampMs": 1779994764952,
+    "tradeAmount": 20000000,
+    "lowerStrike": 63565,
+    "higherStrike": 76305,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09100912245785986
+  },
+  {
+    "id": "trace-tx-7e77rw82",
+    "timestampMs": 1780000225718,
+    "tradeAmount": 89000000,
+    "lowerStrike": 64065,
+    "higherStrike": 76665,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18002526019955067
+  },
+  {
+    "id": "trace-tx-pl1bazjn",
+    "timestampMs": 1780004743724,
+    "tradeAmount": 10000000,
+    "lowerStrike": 63241,
+    "higherStrike": 76637,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09569032814580265
+  },
+  {
+    "id": "trace-tx-zse43wmp",
+    "timestampMs": 1780008616870,
+    "tradeAmount": 43000000,
+    "lowerStrike": 65539,
+    "higherStrike": 75055,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06797420260405147
+  },
+  {
+    "id": "trace-tx-v8a61px0",
+    "timestampMs": 1780015577368,
+    "tradeAmount": 36000000,
+    "lowerStrike": 53722,
+    "higherStrike": 86184,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23187820956031324
+  },
+  {
+    "id": "trace-tx-sq26irpr",
+    "timestampMs": 1780015645660,
+    "tradeAmount": 19000000,
+    "lowerStrike": 66123,
+    "higherStrike": 74079,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1136709689146141
+  },
+  {
+    "id": "trace-tx-fst09iby",
+    "timestampMs": 1780020837256,
+    "tradeAmount": 14000000,
+    "lowerStrike": 59682,
+    "higherStrike": 81156,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15339764799654004
+  },
+  {
+    "id": "trace-tx-e6u1mrcn",
+    "timestampMs": 1780030757208,
+    "tradeAmount": 15000000,
+    "lowerStrike": 55450,
+    "higherStrike": 83570,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20087042582078962
+  },
+  {
+    "id": "trace-tx-yjqkcy5m",
+    "timestampMs": 1780032038592,
+    "tradeAmount": 31000000,
+    "lowerStrike": 57357,
+    "higherStrike": 82889,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18237375411081702
+  },
+  {
+    "id": "trace-tx-qkvz94ks",
+    "timestampMs": 1780038491915,
+    "tradeAmount": 10000000,
+    "lowerStrike": 64372,
+    "higherStrike": 75668,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16137333791485825
+  },
+  {
+    "id": "trace-tx-scwyiny7",
+    "timestampMs": 1780041921235,
+    "tradeAmount": 67000000,
+    "lowerStrike": 57992,
+    "higherStrike": 81570,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16841601143382015
+  },
+  {
+    "id": "trace-tx-8olz2b8p",
+    "timestampMs": 1780047853854,
+    "tradeAmount": 62000000,
+    "lowerStrike": 65652,
+    "higherStrike": 74834,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06559611671911013
+  },
+  {
+    "id": "trace-tx-7l44pb2b",
+    "timestampMs": 1780055392878,
+    "tradeAmount": 14000000,
+    "lowerStrike": 64697,
+    "higherStrike": 75951,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1607827522805939
+  },
+  {
+    "id": "trace-tx-ku8vlzum",
+    "timestampMs": 1780055863649,
+    "tradeAmount": 84000000,
+    "lowerStrike": 55248,
+    "higherStrike": 84990,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21245387092026852
+  },
+  {
+    "id": "trace-tx-m7nmt7mf",
+    "timestampMs": 1780066737163,
+    "tradeAmount": 66000000,
+    "lowerStrike": 62894,
+    "higherStrike": 76124,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09451349169418553
+  },
+  {
+    "id": "trace-tx-x2sfrh5s",
+    "timestampMs": 1780074379202,
+    "tradeAmount": 30000000,
+    "lowerStrike": 58562,
+    "higherStrike": 81914,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16680083144967583
+  },
+  {
+    "id": "trace-tx-kvxuye6t",
+    "timestampMs": 1780079663715,
+    "tradeAmount": 51000000,
+    "lowerStrike": 54982,
+    "higherStrike": 84566,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21132566502087308
+  },
+  {
+    "id": "trace-tx-0aznv6mf",
+    "timestampMs": 1780079950580,
+    "tradeAmount": 21000000,
+    "lowerStrike": 57134,
+    "higherStrike": 83220,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1863426112560858
+  },
+  {
+    "id": "trace-tx-lwr495sf",
+    "timestampMs": 1780081321124,
+    "tradeAmount": 92000000,
+    "lowerStrike": 61713,
+    "higherStrike": 77835,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11516535527782164
+  },
+  {
+    "id": "trace-tx-y4tm7b9f",
+    "timestampMs": 1780083491470,
+    "tradeAmount": 48000000,
+    "lowerStrike": 59437,
+    "higherStrike": 80665,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1516416376534764
+  },
+  {
+    "id": "trace-tx-c9njazbi",
+    "timestampMs": 1780084296024,
+    "tradeAmount": 65000000,
+    "lowerStrike": 56619,
+    "higherStrike": 82923,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18789435330672344
+  },
+  {
+    "id": "trace-tx-pzk06gwc",
+    "timestampMs": 1780085577243,
+    "tradeAmount": 91000000,
+    "lowerStrike": 61916,
+    "higherStrike": 77360,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22063100152508086
+  },
+  {
+    "id": "trace-tx-blwg4k6x",
+    "timestampMs": 1780085682017,
+    "tradeAmount": 88000000,
+    "lowerStrike": 55102,
+    "higherStrike": 85548,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21748310532265347
+  },
+  {
+    "id": "trace-tx-ev87nxbn",
+    "timestampMs": 1780090628102,
+    "tradeAmount": 65000000,
+    "lowerStrike": 54824,
+    "higherStrike": 84536,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21224184083927777
+  },
+  {
+    "id": "trace-tx-jhe1rw1q",
+    "timestampMs": 1780090774690,
+    "tradeAmount": 61000000,
+    "lowerStrike": 59840,
+    "higherStrike": 79828,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1427755965996689
+  },
+  {
+    "id": "trace-tx-efjg3sak",
+    "timestampMs": 1780101840332,
+    "tradeAmount": 96000000,
+    "lowerStrike": 61880,
+    "higherStrike": 79064,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24550568633885023
+  },
+  {
+    "id": "trace-tx-pqlyu8cf",
+    "timestampMs": 1780108217678,
+    "tradeAmount": 68000000,
+    "lowerStrike": 56575,
+    "higherStrike": 84209,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19738818133400088
+  },
+  {
+    "id": "trace-tx-wepjalod",
+    "timestampMs": 1780109875663,
+    "tradeAmount": 76000000,
+    "lowerStrike": 53495,
+    "higherStrike": 86293,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23428050967357067
+  },
+  {
+    "id": "trace-tx-tvtoyn5s",
+    "timestampMs": 1780121670964,
+    "tradeAmount": 42000000,
+    "lowerStrike": 64931,
+    "higherStrike": 74547,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06869647593183659
+  },
+  {
+    "id": "trace-tx-vxmisx7y",
+    "timestampMs": 1780134467001,
+    "tradeAmount": 41430000000,
+    "lowerStrike": 56977,
+    "higherStrike": 82885,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12337309485673487
+  },
+  {
+    "id": "trace-tx-nbyjdsoa",
+    "timestampMs": 1780136220704,
+    "tradeAmount": 74000000,
+    "lowerStrike": 65166,
+    "higherStrike": 74350,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06560929129592769
+  },
+  {
+    "id": "trace-tx-yv2x8a4p",
+    "timestampMs": 1780146653781,
+    "tradeAmount": 38000000,
+    "lowerStrike": 62165,
+    "higherStrike": 78817,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11894443339179757
+  },
+  {
+    "id": "trace-tx-thvyqqlk",
+    "timestampMs": 1780146851147,
+    "tradeAmount": 69000000,
+    "lowerStrike": 62235,
+    "higherStrike": 78743,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2358368073441212
+  },
+  {
+    "id": "trace-tx-9ksgozj1",
+    "timestampMs": 1780149170900,
+    "tradeAmount": 58000000,
+    "lowerStrike": 64197,
+    "higherStrike": 76697,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08928920130859182
+  },
+  {
+    "id": "trace-tx-5lmvf57r",
+    "timestampMs": 1780156141629,
+    "tradeAmount": 86000000,
+    "lowerStrike": 59009,
+    "higherStrike": 81537,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1609160175034814
+  },
+  {
+    "id": "trace-tx-9ecyss3k",
+    "timestampMs": 1780157625992,
+    "tradeAmount": 70000000,
+    "lowerStrike": 66286,
+    "higherStrike": 73292,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.050051218048323
+  },
+  {
+    "id": "trace-tx-o8rc0yxq",
+    "timestampMs": 1780162286384,
+    "tradeAmount": 71000000,
+    "lowerStrike": 66599,
+    "higherStrike": 74117,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.053708278062703535
+  },
+  {
+    "id": "trace-tx-j0wk03zr",
+    "timestampMs": 1780167514849,
+    "tradeAmount": 92000000,
+    "lowerStrike": 65090,
+    "higherStrike": 75566,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07483607318082655
+  },
+  {
+    "id": "trace-tx-a2lf53pe",
+    "timestampMs": 1780172434574,
+    "tradeAmount": 88000000,
+    "lowerStrike": 54229,
+    "higherStrike": 85251,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22159068936334692
+  },
+  {
+    "id": "trace-tx-8oi7s1in",
+    "timestampMs": 1780179358968,
+    "tradeAmount": 92000000,
+    "lowerStrike": 61497,
+    "higherStrike": 78505,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12149248072912544
+  },
+  {
+    "id": "trace-tx-yxry1uz1",
+    "timestampMs": 1780181157832,
+    "tradeAmount": 34785000000,
+    "lowerStrike": 56128,
+    "higherStrike": 82906,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12751432623525932
+  },
+  {
+    "id": "trace-tx-31tnl933",
+    "timestampMs": 1780195051006,
+    "tradeAmount": 14000000,
+    "lowerStrike": 64442,
+    "higherStrike": 76138,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16709345010057575
+  },
+  {
+    "id": "trace-tx-2mg5i8p3",
+    "timestampMs": 1780199115560,
+    "tradeAmount": 84000000,
+    "lowerStrike": 62021,
+    "higherStrike": 77967,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11390128606292223
+  },
+  {
+    "id": "trace-tx-n4n0g4ax",
+    "timestampMs": 1780201233917,
+    "tradeAmount": 1188000000,
+    "lowerStrike": 55192,
+    "higherStrike": 83914,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13677421687185137
+  },
+  {
+    "id": "trace-tx-5z1bdcew",
+    "timestampMs": 1780202316383,
+    "tradeAmount": 73000000,
+    "lowerStrike": 57131,
+    "higherStrike": 83367,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.187400486438708
+  },
+  {
+    "id": "trace-tx-kum5v6b0",
+    "timestampMs": 1780209120926,
+    "tradeAmount": 36750000000,
+    "lowerStrike": 45389,
+    "higherStrike": 93945,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23122301960352432
+  },
+  {
+    "id": "trace-tx-v2bghcl3",
+    "timestampMs": 1780212410946,
+    "tradeAmount": 16096000000,
+    "lowerStrike": 63103,
+    "higherStrike": 77511,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06861741893205747
+  },
+  {
+    "id": "trace-tx-t1c3bunl",
+    "timestampMs": 1780216426577,
+    "tradeAmount": 64000000,
+    "lowerStrike": 56754,
+    "higherStrike": 83874,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19372738502959608
+  },
+  {
+    "id": "trace-tx-r1js9311",
+    "timestampMs": 1780218105291,
+    "tradeAmount": 38000000,
+    "lowerStrike": 62569,
+    "higherStrike": 78307,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2248405739891921
+  },
+  {
+    "id": "trace-tx-rsv76gi6",
+    "timestampMs": 1780224282850,
+    "tradeAmount": 59000000,
+    "lowerStrike": 67446,
+    "higherStrike": 72034,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06556940896624225
+  },
+  {
+    "id": "trace-tx-t2rdiswj",
+    "timestampMs": 1780228876198,
+    "tradeAmount": 2967000000,
+    "lowerStrike": 45463,
+    "higherStrike": 93773,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23005400828128358
+  },
+  {
+    "id": "trace-tx-sohrfmrh",
+    "timestampMs": 1780231205432,
+    "tradeAmount": 38000000,
+    "lowerStrike": 58425,
+    "higherStrike": 81201,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1626978557547078
+  },
+  {
+    "id": "trace-tx-cm54irga",
+    "timestampMs": 1780233679143,
+    "tradeAmount": 49000000,
+    "lowerStrike": 57485,
+    "higherStrike": 82619,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17953298004043838
+  },
+  {
+    "id": "trace-tx-ljcufc94",
+    "timestampMs": 1780244316221,
+    "tradeAmount": 26000000,
+    "lowerStrike": 55256,
+    "higherStrike": 83868,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20437277894715694
+  },
+  {
+    "id": "trace-tx-56dka14r",
+    "timestampMs": 1780244577319,
+    "tradeAmount": 95000000,
+    "lowerStrike": 63809,
+    "higherStrike": 76609,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1828709497734567
+  },
+  {
+    "id": "trace-tx-orxfak6k",
+    "timestampMs": 1780244808247,
+    "tradeAmount": 85000000,
+    "lowerStrike": 58049,
+    "higherStrike": 81987,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1709936571243309
+  },
+  {
+    "id": "trace-tx-c360uk6r",
+    "timestampMs": 1780245947847,
+    "tradeAmount": 38648000000,
+    "lowerStrike": 47227,
+    "higherStrike": 92305,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2146591949458268
+  },
+  {
+    "id": "trace-tx-s5hkyl5g",
+    "timestampMs": 1780249337097,
+    "tradeAmount": 56000000,
+    "lowerStrike": 56396,
+    "higherStrike": 84380,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19988630418080794
+  },
+  {
+    "id": "trace-tx-v0jxcexn",
+    "timestampMs": 1780251376497,
+    "tradeAmount": 56000000,
+    "lowerStrike": 64413,
+    "higherStrike": 76173,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0840060449495284
+  },
+  {
+    "id": "trace-tx-6x46tbwh",
+    "timestampMs": 1780254723935,
+    "tradeAmount": 14189000000,
+    "lowerStrike": 63168,
+    "higherStrike": 77192,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20036500204986102
+  },
+  {
+    "id": "trace-tx-05izsgkw",
+    "timestampMs": 1780269861695,
+    "tradeAmount": 13000000,
+    "lowerStrike": 65430,
+    "higherStrike": 74770,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06672716582666366
+  },
+  {
+    "id": "trace-tx-2vds746b",
+    "timestampMs": 1780271601528,
+    "tradeAmount": 21655000000,
+    "lowerStrike": 51657,
+    "higherStrike": 88979,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17772388359199942
+  },
+  {
+    "id": "trace-tx-gm59eboj",
+    "timestampMs": 1780273862597,
+    "tradeAmount": 55000000,
+    "lowerStrike": 60216,
+    "higherStrike": 79508,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13780335360172902
+  },
+  {
+    "id": "trace-tx-vfzoboga",
+    "timestampMs": 1780285412492,
+    "tradeAmount": 58000000,
+    "lowerStrike": 58673,
+    "higherStrike": 80499,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15590311160057096
+  },
+  {
+    "id": "trace-tx-eocr7zkh",
+    "timestampMs": 1780296561540,
+    "tradeAmount": 82000000,
+    "lowerStrike": 65624,
+    "higherStrike": 75374,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06964899460048
+  },
+  {
+    "id": "trace-tx-uje2ecq8",
+    "timestampMs": 1780303880664,
+    "tradeAmount": 91000000,
+    "lowerStrike": 64235,
+    "higherStrike": 76141,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17009138207638533
+  },
+  {
+    "id": "trace-tx-zkrn36yn",
+    "timestampMs": 1780316229520,
+    "tradeAmount": 34743000000,
+    "lowerStrike": 44722,
+    "higherStrike": 95888,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24365700419953212
+  },
+  {
+    "id": "trace-tx-lfecz69h",
+    "timestampMs": 1780318565878,
+    "tradeAmount": 11000000,
+    "lowerStrike": 61254,
+    "higherStrike": 78540,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24694815330887093
+  },
+  {
+    "id": "trace-tx-gwb9hkbm",
+    "timestampMs": 1780331208163,
+    "tradeAmount": 11000000,
+    "lowerStrike": 61239,
+    "higherStrike": 78465,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12304735569274579
+  },
+  {
+    "id": "trace-tx-74ivdd2e",
+    "timestampMs": 1780337865692,
+    "tradeAmount": 32000000,
+    "lowerStrike": 64543,
+    "higherStrike": 74803,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07328619582161516
+  },
+  {
+    "id": "trace-tx-54wahefs",
+    "timestampMs": 1780338416987,
+    "tradeAmount": 17000000,
+    "lowerStrike": 53468,
+    "higherStrike": 87078,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24008363636798152
+  },
+  {
+    "id": "trace-tx-sqyvzs6z",
+    "timestampMs": 1780344243457,
+    "tradeAmount": 41000000,
+    "lowerStrike": 57553,
+    "higherStrike": 82779,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18018843827565684
+  },
+  {
+    "id": "trace-tx-jf0ds0gl",
+    "timestampMs": 1780349961784,
+    "tradeAmount": 53000000,
+    "lowerStrike": 53407,
+    "higherStrike": 86519,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23652467029731322
+  },
+  {
+    "id": "trace-tx-rmpeykr1",
+    "timestampMs": 1780359430725,
+    "tradeAmount": 52000000,
+    "lowerStrike": 53979,
+    "higherStrike": 86921,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2353002377623608
+  },
+  {
+    "id": "trace-tx-5sv0pwap",
+    "timestampMs": 1780360713292,
+    "tradeAmount": 84000000,
+    "lowerStrike": 62874,
+    "higherStrike": 77016,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10102807719951151
+  },
+  {
+    "id": "trace-tx-y8z3oknp",
+    "timestampMs": 1780360816988,
+    "tradeAmount": 90000000,
+    "lowerStrike": 54938,
+    "higherStrike": 84496,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21112872450120435
+  },
+  {
+    "id": "trace-tx-1hd6x2gc",
+    "timestampMs": 1780362757184,
+    "tradeAmount": 46000000,
+    "lowerStrike": 67672,
+    "higherStrike": 72476,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06863132975040889
+  },
+  {
+    "id": "trace-tx-ohm09psf",
+    "timestampMs": 1780363507868,
+    "tradeAmount": 21000000,
+    "lowerStrike": 54955,
+    "higherStrike": 85153,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21570155203857488
+  },
+  {
+    "id": "trace-tx-qz1c8egh",
+    "timestampMs": 1780364223221,
+    "tradeAmount": 13959000000,
+    "lowerStrike": 60967,
+    "higherStrike": 79495,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08823458756385186
+  },
+  {
+    "id": "trace-tx-0672mblx",
+    "timestampMs": 1780370545080,
+    "tradeAmount": 92000000,
+    "lowerStrike": 63745,
+    "higherStrike": 75851,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17296778190066292
+  },
+  {
+    "id": "trace-tx-01hosxha",
+    "timestampMs": 1780377643190,
+    "tradeAmount": 87000000,
+    "lowerStrike": 62854,
+    "higherStrike": 76880,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10019018425558537
+  },
+  {
+    "id": "trace-tx-5lrfr2om",
+    "timestampMs": 1780383665491,
+    "tradeAmount": 55000000,
+    "lowerStrike": 66289,
+    "higherStrike": 73199,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0987188652314933
+  },
+  {
+    "id": "trace-tx-om2gf12d",
+    "timestampMs": 1780388414368,
+    "tradeAmount": 34983000000,
+    "lowerStrike": 66712,
+    "higherStrike": 73674,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09948235269393012
+  },
+  {
+    "id": "trace-tx-147uisnw",
+    "timestampMs": 1780396135942,
+    "tradeAmount": 30000000,
+    "lowerStrike": 55767,
+    "higherStrike": 84099,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20237262925674793
+  },
+  {
+    "id": "trace-tx-38wfopuq",
+    "timestampMs": 1780405409844,
+    "tradeAmount": 13047000000,
+    "lowerStrike": 62690,
+    "higherStrike": 77882,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21705642021299298
+  },
+  {
+    "id": "trace-tx-xi4ik13y",
+    "timestampMs": 1780417846959,
+    "tradeAmount": 14802000000,
+    "lowerStrike": 51122,
+    "higherStrike": 89628,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18336526138438092
+  },
+  {
+    "id": "trace-tx-s9z4z5sf",
+    "timestampMs": 1780424727691,
+    "tradeAmount": 12479000000,
+    "lowerStrike": 54185,
+    "higherStrike": 85647,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14982183172252808
+  },
+  {
+    "id": "trace-tx-nz9p63fo",
+    "timestampMs": 1780425838465,
+    "tradeAmount": 80000000,
+    "lowerStrike": 66025,
+    "higherStrike": 73749,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11034964099611416
+  },
+  {
+    "id": "trace-tx-02vc6qdp",
+    "timestampMs": 1780427254711,
+    "tradeAmount": 56000000,
+    "lowerStrike": 57187,
+    "higherStrike": 82461,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18053386960139484
+  },
+  {
+    "id": "trace-tx-bszpx4o2",
+    "timestampMs": 1780437551043,
+    "tradeAmount": 96000000,
+    "lowerStrike": 65871,
+    "higherStrike": 74081,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11729090965884151
+  },
+  {
+    "id": "trace-tx-gtl1g1iy",
+    "timestampMs": 1780444395650,
+    "tradeAmount": 37000000,
+    "lowerStrike": 58549,
+    "higherStrike": 82155,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16862352899972732
+  },
+  {
+    "id": "trace-tx-5y0i4zg0",
+    "timestampMs": 1780448419609,
+    "tradeAmount": 82000000,
+    "lowerStrike": 67932,
+    "higherStrike": 72464,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06476167250824605
+  },
+  {
+    "id": "trace-tx-clqsdgok",
+    "timestampMs": 1780458018395,
+    "tradeAmount": 20000000,
+    "lowerStrike": 66315,
+    "higherStrike": 74283,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0569155339506406
+  },
+  {
+    "id": "trace-tx-93lzgn0h",
+    "timestampMs": 1780460575825,
+    "tradeAmount": 90000000,
+    "lowerStrike": 55969,
+    "higherStrike": 83183,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.194387609100027
+  },
+  {
+    "id": "trace-tx-ard3q0vi",
+    "timestampMs": 1780465684447,
+    "tradeAmount": 92000000,
+    "lowerStrike": 65699,
+    "higherStrike": 75011,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06652244176433264
+  },
+  {
+    "id": "trace-tx-tr2vcg7a",
+    "timestampMs": 1780469066057,
+    "tradeAmount": 23000000,
+    "lowerStrike": 63778,
+    "higherStrike": 76130,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08823135599995247
+  },
+  {
+    "id": "trace-tx-z8pd88qp",
+    "timestampMs": 1780475398430,
+    "tradeAmount": 52000000,
+    "lowerStrike": 55928,
+    "higherStrike": 84280,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20251621250783858
+  },
+  {
+    "id": "trace-tx-kwf8n35n",
+    "timestampMs": 1780478350749,
+    "tradeAmount": 12466000000,
+    "lowerStrike": 62653,
+    "higherStrike": 77447,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07044804371355239
+  },
+  {
+    "id": "trace-tx-qe3smcve",
+    "timestampMs": 1780488086507,
+    "tradeAmount": 68000000,
+    "lowerStrike": 59878,
+    "higherStrike": 80840,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14973775823430252
+  },
+  {
+    "id": "trace-tx-cezd3pbq",
+    "timestampMs": 1780491535675,
+    "tradeAmount": 26000000,
+    "lowerStrike": 62884,
+    "higherStrike": 76700,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19738453123971778
+  },
+  {
+    "id": "trace-tx-hmxihxbw",
+    "timestampMs": 1780492345209,
+    "tradeAmount": 83000000,
+    "lowerStrike": 66324,
+    "higherStrike": 73674,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05250315177626284
+  },
+  {
+    "id": "trace-tx-kxdi7jwe",
+    "timestampMs": 1780494590569,
+    "tradeAmount": 68000000,
+    "lowerStrike": 64002,
+    "higherStrike": 75688,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0834785441621275
+  },
+  {
+    "id": "trace-tx-wyaecuzz",
+    "timestampMs": 1780495732395,
+    "tradeAmount": 49000000,
+    "lowerStrike": 59550,
+    "higherStrike": 81064,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15368167388014292
+  },
+  {
+    "id": "trace-tx-rz9mkbn2",
+    "timestampMs": 1780502898274,
+    "tradeAmount": 73000000,
+    "lowerStrike": 60368,
+    "higherStrike": 79920,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.139663900286541
+  },
+  {
+    "id": "trace-tx-001cop40",
+    "timestampMs": 1780506041559,
+    "tradeAmount": 64000000,
+    "lowerStrike": 67684,
+    "higherStrike": 71572,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.055570729620429
+  },
+  {
+    "id": "trace-tx-z0hwi775",
+    "timestampMs": 1780512100370,
+    "tradeAmount": 18000000,
+    "lowerStrike": 64474,
+    "higherStrike": 75414,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15629859843595922
+  },
+  {
+    "id": "trace-tx-tcxdkp1a",
+    "timestampMs": 1780512476078,
+    "tradeAmount": 40000000,
+    "lowerStrike": 62243,
+    "higherStrike": 78113,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11335865706196167
+  },
+  {
+    "id": "trace-tx-q2f6s9mu",
+    "timestampMs": 1780513346276,
+    "tradeAmount": 19000000,
+    "lowerStrike": 61289,
+    "higherStrike": 77737,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2349766758830752
+  },
+  {
+    "id": "trace-tx-0qebdfou",
+    "timestampMs": 1780519681822,
+    "tradeAmount": 45191000000,
+    "lowerStrike": 61873,
+    "higherStrike": 78727,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08026339361797008
+  },
+  {
+    "id": "trace-tx-q3ofylkd",
+    "timestampMs": 1780532095529,
+    "tradeAmount": 16000000,
+    "lowerStrike": 55772,
+    "higherStrike": 84206,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20310027302703249
+  },
+  {
+    "id": "trace-tx-bw4798h5",
+    "timestampMs": 1780537148841,
+    "tradeAmount": 22000000,
+    "lowerStrike": 65912,
+    "higherStrike": 73698,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11124762853496922
+  },
+  {
+    "id": "trace-tx-axzf1cec",
+    "timestampMs": 1780538230448,
+    "tradeAmount": 37000000,
+    "lowerStrike": 63474,
+    "higherStrike": 77048,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09695742287539391
+  },
+  {
+    "id": "trace-tx-r8seojj6",
+    "timestampMs": 1780540327114,
+    "tradeAmount": 65000000,
+    "lowerStrike": 64535,
+    "higherStrike": 76005,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08194019026572337
+  },
+  {
+    "id": "trace-tx-oo897vnb",
+    "timestampMs": 1780547148512,
+    "tradeAmount": 49628000000,
+    "lowerStrike": 61799,
+    "higherStrike": 78831,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08110836935092841
+  },
+  {
+    "id": "trace-tx-vmm4oaqh",
+    "timestampMs": 1780550520986,
+    "tradeAmount": 23000000,
+    "lowerStrike": 61654,
+    "higherStrike": 78318,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23808136403048558
+  },
+  {
+    "id": "trace-tx-vdwbivyt",
+    "timestampMs": 1780568247673,
+    "tradeAmount": 90000000,
+    "lowerStrike": 63574,
+    "higherStrike": 76312,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09099026373865199
+  },
+  {
+    "id": "trace-tx-p8edu0q7",
+    "timestampMs": 1780575413645,
+    "tradeAmount": 40693000000,
+    "lowerStrike": 59573,
+    "higherStrike": 80521,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0997618883511594
+  },
+  {
+    "id": "trace-tx-l1u3o8hj",
+    "timestampMs": 1780593165201,
+    "tradeAmount": 20000000,
+    "lowerStrike": 55603,
+    "higherStrike": 84939,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2095512114902271
+  },
+  {
+    "id": "trace-tx-hb84f8j8",
+    "timestampMs": 1780597136808,
+    "tradeAmount": 49000000,
+    "lowerStrike": 52840,
+    "higherStrike": 87482,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24744657648531881
+  },
+  {
+    "id": "trace-tx-9ecqkl6i",
+    "timestampMs": 1780602019242,
+    "tradeAmount": 25000000,
+    "lowerStrike": 64860,
+    "higherStrike": 75302,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07459232166106718
+  },
+  {
+    "id": "trace-tx-lmwd47eq",
+    "timestampMs": 1780606046081,
+    "tradeAmount": 59000000,
+    "lowerStrike": 57566,
+    "higherStrike": 83084,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1822764188925221
+  },
+  {
+    "id": "trace-tx-6m0vw2v5",
+    "timestampMs": 1780607912938,
+    "tradeAmount": 26000000,
+    "lowerStrike": 61615,
+    "higherStrike": 77591,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22823291262118933
+  },
+  {
+    "id": "trace-tx-sv8yo0qp",
+    "timestampMs": 1780614541658,
+    "tradeAmount": 96000000,
+    "lowerStrike": 62744,
+    "higherStrike": 76544,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09858435657944009
+  },
+  {
+    "id": "trace-tx-qeurkwhg",
+    "timestampMs": 1780621984998,
+    "tradeAmount": 10000000,
+    "lowerStrike": 62081,
+    "higherStrike": 78133,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11466313085172297
+  },
+  {
+    "id": "trace-tx-ocy10t78",
+    "timestampMs": 1780623095063,
+    "tradeAmount": 59000000,
+    "lowerStrike": 68046,
+    "higherStrike": 71946,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.055739265962954046
+  },
+  {
+    "id": "trace-tx-z0uij5bb",
+    "timestampMs": 1780626329877,
+    "tradeAmount": 25000000,
+    "lowerStrike": 63052,
+    "higherStrike": 76586,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0966791633508069
+  },
+  {
+    "id": "trace-tx-09bpzxpl",
+    "timestampMs": 1780631168719,
+    "tradeAmount": 86000000,
+    "lowerStrike": 65074,
+    "higherStrike": 75848,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07696081020704433
+  },
+  {
+    "id": "trace-tx-it3q64ew",
+    "timestampMs": 1780644434644,
+    "tradeAmount": 25000000,
+    "lowerStrike": 63779,
+    "higherStrike": 76361,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08987150931831561
+  },
+  {
+    "id": "trace-tx-yr6cthqu",
+    "timestampMs": 1780644812103,
+    "tradeAmount": 96000000,
+    "lowerStrike": 63145,
+    "higherStrike": 76807,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09758990666435752
+  },
+  {
+    "id": "trace-tx-i8rtpfrl",
+    "timestampMs": 1780652111350,
+    "tradeAmount": 5105000000,
+    "lowerStrike": 64850,
+    "higherStrike": 75964,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05292795901273058
+  },
+  {
+    "id": "trace-tx-6ozfhxot",
+    "timestampMs": 1780666120911,
+    "tradeAmount": 13000000,
+    "lowerStrike": 65303,
+    "higherStrike": 74679,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13396980111513918
+  },
+  {
+    "id": "trace-tx-dj8z9b6f",
+    "timestampMs": 1780668532203,
+    "tradeAmount": 62000000,
+    "lowerStrike": 63609,
+    "higherStrike": 76373,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09117856422340423
+  },
+  {
+    "id": "trace-tx-thl3raib",
+    "timestampMs": 1780668653515,
+    "tradeAmount": 18000000,
+    "lowerStrike": 56240,
+    "higherStrike": 83522,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1948749687880848
+  },
+  {
+    "id": "trace-tx-delptl3n",
+    "timestampMs": 1780668922989,
+    "tradeAmount": 32000000,
+    "lowerStrike": 63340,
+    "higherStrike": 76742,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09572892183091451
+  },
+  {
+    "id": "trace-tx-l5hdet9j",
+    "timestampMs": 1780674075437,
+    "tradeAmount": 77000000,
+    "lowerStrike": 60367,
+    "higherStrike": 79357,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13564854116047742
+  },
+  {
+    "id": "trace-tx-bpufzecj",
+    "timestampMs": 1780676101086,
+    "tradeAmount": 98000000,
+    "lowerStrike": 62681,
+    "higherStrike": 77979,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10928492725043322
+  },
+  {
+    "id": "trace-tx-bh1q2tqj",
+    "timestampMs": 1780679912197,
+    "tradeAmount": 90000000,
+    "lowerStrike": 67527,
+    "higherStrike": 73307,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08257639762639571
+  },
+  {
+    "id": "trace-tx-p8s5tqam",
+    "timestampMs": 1780692916806,
+    "tradeAmount": 65000000,
+    "lowerStrike": 66673,
+    "higherStrike": 73627,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0993555880166819
+  },
+  {
+    "id": "trace-tx-5dneavfw",
+    "timestampMs": 1780706404235,
+    "tradeAmount": 34000000,
+    "lowerStrike": 64264,
+    "higherStrike": 75148,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07774356495889244
+  },
+  {
+    "id": "trace-tx-1p9x8rnu",
+    "timestampMs": 1780710827634,
+    "tradeAmount": 88000000,
+    "lowerStrike": 62621,
+    "higherStrike": 77835,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21735167337636835
+  },
+  {
+    "id": "trace-tx-80e6fm9j",
+    "timestampMs": 1780715398459,
+    "tradeAmount": 43000000,
+    "lowerStrike": 65470,
+    "higherStrike": 74166,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06211896292177224
+  },
+  {
+    "id": "trace-tx-ihm0dnob",
+    "timestampMs": 1780736722772,
+    "tradeAmount": 73000000,
+    "lowerStrike": 60266,
+    "higherStrike": 80398,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1438030601070291
+  },
+  {
+    "id": "trace-tx-sl1ipci3",
+    "timestampMs": 1780740040360,
+    "tradeAmount": 62000000,
+    "lowerStrike": 64139,
+    "higherStrike": 76841,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18146745932877179
+  },
+  {
+    "id": "trace-tx-isnyt2hk",
+    "timestampMs": 1780748156432,
+    "tradeAmount": 43700000000,
+    "lowerStrike": 63326,
+    "higherStrike": 75748,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05915992134937229
+  },
+  {
+    "id": "trace-tx-j66nxbcb",
+    "timestampMs": 1780755309713,
+    "tradeAmount": 75000000,
+    "lowerStrike": 61344,
+    "higherStrike": 78842,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1249977173705388
+  },
+  {
+    "id": "trace-tx-nqkiq9uk",
+    "timestampMs": 1780767280482,
+    "tradeAmount": 24676000000,
+    "lowerStrike": 65323,
+    "higherStrike": 73835,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1216051003656865
+  },
+  {
+    "id": "trace-tx-fil5ptti",
+    "timestampMs": 1780772905820,
+    "tradeAmount": 21000000,
+    "lowerStrike": 67545,
+    "higherStrike": 72275,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06759757494598849
+  },
+  {
+    "id": "trace-tx-ystjzrvh",
+    "timestampMs": 1780774090326,
+    "tradeAmount": 27000000,
+    "lowerStrike": 63466,
+    "higherStrike": 76100,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0902482666864477
+  },
+  {
+    "id": "trace-tx-nk3efakk",
+    "timestampMs": 1780775441955,
+    "tradeAmount": 60000000,
+    "lowerStrike": 65562,
+    "higherStrike": 74338,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12538772002078785
+  },
+  {
+    "id": "trace-tx-ykwe7cr6",
+    "timestampMs": 1780785352402,
+    "tradeAmount": 50000000,
+    "lowerStrike": 55198,
+    "higherStrike": 84314,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.207976701272775
+  },
+  {
+    "id": "trace-tx-bxmpp62n",
+    "timestampMs": 1780788951714,
+    "tradeAmount": 35000000,
+    "lowerStrike": 65052,
+    "higherStrike": 74470,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13454556423065678
+  },
+  {
+    "id": "trace-tx-r61ovaly",
+    "timestampMs": 1780801096020,
+    "tradeAmount": 39000000,
+    "lowerStrike": 65534,
+    "higherStrike": 74498,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12805985935335024
+  },
+  {
+    "id": "trace-tx-t0slrg23",
+    "timestampMs": 1780807202627,
+    "tradeAmount": 30000000,
+    "lowerStrike": 64271,
+    "higherStrike": 75869,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16570518698752085
+  },
+  {
+    "id": "trace-tx-wjdeinfd",
+    "timestampMs": 1780811951509,
+    "tradeAmount": 7450000000,
+    "lowerStrike": 61631,
+    "higherStrike": 78841,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.081954124497221
+  },
+  {
+    "id": "trace-tx-yjwrj31o",
+    "timestampMs": 1780814196090,
+    "tradeAmount": 88000000,
+    "lowerStrike": 64449,
+    "higherStrike": 75389,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1563134649122444
+  },
+  {
+    "id": "trace-tx-mvh24fln",
+    "timestampMs": 1780816431464,
+    "tradeAmount": 19000000,
+    "lowerStrike": 64268,
+    "higherStrike": 76064,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08427050420938129
+  },
+  {
+    "id": "trace-tx-z3wpck5u",
+    "timestampMs": 1780821377622,
+    "tradeAmount": 71000000,
+    "lowerStrike": 55322,
+    "higherStrike": 84616,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20925040015238056
+  },
+  {
+    "id": "trace-tx-6hilhpi8",
+    "timestampMs": 1780824722955,
+    "tradeAmount": 31000000,
+    "lowerStrike": 56847,
+    "higherStrike": 82709,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1847333479101987
+  },
+  {
+    "id": "trace-tx-m6jevo8b",
+    "timestampMs": 1780838537299,
+    "tradeAmount": 83000000,
+    "lowerStrike": 66870,
+    "higherStrike": 74062,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10274682645562279
+  },
+  {
+    "id": "trace-tx-ntuutkg5",
+    "timestampMs": 1780847070705,
+    "tradeAmount": 27000000,
+    "lowerStrike": 67597,
+    "higherStrike": 73117,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07887765999394236
+  },
+  {
+    "id": "trace-tx-fciswilt",
+    "timestampMs": 1780849947621,
+    "tradeAmount": 91000000,
+    "lowerStrike": 64798,
+    "higherStrike": 74812,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14306693948510524
+  },
+  {
+    "id": "trace-tx-11zcmmeo",
+    "timestampMs": 1780856935192,
+    "tradeAmount": 28000000,
+    "lowerStrike": 57337,
+    "higherStrike": 81817,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17485830123683482
+  },
+  {
+    "id": "trace-tx-qb7wexll",
+    "timestampMs": 1780865585717,
+    "tradeAmount": 94000000,
+    "lowerStrike": 66305,
+    "higherStrike": 74229,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11322578079838325
+  },
+  {
+    "id": "trace-tx-y0ny7dt0",
+    "timestampMs": 1780870122129,
+    "tradeAmount": 59000000,
+    "lowerStrike": 54495,
+    "higherStrike": 85269,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21981542872779775
+  },
+  {
+    "id": "trace-tx-unlda98m",
+    "timestampMs": 1780881712782,
+    "tradeAmount": 85000000,
+    "lowerStrike": 58299,
+    "higherStrike": 82479,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17271449268576355
+  },
+  {
+    "id": "trace-tx-ugqik183",
+    "timestampMs": 1780884555892,
+    "tradeAmount": 67000000,
+    "lowerStrike": 62117,
+    "higherStrike": 78219,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11501807187334381
+  },
+  {
+    "id": "trace-tx-ul8tom38",
+    "timestampMs": 1780887447186,
+    "tradeAmount": 75000000,
+    "lowerStrike": 59774,
+    "higherStrike": 80098,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14518254580320658
+  },
+  {
+    "id": "trace-tx-bk469ui0",
+    "timestampMs": 1780891517502,
+    "tradeAmount": 78000000,
+    "lowerStrike": 59932,
+    "higherStrike": 80958,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15018673420657383
+  },
+  {
+    "id": "trace-tx-9pfvv57b",
+    "timestampMs": 1780893408443,
+    "tradeAmount": 27000000,
+    "lowerStrike": 60101,
+    "higherStrike": 80635,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1466761081253058
+  },
+  {
+    "id": "trace-tx-upj6klbp",
+    "timestampMs": 1780901261612,
+    "tradeAmount": 95000000,
+    "lowerStrike": 64648,
+    "higherStrike": 74688,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07172004853100314
+  },
+  {
+    "id": "trace-tx-the8r46s",
+    "timestampMs": 1780904290554,
+    "tradeAmount": 28000000,
+    "lowerStrike": 54526,
+    "higherStrike": 85346,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22015427348327543
+  },
+  {
+    "id": "trace-tx-zu0k0306",
+    "timestampMs": 1780909613353,
+    "tradeAmount": 81000000,
+    "lowerStrike": 64983,
+    "higherStrike": 74355,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06695402897669374
+  },
+  {
+    "id": "trace-tx-w28v9j9j",
+    "timestampMs": 1780911954367,
+    "tradeAmount": 27000000,
+    "lowerStrike": 63369,
+    "higherStrike": 76657,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.094920217419384
+  },
+  {
+    "id": "trace-tx-vpo7hzih",
+    "timestampMs": 1780913987197,
+    "tradeAmount": 42000000,
+    "lowerStrike": 66390,
+    "higherStrike": 73724,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.052393801745092165
+  },
+  {
+    "id": "trace-tx-5mrixkrj",
+    "timestampMs": 1780917460842,
+    "tradeAmount": 54000000,
+    "lowerStrike": 55764,
+    "higherStrike": 83584,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.198716583198432
+  },
+  {
+    "id": "trace-tx-6pxdsszn",
+    "timestampMs": 1780920666747,
+    "tradeAmount": 66000000,
+    "lowerStrike": 65304,
+    "higherStrike": 74868,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13664568589553472
+  },
+  {
+    "id": "trace-tx-rnetwnwq",
+    "timestampMs": 1780927059315,
+    "tradeAmount": 26000000,
+    "lowerStrike": 60208,
+    "higherStrike": 80424,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14440536138679733
+  },
+  {
+    "id": "trace-tx-lnomxab8",
+    "timestampMs": 1780927457000,
+    "tradeAmount": 59000000,
+    "lowerStrike": 63877,
+    "higherStrike": 76337,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08900719206822019
+  },
+  {
+    "id": "trace-tx-f0w3xuce",
+    "timestampMs": 1780939251878,
+    "tradeAmount": 72000000,
+    "lowerStrike": 62312,
+    "higherStrike": 76978,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20953757186458677
+  },
+  {
+    "id": "trace-tx-qsl0a0k7",
+    "timestampMs": 1780948123015,
+    "tradeAmount": 90000000,
+    "lowerStrike": 66743,
+    "higherStrike": 72285,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07919063828799205
+  },
+  {
+    "id": "trace-tx-9dmr6tli",
+    "timestampMs": 1780956373478,
+    "tradeAmount": 30635000000,
+    "lowerStrike": 53437,
+    "higherStrike": 86761,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15868936162116715
+  },
+  {
+    "id": "trace-tx-qaj5wxbz",
+    "timestampMs": 1780956472185,
+    "tradeAmount": 92000000,
+    "lowerStrike": 54897,
+    "higherStrike": 85771,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2205314651596571
+  },
+  {
+    "id": "trace-tx-rxqvw5fz",
+    "timestampMs": 1780960903298,
+    "tradeAmount": 24000000,
+    "lowerStrike": 65223,
+    "higherStrike": 73997,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12536450873636257
+  },
+  {
+    "id": "trace-tx-x5kwzac3",
+    "timestampMs": 1780962370621,
+    "tradeAmount": 63000000,
+    "lowerStrike": 52443,
+    "higherStrike": 87347,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2493256282665663
+  },
+  {
+    "id": "trace-tx-fax7ehun",
+    "timestampMs": 1780972739557,
+    "tradeAmount": 95000000,
+    "lowerStrike": 59237,
+    "higherStrike": 80601,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1526061795421974
+  },
+  {
+    "id": "trace-tx-x9xw4oqk",
+    "timestampMs": 1780974875715,
+    "tradeAmount": 41000000,
+    "lowerStrike": 61565,
+    "higherStrike": 78077,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23589971938642335
+  },
+  {
+    "id": "trace-tx-gabeq298",
+    "timestampMs": 1780990577613,
+    "tradeAmount": 55000000,
+    "lowerStrike": 64849,
+    "higherStrike": 74315,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.06762558625907773
+  },
+  {
+    "id": "trace-tx-yw6qnawj",
+    "timestampMs": 1780991318819,
+    "tradeAmount": 67000000,
+    "lowerStrike": 67772,
+    "higherStrike": 72882,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07300396603316278
+  },
+  {
+    "id": "trace-tx-ewkzlg13",
+    "timestampMs": 1780991734986,
+    "tradeAmount": 77000000,
+    "lowerStrike": 64709,
+    "higherStrike": 75601,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15562228933696398
+  },
+  {
+    "id": "trace-tx-lm9ram8d",
+    "timestampMs": 1780995262404,
+    "tradeAmount": 19000000,
+    "lowerStrike": 59082,
+    "higherStrike": 80450,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15262875854320151
+  },
+  {
+    "id": "trace-tx-2bgyh9ij",
+    "timestampMs": 1780999097832,
+    "tradeAmount": 99000000,
+    "lowerStrike": 62644,
+    "higherStrike": 77418,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21106394655831
+  },
+  {
+    "id": "trace-tx-mnswpue2",
+    "timestampMs": 1780999427253,
+    "tradeAmount": 27499000000,
+    "lowerStrike": 47084,
+    "higherStrike": 92616,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21682382104165376
+  },
+  {
+    "id": "trace-tx-v9kcjnmn",
+    "timestampMs": 1781003659592,
+    "tradeAmount": 13000000,
+    "lowerStrike": 66785,
+    "higherStrike": 74159,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10536684362976814
+  },
+  {
+    "id": "trace-tx-cj3btie1",
+    "timestampMs": 1781004436446,
+    "tradeAmount": 65000000,
+    "lowerStrike": 65933,
+    "higherStrike": 73385,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1064706594181293
+  },
+  {
+    "id": "trace-tx-y1hk1ily",
+    "timestampMs": 1781026236475,
+    "tradeAmount": 88000000,
+    "lowerStrike": 68178,
+    "higherStrike": 71820,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.052048258882904944
+  },
+  {
+    "id": "trace-tx-qj8niq6j",
+    "timestampMs": 1781026308017,
+    "tradeAmount": 46000000,
+    "lowerStrike": 60770,
+    "higherStrike": 79778,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13577696473141143
+  },
+  {
+    "id": "trace-tx-wzxlb3w2",
+    "timestampMs": 1781030551315,
+    "tradeAmount": 82000000,
+    "lowerStrike": 60735,
+    "higherStrike": 79955,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13729330619618002
+  },
+  {
+    "id": "trace-tx-mi0xhvpm",
+    "timestampMs": 1781040157371,
+    "tradeAmount": 54000000,
+    "lowerStrike": 60932,
+    "higherStrike": 78254,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2474599210385024
+  },
+  {
+    "id": "trace-tx-w5se9ojz",
+    "timestampMs": 1781040571983,
+    "tradeAmount": 27000000,
+    "lowerStrike": 64986,
+    "higherStrike": 75510,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07517620779816664
+  },
+  {
+    "id": "trace-tx-ro5hlm83",
+    "timestampMs": 1781045975526,
+    "tradeAmount": 32000000,
+    "lowerStrike": 61914,
+    "higherStrike": 78872,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12113553493275427
+  },
+  {
+    "id": "trace-tx-g3lwlstk",
+    "timestampMs": 1781056221895,
+    "tradeAmount": 27120000000,
+    "lowerStrike": 66820,
+    "higherStrike": 73492,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09532152117603832
+  },
+  {
+    "id": "trace-tx-bdeilbk5",
+    "timestampMs": 1781060982583,
+    "tradeAmount": 14000000,
+    "lowerStrike": 54448,
+    "higherStrike": 85174,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2194754812477756
+  },
+  {
+    "id": "trace-tx-vyv0px9f",
+    "timestampMs": 1781065126231,
+    "tradeAmount": 18000000,
+    "lowerStrike": 66111,
+    "higherStrike": 74301,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05850404734931916
+  },
+  {
+    "id": "trace-tx-5s8qhael",
+    "timestampMs": 1781068108384,
+    "tradeAmount": 49000000,
+    "lowerStrike": 54363,
+    "higherStrike": 85947,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22560030661249436
+  },
+  {
+    "id": "trace-tx-kl8hj3ov",
+    "timestampMs": 1781073970407,
+    "tradeAmount": 30970000000,
+    "lowerStrike": 59581,
+    "higherStrike": 80577,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09998615185195098
+  },
+  {
+    "id": "trace-tx-xpethilq",
+    "timestampMs": 1781096988232,
+    "tradeAmount": 20372000000,
+    "lowerStrike": 52272,
+    "higherStrike": 87622,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16833958093984774
+  },
+  {
+    "id": "trace-tx-0nvp41sh",
+    "timestampMs": 1781097661810,
+    "tradeAmount": 38000000,
+    "lowerStrike": 58854,
+    "higherStrike": 81262,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16007046444393264
+  },
+  {
+    "id": "trace-tx-xl1qls6b",
+    "timestampMs": 1781100306968,
+    "tradeAmount": 43000000,
+    "lowerStrike": 56860,
+    "higherStrike": 83888,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1930676832566413
+  },
+  {
+    "id": "trace-tx-e3yay2n9",
+    "timestampMs": 1781100727198,
+    "tradeAmount": 27000000,
+    "lowerStrike": 59657,
+    "higherStrike": 80023,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14548528674342837
+  },
+  {
+    "id": "trace-tx-7jhu37b3",
+    "timestampMs": 1781114603216,
+    "tradeAmount": 99000000,
+    "lowerStrike": 61008,
+    "higherStrike": 78986,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12842331478748353
+  },
+  {
+    "id": "trace-tx-47be33t2",
+    "timestampMs": 1781117327191,
+    "tradeAmount": 92000000,
+    "lowerStrike": 66413,
+    "higherStrike": 73819,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05290506873236045
+  },
+  {
+    "id": "trace-tx-ddl598qi",
+    "timestampMs": 1781118985433,
+    "tradeAmount": 32931000000,
+    "lowerStrike": 51324,
+    "higherStrike": 88586,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17743993160668864
+  },
+  {
+    "id": "trace-tx-xt6vkt7p",
+    "timestampMs": 1781129749334,
+    "tradeAmount": 23000000,
+    "lowerStrike": 63353,
+    "higherStrike": 76959,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19437619209016127
+  },
+  {
+    "id": "trace-tx-kk8y2ss3",
+    "timestampMs": 1781145708461,
+    "tradeAmount": 84000000,
+    "lowerStrike": 63557,
+    "higherStrike": 76513,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09255604707981908
+  },
+  {
+    "id": "trace-tx-m1o9pqqr",
+    "timestampMs": 1781168748771,
+    "tradeAmount": 18710000000,
+    "lowerStrike": 64956,
+    "higherStrike": 74178,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13176686433928964
+  },
+  {
+    "id": "trace-tx-3po00wrl",
+    "timestampMs": 1781185163801,
+    "tradeAmount": 32998000000,
+    "lowerStrike": 67861,
+    "higherStrike": 71485,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05177403426498431
+  },
+  {
+    "id": "trace-tx-ceghsukv",
+    "timestampMs": 1781193355589,
+    "tradeAmount": 13000000,
+    "lowerStrike": 56679,
+    "higherStrike": 84089,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19579132917807535
+  },
+  {
+    "id": "trace-tx-v2ezh5ic",
+    "timestampMs": 1781196353693,
+    "tradeAmount": 14000000,
+    "lowerStrike": 54273,
+    "higherStrike": 85231,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2211352256025479
+  },
+  {
+    "id": "trace-tx-lr2euogk",
+    "timestampMs": 1781197802742,
+    "tradeAmount": 7722000000,
+    "lowerStrike": 67327,
+    "higherStrike": 72979,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08075158525345921
+  },
+  {
+    "id": "trace-tx-3cdf08g5",
+    "timestampMs": 1781198550025,
+    "tradeAmount": 81000000,
+    "lowerStrike": 54399,
+    "higherStrike": 85995,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22569959323664351
+  },
+  {
+    "id": "trace-tx-jo105yc0",
+    "timestampMs": 1781206079959,
+    "tradeAmount": 99000000,
+    "lowerStrike": 64002,
+    "higherStrike": 76258,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08755465342127955
+  },
+  {
+    "id": "trace-tx-xauhy2m4",
+    "timestampMs": 1781221252347,
+    "tradeAmount": 23000000,
+    "lowerStrike": 53172,
+    "higherStrike": 87576,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.24575110634950914
+  },
+  {
+    "id": "trace-tx-fd486bwm",
+    "timestampMs": 1781224584514,
+    "tradeAmount": 25809000000,
+    "lowerStrike": 52831,
+    "higherStrike": 87493,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1650648151186364
+  },
+  {
+    "id": "trace-tx-1qgs7bre",
+    "timestampMs": 1781227193638,
+    "tradeAmount": 16821000000,
+    "lowerStrike": 64003,
+    "higherStrike": 76639,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18052430319890572
+  },
+  {
+    "id": "trace-tx-fl41qmft",
+    "timestampMs": 1781229101232,
+    "tradeAmount": 96000000,
+    "lowerStrike": 55229,
+    "higherStrike": 83917,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20492713483738728
+  },
+  {
+    "id": "trace-tx-d2ea59qd",
+    "timestampMs": 1781229229675,
+    "tradeAmount": 49000000,
+    "lowerStrike": 58519,
+    "higherStrike": 82361,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17030660427812286
+  },
+  {
+    "id": "trace-tx-izhoftsc",
+    "timestampMs": 1781235162893,
+    "tradeAmount": 33000000,
+    "lowerStrike": 65568,
+    "higherStrike": 73634,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11523484357353292
+  },
+  {
+    "id": "trace-tx-iogki0hf",
+    "timestampMs": 1781244461637,
+    "tradeAmount": 41853000000,
+    "lowerStrike": 66376,
+    "higherStrike": 72718,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09060685788743579
+  },
+  {
+    "id": "trace-tx-1fppu8ez",
+    "timestampMs": 1781244582023,
+    "tradeAmount": 68000000,
+    "lowerStrike": 65272,
+    "higherStrike": 74028,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0625435531936418
+  },
+  {
+    "id": "trace-tx-hmh9zy2k",
+    "timestampMs": 1781254066408,
+    "tradeAmount": 40355000000,
+    "lowerStrike": 48794,
+    "higherStrike": 90314,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1977175717967753
+  },
+  {
+    "id": "trace-tx-9mqs74wr",
+    "timestampMs": 1781254362469,
+    "tradeAmount": 81000000,
+    "lowerStrike": 54529,
+    "higherStrike": 85217,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21920836453821174
+  },
+  {
+    "id": "trace-tx-tkhp4cpo",
+    "timestampMs": 1781258361686,
+    "tradeAmount": 58000000,
+    "lowerStrike": 53919,
+    "higherStrike": 86389,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23193792298254812
+  },
+  {
+    "id": "trace-tx-crurr5y0",
+    "timestampMs": 1781275257611,
+    "tradeAmount": 45683000000,
+    "lowerStrike": 49318,
+    "higherStrike": 90134,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19436958631135848
+  },
+  {
+    "id": "trace-tx-n5goz79e",
+    "timestampMs": 1781285420971,
+    "tradeAmount": 43000000,
+    "lowerStrike": 61258,
+    "higherStrike": 78992,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12667158019560648
+  },
+  {
+    "id": "trace-tx-dz8izuqu",
+    "timestampMs": 1781297811231,
+    "tradeAmount": 86000000,
+    "lowerStrike": 62653,
+    "higherStrike": 77781,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2161332071377935
+  },
+  {
+    "id": "trace-tx-09trrirx",
+    "timestampMs": 1781298080590,
+    "tradeAmount": 15000000,
+    "lowerStrike": 60531,
+    "higherStrike": 79299,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.134068631623748
+  },
+  {
+    "id": "trace-tx-7ec57no6",
+    "timestampMs": 1781304616832,
+    "tradeAmount": 68000000,
+    "lowerStrike": 54273,
+    "higherStrike": 86053,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2270078451432948
+  },
+  {
+    "id": "trace-tx-0q88fy80",
+    "timestampMs": 1781311812630,
+    "tradeAmount": 46685000000,
+    "lowerStrike": 67916,
+    "higherStrike": 72178,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.060893420380959844
+  },
+  {
+    "id": "trace-tx-e5dy3qtf",
+    "timestampMs": 1781312467469,
+    "tradeAmount": 31000000,
+    "lowerStrike": 53375,
+    "higherStrike": 85833,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23184424552304927
+  },
+  {
+    "id": "trace-tx-zijy2y3r",
+    "timestampMs": 1781319676899,
+    "tradeAmount": 21000000,
+    "lowerStrike": 54679,
+    "higherStrike": 86243,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22547066103123825
+  },
+  {
+    "id": "trace-tx-uhx1lws4",
+    "timestampMs": 1781332892075,
+    "tradeAmount": 90000000,
+    "lowerStrike": 57604,
+    "higherStrike": 82886,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1805988734425646
+  },
+  {
+    "id": "trace-tx-cdyi0ltj",
+    "timestampMs": 1781336374340,
+    "tradeAmount": 31000000,
+    "lowerStrike": 61315,
+    "higherStrike": 77799,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23551113937746992
+  },
+  {
+    "id": "trace-tx-25msmm1y",
+    "timestampMs": 1781344089946,
+    "tradeAmount": 50000000,
+    "lowerStrike": 54330,
+    "higherStrike": 85122,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2199533657520612
+  },
+  {
+    "id": "trace-tx-1fcd1ohh",
+    "timestampMs": 1781346080277,
+    "tradeAmount": 68000000,
+    "lowerStrike": 60272,
+    "higherStrike": 79730,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13899484770078943
+  },
+  {
+    "id": "trace-tx-7f0li70g",
+    "timestampMs": 1781347879729,
+    "tradeAmount": 23632000000,
+    "lowerStrike": 46239,
+    "higherStrike": 92943,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22240116049616332
+  },
+  {
+    "id": "trace-tx-joqc3l59",
+    "timestampMs": 1781367743300,
+    "tradeAmount": 33180000000,
+    "lowerStrike": 61277,
+    "higherStrike": 77825,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07880820628922561
+  },
+  {
+    "id": "trace-tx-diiohowq",
+    "timestampMs": 1781370676272,
+    "tradeAmount": 16000000,
+    "lowerStrike": 66688,
+    "higherStrike": 73902,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05153322417336048
+  },
+  {
+    "id": "trace-tx-0tbia51v",
+    "timestampMs": 1781380259639,
+    "tradeAmount": 65000000,
+    "lowerStrike": 65910,
+    "higherStrike": 73756,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11211099940621992
+  },
+  {
+    "id": "trace-tx-8l9roaqn",
+    "timestampMs": 1781386029795,
+    "tradeAmount": 82000000,
+    "lowerStrike": 64477,
+    "higherStrike": 74825,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.0739285174209581
+  },
+  {
+    "id": "trace-tx-9sczj5r1",
+    "timestampMs": 1781392618173,
+    "tradeAmount": 11000000,
+    "lowerStrike": 56652,
+    "higherStrike": 83482,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19165368381845987
+  },
+  {
+    "id": "trace-tx-y3dbibn5",
+    "timestampMs": 1781399600163,
+    "tradeAmount": 26000000,
+    "lowerStrike": 64592,
+    "higherStrike": 75100,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07506416800514884
+  },
+  {
+    "id": "trace-tx-0rg6k96n",
+    "timestampMs": 1781400716114,
+    "tradeAmount": 60000000,
+    "lowerStrike": 66740,
+    "higherStrike": 72490,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08216458447190125
+  },
+  {
+    "id": "trace-tx-ruigc0pp",
+    "timestampMs": 1781412852459,
+    "tradeAmount": 10000000,
+    "lowerStrike": 59436,
+    "higherStrike": 79738,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14501832157226913
+  },
+  {
+    "id": "trace-tx-bejszwgb",
+    "timestampMs": 1781415673876,
+    "tradeAmount": 27000000,
+    "lowerStrike": 63229,
+    "higherStrike": 77687,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20655656350354779
+  },
+  {
+    "id": "trace-tx-htmqnk7z",
+    "timestampMs": 1781417152483,
+    "tradeAmount": 16000000,
+    "lowerStrike": 62654,
+    "higherStrike": 76496,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19775150802041375
+  },
+  {
+    "id": "trace-tx-y2hh6v29",
+    "timestampMs": 1781419973741,
+    "tradeAmount": 10000000,
+    "lowerStrike": 60880,
+    "higherStrike": 78228,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2478321569914546
+  },
+  {
+    "id": "trace-tx-wne3a1s7",
+    "timestampMs": 1781420166317,
+    "tradeAmount": 10853000000,
+    "lowerStrike": 57051,
+    "higherStrike": 82595,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12164168620250071
+  },
+  {
+    "id": "trace-tx-7a53cc8a",
+    "timestampMs": 1781423315414,
+    "tradeAmount": 81000000,
+    "lowerStrike": 54205,
+    "higherStrike": 85287,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2220155298320357
+  },
+  {
+    "id": "trace-tx-1udgfhpt",
+    "timestampMs": 1781425575895,
+    "tradeAmount": 4344000000,
+    "lowerStrike": 58230,
+    "higherStrike": 81368,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11018501155087196
+  },
+  {
+    "id": "trace-tx-mtqt5u4j",
+    "timestampMs": 1781428231255,
+    "tradeAmount": 93000000,
+    "lowerStrike": 61501,
+    "higherStrike": 77573,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11481164949621091
+  },
+  {
+    "id": "trace-tx-lqvyebmw",
+    "timestampMs": 1781436334479,
+    "tradeAmount": 25000000,
+    "lowerStrike": 62218,
+    "higherStrike": 77582,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2194972560368279
+  },
+  {
+    "id": "trace-tx-2vj43noy",
+    "timestampMs": 1781436773497,
+    "tradeAmount": 15000000,
+    "lowerStrike": 61839,
+    "higherStrike": 77361,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22176096587599814
+  },
+  {
+    "id": "trace-tx-0yvm5uie",
+    "timestampMs": 1781438734611,
+    "tradeAmount": 31000000,
+    "lowerStrike": 55477,
+    "higherStrike": 83791,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.202245419406685
+  },
+  {
+    "id": "trace-tx-8hu2sxni",
+    "timestampMs": 1781440850672,
+    "tradeAmount": 47000000,
+    "lowerStrike": 64162,
+    "higherStrike": 76420,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08756439793581877
+  },
+  {
+    "id": "trace-tx-c62cpovt",
+    "timestampMs": 1781453578386,
+    "tradeAmount": 74000000,
+    "lowerStrike": 61750,
+    "higherStrike": 79120,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12407385682285604
+  },
+  {
+    "id": "trace-tx-2tyqxeyi",
+    "timestampMs": 1781460457038,
+    "tradeAmount": 49000000,
+    "lowerStrike": 59826,
+    "higherStrike": 81164,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1524256440650975
+  },
+  {
+    "id": "trace-tx-hu92jwmu",
+    "timestampMs": 1781462242924,
+    "tradeAmount": 44000000,
+    "lowerStrike": 61597,
+    "higherStrike": 78073,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2353968670595704
+  },
+  {
+    "id": "trace-tx-zszf3fwf",
+    "timestampMs": 1781465104550,
+    "tradeAmount": 12000000,
+    "lowerStrike": 66985,
+    "higherStrike": 72259,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07534353308160811
+  },
+  {
+    "id": "trace-tx-s8koxfa6",
+    "timestampMs": 1781466054418,
+    "tradeAmount": 72000000,
+    "lowerStrike": 66955,
+    "higherStrike": 72425,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07817119078057524
+  },
+  {
+    "id": "trace-tx-37trpnpn",
+    "timestampMs": 1781467456564,
+    "tradeAmount": 57000000,
+    "lowerStrike": 59461,
+    "higherStrike": 80413,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1496684244538774
+  },
+  {
+    "id": "trace-tx-xsgdltmq",
+    "timestampMs": 1781480058948,
+    "tradeAmount": 77000000,
+    "lowerStrike": 64825,
+    "higherStrike": 75257,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07451440753186774
+  },
+  {
+    "id": "trace-tx-d5pquqw8",
+    "timestampMs": 1781481022925,
+    "tradeAmount": 16000000,
+    "lowerStrike": 59418,
+    "higherStrike": 81298,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1562918428624578
+  },
+  {
+    "id": "trace-tx-w02es52c",
+    "timestampMs": 1781483091854,
+    "tradeAmount": 27360000000,
+    "lowerStrike": 62053,
+    "higherStrike": 77219,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07222473235071798
+  },
+  {
+    "id": "trace-tx-ijq1xwak",
+    "timestampMs": 1781486244229,
+    "tradeAmount": 47058000000,
+    "lowerStrike": 59723,
+    "higherStrike": 79713,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09519427489800938
+  },
+  {
+    "id": "trace-tx-e68f2s0u",
+    "timestampMs": 1781497463248,
+    "tradeAmount": 23467000000,
+    "lowerStrike": 65651,
+    "higherStrike": 74339,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12412957136617293
+  },
+  {
+    "id": "trace-tx-zp5c0nup",
+    "timestampMs": 1781498066927,
+    "tradeAmount": 94000000,
+    "lowerStrike": 64635,
+    "higherStrike": 75839,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08003587552557728
+  },
+  {
+    "id": "trace-tx-fid9fnmz",
+    "timestampMs": 1781500532962,
+    "tradeAmount": 56000000,
+    "lowerStrike": 63433,
+    "higherStrike": 75799,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.08833483581874567
+  },
+  {
+    "id": "trace-tx-5uhi0ao7",
+    "timestampMs": 1781506000343,
+    "tradeAmount": 95000000,
+    "lowerStrike": 56269,
+    "higherStrike": 83109,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1917281812280382
+  },
+  {
+    "id": "trace-tx-4t1ryq2h",
+    "timestampMs": 1781512455680,
+    "tradeAmount": 21000000,
+    "lowerStrike": 65746,
+    "higherStrike": 74094,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11926113492849266
+  },
+  {
+    "id": "trace-tx-3zq6j697",
+    "timestampMs": 1781518835615,
+    "tradeAmount": 12000000,
+    "lowerStrike": 58911,
+    "higherStrike": 81399,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16063690687706392
+  },
+  {
+    "id": "trace-tx-qk5frmnd",
+    "timestampMs": 1781520469324,
+    "tradeAmount": 78000000,
+    "lowerStrike": 55364,
+    "higherStrike": 85194,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2130739858014769
+  },
+  {
+    "id": "trace-tx-lsfjd1uu",
+    "timestampMs": 1781523516492,
+    "tradeAmount": 49000000,
+    "lowerStrike": 65901,
+    "higherStrike": 73485,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.05417592590794876
+  },
+  {
+    "id": "trace-tx-v1u4p8kf",
+    "timestampMs": 1781524002450,
+    "tradeAmount": 28156000000,
+    "lowerStrike": 50391,
+    "higherStrike": 90209,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18961603959243245
+  },
+  {
+    "id": "trace-tx-0omvrvv1",
+    "timestampMs": 1781528025555,
+    "tradeAmount": 14000000,
+    "lowerStrike": 65388,
+    "higherStrike": 75212,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07017832345162185
+  },
+  {
+    "id": "trace-tx-g1aoqx3t",
+    "timestampMs": 1781535117656,
+    "tradeAmount": 68000000,
+    "lowerStrike": 66520,
+    "higherStrike": 72976,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09225562447003242
+  },
+  {
+    "id": "trace-tx-u3noo8nl",
+    "timestampMs": 1781537341597,
+    "tradeAmount": 45000000,
+    "lowerStrike": 56400,
+    "higherStrike": 82920,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1894418000167008
+  },
+  {
+    "id": "trace-tx-76isbzew",
+    "timestampMs": 1781538851903,
+    "tradeAmount": 26000000,
+    "lowerStrike": 64153,
+    "higherStrike": 75209,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07898226665872393
+  },
+  {
+    "id": "trace-tx-7v6rhw1k",
+    "timestampMs": 1781539643428,
+    "tradeAmount": 60000000,
+    "lowerStrike": 60215,
+    "higherStrike": 78999,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1341728839609616
+  },
+  {
+    "id": "trace-tx-ceplpe2n",
+    "timestampMs": 1781547197023,
+    "tradeAmount": 45000000,
+    "lowerStrike": 53629,
+    "higherStrike": 85551,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22801892439711718
+  },
+  {
+    "id": "trace-tx-wje6co44",
+    "timestampMs": 1781547813163,
+    "tradeAmount": 71000000,
+    "lowerStrike": 63694,
+    "higherStrike": 76612,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09227510759040135
+  },
+  {
+    "id": "trace-tx-phjtuktm",
+    "timestampMs": 1781549942419,
+    "tradeAmount": 65000000,
+    "lowerStrike": 60623,
+    "higherStrike": 80287,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14047006540585855
+  },
+  {
+    "id": "trace-tx-8s6w4dkq",
+    "timestampMs": 1781554482853,
+    "tradeAmount": 74000000,
+    "lowerStrike": 61859,
+    "higherStrike": 78717,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12042754189060466
+  },
+  {
+    "id": "trace-tx-ox4qum9m",
+    "timestampMs": 1781559612718,
+    "tradeAmount": 78000000,
+    "lowerStrike": 63725,
+    "higherStrike": 75793,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17240440632820192
+  },
+  {
+    "id": "trace-tx-fkia1fc1",
+    "timestampMs": 1781566271041,
+    "tradeAmount": 43000000,
+    "lowerStrike": 58661,
+    "higherStrike": 80851,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1585077520230817
+  },
+  {
+    "id": "trace-tx-c92vpyvt",
+    "timestampMs": 1781567955711,
+    "tradeAmount": 82000000,
+    "lowerStrike": 53525,
+    "higherStrike": 86131,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23290189318989502
+  },
+  {
+    "id": "trace-tx-erqa38hi",
+    "timestampMs": 1781575569731,
+    "tradeAmount": 92000000,
+    "lowerStrike": 64394,
+    "higherStrike": 75522,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07949745301986649
+  },
+  {
+    "id": "trace-tx-47bcgk7b",
+    "timestampMs": 1781577920435,
+    "tradeAmount": 29000000,
+    "lowerStrike": 64141,
+    "higherStrike": 76569,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17755282332076933
+  },
+  {
+    "id": "trace-tx-bxpkr1a8",
+    "timestampMs": 1781579455081,
+    "tradeAmount": 45000000,
+    "lowerStrike": 61410,
+    "higherStrike": 78532,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12231248390458754
+  },
+  {
+    "id": "trace-tx-x4id18i7",
+    "timestampMs": 1781589173528,
+    "tradeAmount": 93000000,
+    "lowerStrike": 60484,
+    "higherStrike": 78548,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.12903518619925186
+  },
+  {
+    "id": "trace-tx-o62kzxwk",
+    "timestampMs": 1781590213186,
+    "tradeAmount": 16000000,
+    "lowerStrike": 62670,
+    "higherStrike": 77504,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21193256697360174
+  },
+  {
+    "id": "trace-tx-sdrs43i6",
+    "timestampMs": 1781590718138,
+    "tradeAmount": 42000000,
+    "lowerStrike": 66279,
+    "higherStrike": 73173,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09850596357141062
+  },
+  {
+    "id": "trace-tx-ih9b0d9m",
+    "timestampMs": 1781590803743,
+    "tradeAmount": 98000000,
+    "lowerStrike": 58278,
+    "higherStrike": 81718,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16743683273501964
+  },
+  {
+    "id": "trace-tx-nc7c3udw",
+    "timestampMs": 1781596322589,
+    "tradeAmount": 18215000000,
+    "lowerStrike": 48420,
+    "higherStrike": 91862,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20687116876905237
+  },
+  {
+    "id": "trace-tx-rzhe84dl",
+    "timestampMs": 1781600693882,
+    "tradeAmount": 49000000,
+    "lowerStrike": 62851,
+    "higherStrike": 77669,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.21169295592899662
+  },
+  {
+    "id": "trace-tx-nqaqgewc",
+    "timestampMs": 1781601672710,
+    "tradeAmount": 63000000,
+    "lowerStrike": 56253,
+    "higherStrike": 83883,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.19735830877147725
+  },
+  {
+    "id": "trace-tx-94mme86a",
+    "timestampMs": 1781601758464,
+    "tradeAmount": 20000000,
+    "lowerStrike": 59488,
+    "higherStrike": 81274,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15562030142624056
+  },
+  {
+    "id": "trace-tx-78job20s",
+    "timestampMs": 1781603658503,
+    "tradeAmount": 55000000,
+    "lowerStrike": 66448,
+    "higherStrike": 73058,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09444182804664297
+  },
+  {
+    "id": "trace-tx-3iero97h",
+    "timestampMs": 1781608152302,
+    "tradeAmount": 99000000,
+    "lowerStrike": 59636,
+    "higherStrike": 79536,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.14215496009436696
+  },
+  {
+    "id": "trace-tx-3dis8qxl",
+    "timestampMs": 1781609158251,
+    "tradeAmount": 66000000,
+    "lowerStrike": 60657,
+    "higherStrike": 79317,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13329097859301176
+  },
+  {
+    "id": "trace-tx-rmw0b0pr",
+    "timestampMs": 1781618593450,
+    "tradeAmount": 97000000,
+    "lowerStrike": 53059,
+    "higherStrike": 86121,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23615840355788575
+  },
+  {
+    "id": "trace-tx-vfayobtt",
+    "timestampMs": 1781619616826,
+    "tradeAmount": 43000000,
+    "lowerStrike": 62380,
+    "higherStrike": 76724,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20491922229951198
+  },
+  {
+    "id": "trace-tx-tt8p4d8o",
+    "timestampMs": 1781629802679,
+    "tradeAmount": 51000000,
+    "lowerStrike": 66055,
+    "higherStrike": 73429,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.10535077915961913
+  },
+  {
+    "id": "trace-tx-hb7zvo1m",
+    "timestampMs": 1781636649833,
+    "tradeAmount": 53000000,
+    "lowerStrike": 65815,
+    "higherStrike": 73843,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11469642651177006
+  },
+  {
+    "id": "trace-tx-ebfkpula",
+    "timestampMs": 1781640340203,
+    "tradeAmount": 42000000,
+    "lowerStrike": 57594,
+    "higherStrike": 82852,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.18042725319175834
+  },
+  {
+    "id": "trace-tx-akfpoa9b",
+    "timestampMs": 1781641992942,
+    "tradeAmount": 92000000,
+    "lowerStrike": 61485,
+    "higherStrike": 78045,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2365943406819419
+  },
+  {
+    "id": "trace-tx-p9abijf3",
+    "timestampMs": 1781646769797,
+    "tradeAmount": 91000000,
+    "lowerStrike": 58540,
+    "higherStrike": 82036,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.16783417416024196
+  },
+  {
+    "id": "trace-tx-djh3k4ia",
+    "timestampMs": 1781662619163,
+    "tradeAmount": 73000000,
+    "lowerStrike": 60020,
+    "higherStrike": 79088,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.13620384565817473
+  },
+  {
+    "id": "trace-tx-5my2epqk",
+    "timestampMs": 1781664900507,
+    "tradeAmount": 43000000,
+    "lowerStrike": 52254,
+    "higherStrike": 86974,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2480112482215902
+  },
+  {
+    "id": "trace-tx-9dpkt6kz",
+    "timestampMs": 1781672642002,
+    "tradeAmount": 25334000000,
+    "lowerStrike": 50975,
+    "higherStrike": 88519,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17878610807871365
+  },
+  {
+    "id": "trace-tx-rm2pqioh",
+    "timestampMs": 1781673681323,
+    "tradeAmount": 37000000,
+    "lowerStrike": 64741,
+    "higherStrike": 75635,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.07782833520530152
+  },
+  {
+    "id": "trace-tx-yzigbrqa",
+    "timestampMs": 1781674021409,
+    "tradeAmount": 67000000,
+    "lowerStrike": 58892,
+    "higherStrike": 80510,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15441849863376678
+  },
+  {
+    "id": "trace-tx-lx1m0rfs",
+    "timestampMs": 1781675369381,
+    "tradeAmount": 41000000,
+    "lowerStrike": 66298,
+    "higherStrike": 74328,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.057358154744759006
+  },
+  {
+    "id": "trace-tx-soefqg0o",
+    "timestampMs": 1781681048523,
+    "tradeAmount": 96000000,
+    "lowerStrike": 63816,
+    "higherStrike": 76038,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.17462038547581588
+  },
+  {
+    "id": "trace-tx-t64l2i1j",
+    "timestampMs": 1781689720578,
+    "tradeAmount": 78000000,
+    "lowerStrike": 58376,
+    "higherStrike": 80780,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.1600292552900591
+  },
+  {
+    "id": "trace-tx-3ewh8yzv",
+    "timestampMs": 1781692560842,
+    "tradeAmount": 58000000,
+    "lowerStrike": 63803,
+    "higherStrike": 76823,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.09301149095051459
+  },
+  {
+    "id": "trace-tx-51c8idmv",
+    "timestampMs": 1781696352140,
+    "tradeAmount": 59000000,
+    "lowerStrike": 53867,
+    "higherStrike": 87069,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23716202514086243
+  },
+  {
+    "id": "trace-tx-5fok45wi",
+    "timestampMs": 1781703247628,
+    "tradeAmount": 15139000000,
+    "lowerStrike": 48748,
+    "higherStrike": 91356,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2028982415259571
+  },
+  {
+    "id": "trace-tx-jf6x3wwd",
+    "timestampMs": 1781707613669,
+    "tradeAmount": 21000000,
+    "lowerStrike": 53140,
+    "higherStrike": 85894,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.23396837233398138
+  },
+  {
+    "id": "trace-tx-9d8rx5mi",
+    "timestampMs": 1781713503660,
+    "tradeAmount": 4238000000,
+    "lowerStrike": 58013,
+    "higherStrike": 82703,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.11758045788594625
+  },
+  {
+    "id": "trace-tx-z4vce1gp",
+    "timestampMs": 1781716040659,
+    "tradeAmount": 39000000,
+    "lowerStrike": 58441,
+    "higherStrike": 80605,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.15831628523622587
+  },
+  {
+    "id": "trace-tx-th3268v7",
+    "timestampMs": 1781721786949,
+    "tradeAmount": 79000000,
+    "lowerStrike": 56048,
+    "higherStrike": 84596,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.20391810593657184
+  },
+  {
+    "id": "trace-tx-e0cqy721",
+    "timestampMs": 1781727701879,
+    "tradeAmount": 75000000,
+    "lowerStrike": 61882,
+    "higherStrike": 77392,
+    "expiry": 1781818271,
+    "action": "MintRange",
+    "volatilityEstimate": 0.22157868916148443
+  },
+  {
+    "id": "trace-tx-l7cccy5w",
+    "timestampMs": 1781729516647,
+    "tradeAmount": 44000000,
+    "lowerStrike": 55837,
+    "higherStrike": 84409,
+    "expiry": 1782336671,
+    "action": "MintRange",
+    "volatilityEstimate": 0.2040888227553701
+  }
+]

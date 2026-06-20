@@ -1,6 +1,6 @@
 # Roadmap & Dependencies
 
-**Progress: [███████████████████░] 97% Complete (97/100) — Phase 6 E2E UI & wallet integration complete, ready for Phase 7 (Optimistic Slashing)**
+**Progress: [████████████████████] 100% Complete (100/100) — Phase 7 E2E Live Copy Trading & Optimistic Slashing complete, ready for submission**
 
 ## ✅ Dev Environment Status
 
@@ -314,6 +314,11 @@ To transition from browser-tab simulation to continuous, persistent headless exe
 ## 🚀 Phase 8: Live Walkthrough Demo & Submission — PLANNED
 
 *   🔲 **Walkthrough Video Recording**: Record the live walk-through demo video showcasing the user-driven browser registration, copy-trading loop, telemetry decryption, and contract liquidation.
+*   🔲 **Cloud-Only Demo Strategy (Vercel + Railway Service Toggle)**:
+    *   **Deployment Setup:** Deploy the off-chain SDK bot runner folder to Railway connected to your GitHub repo. Configure the required environment variables (`SUI_RPC_URL`, `AURA_PACKAGE_ID`, `REGISTRY_OBJECT_ID`, `AGENT_PRIVATE_KEY`, etc.) inside the Railway service settings.
+    *   **Gas Preservation State:** Keep the Railway service **paused** or scaled down by default to prevent gas/faucet depletion.
+    *   **Execution:** When recording the demo or presenting to judges, click **Resume / Redeploy** inside the Railway control panel. The cloud worker will boot, execute live on-chain DeepBook trades, and log telemetry to Walrus. The Vercel Audit Studio will stream these events live.
+    *   **Cleanup:** Click **Pause Service** in Railway once the demo concludes to preserve testnet gas.
 *   🔲 **Hackathon Submission Compilation**: Package the final submission assets, links to the deployed Vercel dashboard, GitHub repository, and YouTube walkthrough video.
 
 ---
