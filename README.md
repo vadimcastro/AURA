@@ -49,11 +49,11 @@ AURA solves all three with a protocol-level architecture built on Sui Move primi
 
 - **🗜️ Verifiable State History Compression** — Aggregates raw Walrus telemetry logs periodically (every 5 cycles) into a dense, encrypted "Strategy Summary String" on Walrus to prevent LLM context window overflow while preserving long-term memory.
 
-- **🧠 Reflective Memory & Live OpenRouter Reasoning** — Falls back to OpenRouter's live free Llama-3 model (`meta-llama/llama-3-8b-instruct:free`) for option strike generation, validated against strict JSON schemas, and dynamically scales down trade size by 25% and widens spread by 20% on prior losses.
+- **🧠 Hybrid Validator-Consensus Pattern** — Employs a dual-layer AI strategy: a lightning-fast `google/gemma-4-26b-a4b:free` "Grunt" executor running under a deterministic TypeScript Sanity Sandbox, combined with an off-chain background "Thinker" Panel consensus trio (`nvidia/nemotron-3-ultra-550b-a55b:free`, `qwen/qwen3-coder-480b-a35b:free`, and `meta-llama/llama-3.3-70b-instruct:free`) periodically summarizing historical Walrus traces to update strategy prompts off the live trading path.
 
 - **📊 Optimistic Slashing Dispute Game** — Replaces trusted admin slashing. Users submit disputes by locking a dispute bond. Operators must disclose the decryption key within 24 hours. Failure automatically slashes the operator's performance bond and awards it to the challenger.
 
-- **🏬 Sui Kiosk Strategy NFT wrapping** — High-performing strategy records and reputations can be packaged into an `AgentNFT` and placed in a shared `sui::kiosk::Kiosk`, enabling secure strategy renting and tradeable algorithms.
+- **🏬 Sui Kiosk Strategy NFT wrapping** — High-performing strategy records and reputations can be packaged into an `AgentNFT` containing snapshots of the agent's exact model/orchestration parameters, then placed in a shared `sui::kiosk::Kiosk` to create a tradeable marketplace with high switching costs.
 
 - **🔐 Seal-Encrypted Audit Trails** — Trade reasoning is encrypted client-side via Seal, uploaded to Walrus, and the `blob_id` is committed on-chain. Disputes trigger decryption for verification.
 

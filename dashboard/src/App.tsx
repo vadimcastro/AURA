@@ -3,11 +3,14 @@ import { LandingPage } from './components/LandingPage';
 import { AgentDashboard } from './components/AgentDashboard';
 import { TimelineVisualizer, type SealEnvelope } from './components/TimelineVisualizer';
 import { SealDecrypter } from './components/SealDecrypter';
-import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe } from 'lucide-react';
+import { IntentEngine } from './components/IntentEngine';
+import { VolatilityStudio } from './components/VolatilityStudio';
+import { EscalationInbox } from './components/EscalationInbox';
+import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
 import type React from 'react';
 import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets } from '@mysten/dapp-kit';
 
-type TabType = 'landing' | 'agents';
+type TabType = 'landing' | 'agents' | 'intent' | 'volatility' | 'escalations';
 
 export interface WalletSession {
   address: string;
@@ -170,6 +173,9 @@ function App() {
               <nav className="flex items-center gap-1" aria-label="Main navigation">
                 {navBtn('landing', 'Overview', LayoutDashboard)}
                 {navBtn('agents', 'Audit Studio', FlaskConical)}
+                {navBtn('intent', 'Intent Engine', Sparkles)}
+                {navBtn('volatility', 'Volatility Surface', TrendingUp)}
+                {navBtn('escalations', 'Escalations', AlertTriangle)}
               </nav>
             </div>
 
@@ -338,9 +344,10 @@ function App() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-24 pt-2">
-        {activeTab === 'landing' ? (
+        {activeTab === 'landing' && (
           <LandingPage onNavigate={(tab) => setActiveTab(tab as TabType)} />
-        ) : (
+        )}
+        {activeTab === 'agents' && (
           <div className="space-y-10">
             <section className="pt-6">
               <AgentDashboard onSelectAgent={handleSelectAgent} activeSession={session} />
@@ -364,6 +371,21 @@ function App() {
               </div>
             )}
           </div>
+        )}
+        {activeTab === 'intent' && (
+          <section className="pt-6">
+            <IntentEngine activeSession={session} />
+          </section>
+        )}
+        {activeTab === 'volatility' && (
+          <section className="pt-6">
+            <VolatilityStudio />
+          </section>
+        )}
+        {activeTab === 'escalations' && (
+          <section className="pt-6">
+            <EscalationInbox />
+          </section>
         )}
       </main>
 

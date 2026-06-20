@@ -77,8 +77,75 @@ export interface LLMReasoningOutput {
   reasoning: string;
 }
 
+export interface GruntReasoningOutput {
+  decision: "WIDEN_SPREAD" | "MAINTAIN_SPREAD" | "REDUCE_SIZE";
+  confidence: number;
+  reasoning: string;
+}
+
+export interface SandboxOutput {
+  lowerStrike: number;
+  higherStrike: number;
+  expiry: number;
+  tradeAmount: number;
+  decision: string;
+  confidence: number;
+  reasoning: string;
+}
+
 const green = (text: string) => `\x1b[32m${text}\x1b[0m`;
 const yellow = (text: string) => `\x1b[33m${text}\x1b[0m`;
+
+export function validateGruntReasoning(jsonStr: string): GruntReasoningOutput {
+  const parsed = JSON.parse(jsonStr);
+  if (typeof parsed !== "object" || parsed === null) {
+    throw new Error("Invalid JSON: Grunt output must be an object");
+  }
+  if (!["WIDEN_SPREAD", "MAINTAIN_SPREAD", "REDUCE_SIZE"].includes(parsed.decision)) {
+    throw new Error(`Invalid decision enum value: "${parsed.decision}"`);
+  }
+  if (typeof parsed.confidence !== "number" || parsed.confidence < 0 || parsed.confidence > 1) {
+    throw new Error("Invalid confidence: must be a number between 0 and 1");
+  }
+  if (typeof parsed.reasoning !== "string") {
+    throw new Error("Invalid reasoning: must be a string");
+  }
+  return parsed as GruntReasoningOutput;
+}
+
+export function runTSComponentSandbox(
+  gruntOutput: GruntReasoningOutput,
+  svi: SVIParameters,
+  baseTradeAmount: number,
+  reflectiveMarginWidenFactor: number
+): SandboxOutput {
+  const basePrice = 70000;
+  let spreadWiden = reflectiveMarginWidenFactor;
+  let finalTradeAmount = baseTradeAmount;
+  
+  if (gruntOutput.decision === "WIDEN_SPREAD") {
+    spreadWiden = spreadWiden * 1.5;
+  } else if (gruntOutput.decision === "REDUCE_SIZE") {
+    finalTradeAmount = Math.floor(finalTradeAmount * 0.75);
+  } else if (gruntOutput.decision !== "MAINTAIN_SPREAD") {
+    throw new Error(`LOGICAL_HALLUCINATION_CAUGHT: Unknown decision enum "${gruntOutput.decision}"`);
+  }
+
+  const spread = Math.floor(basePrice * svi.sigma * spreadWiden);
+  const lowerStrike = basePrice - spread;
+  const higherStrike = basePrice + spread;
+  const expiry = Math.floor(Date.now() / 1000) + 86400; // 24h
+
+  return {
+    lowerStrike,
+    higherStrike,
+    expiry,
+    tradeAmount: finalTradeAmount,
+    decision: gruntOutput.decision,
+    confidence: gruntOutput.confidence,
+    reasoning: gruntOutput.reasoning
+  };
+}
 
 export function validateLLMReasoning(jsonStr: string): LLMReasoningOutput {
   const parsed = JSON.parse(jsonStr);
@@ -120,55 +187,103 @@ export function isValidNumber(val: any): boolean {
 
 // ── OpenRouter Live LLM Integration ──────────────────────────────────────────
 
-/**
- * Queries a free model on OpenRouter to generate options strike range decisions
- * using live SVI volatility parameters and reflective memory context.
- */
+export let activeConsensusSummary = "Initial consensus strategy: Maintain a balanced spread. Volatility is normal.";
+
+export async function queryOpenRouter(
+  model: string,
+  prompt: string,
+  apiKey: string
+): Promise<string> {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://aura.finance",
+      "X-Title": "AURA AgentFi"
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+  if (!response.ok) {
+    throw new Error(`OpenRouter HTTP ${response.status} for model ${model}`);
+  }
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) throw new Error(`Empty response from OpenRouter model ${model}`);
+  return content.replace(/```json/g, "").replace(/```/g, "").trim();
+}
+
+export async function runThinkerPanelConsensus(
+  traces: AuditTrace[],
+  apiKey: string
+): Promise<string> {
+  console.log("🧠 Thinker Panel: Running off-loop multi-model consensus checks...");
+  
+  const tracesSummary = traces.map((t, idx) => ({
+    cycle: idx + 1,
+    decision: t.trade_decision,
+    pnl: t.pnl_dusdc,
+    confidence: t.confidence
+  }));
+
+  const consensusPrompt = `Analyze these recent options trading execution traces and output a concise consensus strategy summary (max 2 sentences) for the execution grunt:
+Traces: ${JSON.stringify(tracesSummary)}
+Provide a strategic direction (e.g. shift to widening spread, decrease trade sizes, etc.) based on the net performance.`;
+
+  const models = [
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "qwen/qwen3-coder-480b-a35b:free",
+    "meta-llama/llama-3.3-70b-instruct:free"
+  ];
+
+  const results: string[] = [];
+  for (const model of models) {
+    try {
+      console.log(`🧠 Thinker Panel: Querying model ${model}...`);
+      const response = await queryOpenRouter(model, consensusPrompt, apiKey);
+      results.push(response);
+    } catch (e) {
+      console.warn(`⚠️ Thinker Panel: Model ${model} query failed:`, (e as Error).message);
+    }
+  }
+
+  if (results.length === 0) {
+    console.warn("⚠️ Thinker Panel: All consensus models failed. Using fallback summary.");
+    const netPnL = traces.reduce((acc, t) => acc + (t.pnl_dusdc || 0), 0);
+    if (netPnL < 0) {
+      return "Consensus fallback strategy: Net loss detected. Shift to risk-averse mode, widen options spreads, and scale down trade size.";
+    } else {
+      return "Consensus fallback strategy: Profitable trend. Maintain current options spread parameters.";
+    }
+  }
+
+  console.log("🧠 Thinker Panel: Consensus views synthesized successfully.");
+  return results.join(" | ");
+}
+
 export async function queryOpenRouterLLM(
   svi: SVIParameters,
   previousSummary: string,
-  apiKey: string
+  apiKey: string,
+  model: string = "google/gemma-4-26b-a4b:free"
 ): Promise<string> {
-  try {
-    const prompt = `You are AURA, an options market maker trading SUI options.
+  const prompt = `You are AURA, an options trading executor on Sui.
 Volatility surface SVI parameters: a=${svi.a}, b=${svi.b}, rho=${svi.rho}, m=${svi.m}, sigma=${svi.sigma}.
 Previous Cycle Status: "${previousSummary}".
 Base SUI price is 70000.
-Compute the lower strike, higher strike, expiry (Unix timestamp in seconds, e.g., current time + 86400), trade amount (in MIST, default 5000000), and your decision confidence score (between 0.0 and 1.0).
+Evaluate options market volatility and select one strategy decision.
 Respond ONLY with a valid JSON object matching this schema:
 {
-  "lowerStrike": number,
-  "higherStrike": number,
-  "expiry": number,
-  "tradeAmount": number,
-  "confidence": number,
+  "decision": "WIDEN_SPREAD" | "MAINTAIN_SPREAD" | "REDUCE_SIZE",
+  "confidence": number, // between 0.0 and 1.0
   "reasoning": string
 }`;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://aura.finance",
-        "X-Title": "AURA AgentFi"
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3-8b-instruct:free",
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) throw new Error("Empty response from OpenRouter");
-
-    const cleaned = content.replace(/```json/g, "").replace(/```/g, "").trim();
-    return cleaned;
+  try {
+    return await queryOpenRouter(model, prompt, apiKey);
   } catch (err) {
     throw new Error(`OpenRouter query failed: ${(err as Error).message}`);
   }
@@ -393,41 +508,81 @@ export async function executeTradeCycle(
     }
   }
 
-  // 8.9 Enforce strict JSON Schema validation and parsing
+  // 9.7 - 9.10 Enforce V4 Hybrid Validator-Consensus pattern
   let rawLLMOutputJSON = "";
   const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+  const promptSummary = `Previous Cycle Status: "${previousSummary}". Active Consensus Strategy: "${activeConsensusSummary}".`;
 
   if (openRouterApiKey && !openRouterApiKey.includes("placeholder") && !options.copyParams) {
-    console.log("🤖 Querying live Llama-3 model on OpenRouter for options pricing reasoning...");
+    console.log("🤖 Querying live Gemma-4 Grunt model on OpenRouter for options pricing strategy decision...");
     try {
-      rawLLMOutputJSON = await queryOpenRouterLLM(svi, previousSummary, openRouterApiKey);
+      rawLLMOutputJSON = await queryOpenRouterLLM(svi, promptSummary, openRouterApiKey, "google/gemma-4-26b-a4b:free");
     } catch (e) {
-      console.warn("⚠️ OpenRouter query failed, falling back to local simulation schema:", (e as Error).message);
+      console.warn("⚠️ OpenRouter Gemma-4 Grunt query failed, falling back to local simulation schema:", (e as Error).message);
     }
   }
 
-  // Fallback to local deterministic simulated LLM reasoning output if not queried or failed
+  // Fallback to local deterministic simulated Grunt reasoning output if not queried or failed
   if (!rawLLMOutputJSON) {
     rawLLMOutputJSON = JSON.stringify({
-      lowerStrike,
-      higherStrike,
-      expiry,
-      tradeAmount,
-      confidence: 0.85, // mock confidence score
-      reasoning: `SVI parameters: a=${svi.a}, b=${svi.b}. Volatility spread determined strikes.`
+      decision: "MAINTAIN_SPREAD",
+      confidence: 0.85,
+      reasoning: "SVI parameters normal. Volatility spread dictates maintaining spread."
     });
   }
 
-  console.log("🔍 Running strict schema validation on LLM output JSON...");
-  const validatedOutput = validateLLMReasoning(rawLLMOutputJSON);
-  
-  // Use validated parameters
-  lowerStrike = validatedOutput.lowerStrike;
-  higherStrike = validatedOutput.higherStrike;
-  expiry = validatedOutput.expiry;
-  tradeAmount = validatedOutput.tradeAmount;
-  const confidence = validatedOutput.confidence;
-  console.log("✅ Schema validation passed. Confirmed inputs are type-safe.");
+  console.log("🔍 Running strict schema validation on Grunt output JSON...");
+  let gruntOutput: GruntReasoningOutput;
+  try {
+    gruntOutput = validateGruntReasoning(rawLLMOutputJSON);
+  } catch (e) {
+    // 9.12 DecisionBench Emergent Delegation: if Grunt fails sandbox/structural parsing, escalate to Nemotron 3 Ultra
+    console.warn("🚨 TS Sandbox caught structural/logical hallucination from Grunt! Triggering DecisionBench Emergent Delegation to Nemotron-3-Ultra-550B...");
+    if (openRouterApiKey && !openRouterApiKey.includes("placeholder")) {
+      try {
+        const nemotronOutput = await queryOpenRouterLLM(svi, `Grunt validation error: ${(e as Error).message}. ` + promptSummary, openRouterApiKey, "nvidia/nemotron-3-ultra-550b-a55b:free");
+        gruntOutput = validateGruntReasoning(nemotronOutput);
+        console.log("✅ DecisionBench: Nemotron 3 Ultra emergent delegation successfully resolved the decision.");
+      } catch (nemotronErr) {
+        console.error("❌ DecisionBench: Nemotron 3 Ultra emergent delegation failed. Falling back to default.");
+        gruntOutput = {
+          decision: "MAINTAIN_SPREAD",
+          confidence: 0.50,
+          reasoning: `Emergency fallback: Grunt & Nemotron failed. Error: ${(nemotronErr as Error).message}`
+        };
+      }
+    } else {
+      gruntOutput = {
+        decision: "MAINTAIN_SPREAD",
+        confidence: 0.50,
+        reasoning: `Emergency fallback: Grunt parsing failed. Error: ${(e as Error).message}`
+      };
+    }
+  }
+
+  // 9.9 TypeScript Sanity Sandbox: Map enum decisions to options strikes and sizes deterministically
+  let sandbox: SandboxOutput;
+  try {
+    sandbox = runTSComponentSandbox(gruntOutput, svi, tradeAmount, reflectiveMarginWidenFactor);
+  } catch (sandboxErr) {
+    console.error("❌ TS Sandbox bounds check failed to execute:", (sandboxErr as Error).message);
+    sandbox = {
+      lowerStrike: 70000 - Math.floor(70000 * svi.sigma),
+      higherStrike: 70000 + Math.floor(70000 * svi.sigma),
+      expiry: Math.floor(Date.now() / 1000) + 86400,
+      tradeAmount: Math.floor(tradeAmount * 0.75),
+      decision: "MAINTAIN_SPREAD",
+      confidence: 0.40,
+      reasoning: `Sandbox execution error: ${(sandboxErr as Error).message}`
+    };
+  }
+
+  lowerStrike = sandbox.lowerStrike;
+  higherStrike = sandbox.higherStrike;
+  expiry = sandbox.expiry;
+  tradeAmount = sandbox.tradeAmount;
+  const confidence = sandbox.confidence;
+  console.log(`✅ Sandbox mapping completed. Decision: ${gruntOutput.decision} | Spread: ${lowerStrike}-${higherStrike} | Amount: ${tradeAmount / 1e6} dUSDC`);
 
   // Add explicit type checks to ensure all arguments passed to Sui transaction inputs are properly formed hex addresses, numbers, or BCS-compatible types
   if (!isValidSuiAddress(REGISTRY_OBJECT_ID)) {
@@ -531,6 +686,21 @@ export async function executeTradeCycle(
 
   let txDigest = `mock-tx-digest-trade-${crypto.randomBytes(8).toString("hex")}`;
 
+  // 9.11 Double-Fetch Oracle Check immediately before signing
+  console.log("📡 Double-Fetch Oracle Check: Fetching latest SVI oracle parameters prior to transaction submission...");
+  try {
+    const preSignSvi = await fetchSVIParameters(true);
+    const preSignTimestamp = preSignSvi.timestamp ?? Date.now();
+    if (Math.abs(Date.now() - preSignTimestamp) > 15_000) {
+      console.error(`❌ Double-Fetch Oracle Check failed: SVI oracle data is stale (${(Math.abs(Date.now() - preSignTimestamp) / 1000).toFixed(1)}s delta). Aborting.`);
+      return { success: false };
+    }
+    console.log("✅ Double-Fetch Oracle Check passed: SVI data remains fresh.");
+  } catch (err) {
+    console.error(`❌ Double-Fetch Oracle Check failed to execute: ${(err as Error).message}. Aborting.`);
+    return { success: false };
+  }
+
   // Step 5: Dry-run and execution check
   if (!mockMode && !AURA_PACKAGE_ID.includes("placeholder")) {
     try {
@@ -602,6 +772,7 @@ export async function executeTradeCycle(
     refund: Math.floor(tradeAmount * 0.98),
     reasoningHash: reasoningHash,
     gasBalance: currentGasBalance,
+    confidence: confidence,
   };
 
   let archiveResult;
@@ -641,7 +812,19 @@ export async function executeTradeCycle(
       await commitBlobIdOnChain(compressionBlobId, agentKeypair, mockMode);
       console.log(`🗜️ State History Compression: Successfully committed compressed summary blob ${compressionBlobId} on-chain.`);
       finalBlobId = compressionBlobId;
-      recentTracesMap[agentAddress] = []; // Reset history
+
+      // 9.10 Consensus Thinker Panel: Update activeConsensusSummary off-loop
+      if (openRouterApiKey && !openRouterApiKey.includes("placeholder")) {
+        try {
+          const newConsensus = await runThinkerPanelConsensus(recentTracesMap[agentAddress], openRouterApiKey);
+          activeConsensusSummary = newConsensus;
+          console.log(`🧠 Thinker Panel: New consensus strategy established: "${activeConsensusSummary}"`);
+        } catch (consensusErr) {
+          console.error("❌ Thinker Panel consensus query failed:", (consensusErr as Error).message);
+        }
+      }
+
+      recentTracesMap[agentAddress] = []; // Reset history after consensus reads it
     } catch (compressErr) {
       console.error(`❌ State History Compression failed:`, (compressErr as Error).message);
     }

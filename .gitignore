@@ -54,3 +54,6 @@ dashboard/dist/
 dashboard/dist-ssr/
 dashboard/.eslintcache
 dashboard/.vite/
+
+# ── Local run state ───────────────────────────────────────
+*escalations.json

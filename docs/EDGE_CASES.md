@@ -6,10 +6,11 @@
 *   **Escalation Path:** If the agent's cumulative PnL breaches a configurable drawdown threshold (tracked off-chain), the off-chain keeper pauses the loop and emits a Walrus alert trace. The user can then invoke `revoke_policy` to reclaim remaining funds.
 
 ## B. Oracle Feeder Latency & Front-Running
-*   **The Issue:** The Predict server lags or emits stale SVI parameters, allowing external searchers to front-run the agent's range adjustments.
-*   **The Resolution:** Freshness is enforced at two layers:
-    1.  **Off-chain (TypeScript agent):** Before constructing the PTB, the agent compares the SVI response's `timestamp` field against `Date.now()`. If the delta exceeds 15 seconds, the agent aborts and logs a stale-oracle event to Walrus.
-    2.  **On-chain (Move contract):** If DeepBook Predict's oracle module exposes a `sui::clock::Clock`-based timestamp on its `OracleSVI` object, `borrow_for_trade` can accept a `&Clock` reference and compare `clock::timestamp_ms(clock)` against the oracle's last-update field. This provides a belt-and-suspenders guarantee that even a compromised off-chain agent cannot execute against stale data.
+*   **The Issue:** The Predict server lags or emits stale SVI parameters, allowing external searchers to front-run the agent's range adjustments. Because DeepBook Predict enforces a strict 15-second oracle freshness limit, network latency during execution block assembly can cause transactions to revert, wasting gas and interrupting strategies.
+*   **The Resolution (Double-Fetch Oracle Pattern):**
+    1.  **Off-chain (TypeScript agent):** The agent fetches the latest SVI oracle parameters off-chain, performs pre-flight calculations, and prepares the PTB. To beat the 15-second freshness limit, the agent executes a **Double-Fetch** sequence: immediately before signing and submitting the PTB, it does a high-speed parallel RPC query to fetch the absolute latest on-chain `OracleSVI` object state.
+    2.  **Pre-Flight Verification:** It verifies the off-chain data timestamp matches the on-chain object timestamp. If they differ or the timestamp is >15 seconds old, the agent dynamically updates the target object input arguments in the transaction builder block right before submission, or aborts the trade if the oracle update is stale.
+    3.  **On-chain (Move contract):** The Move execution boundary enforces that `borrow_for_trade` takes a `&Clock` and compares `clock::timestamp_ms(clock)` against the oracle's last-update field, ensuring no transaction can execute against stale data even under off-chain node compromise.
 
 ## C. Walrus Storage Gas Reservoir Exhaustion
 *   **The Issue:** The agent runs out of SUI to pay for Walrus storage writes, causing execution traces to stop uploading, which triggers automatic slashing for audit failures.
@@ -60,13 +61,14 @@ AURA manages resource depletion at both the on-chain execution layer and the bro
     2. It implements exponential backoff intervals between attempts (e.g. 2s, 4s, 8s).
     3. If the runner encounters **three consecutive failures**, it trips the circuit breaker: programmatically halting all loop execution, halting trades, and emitting a critical `CIRCUIT_BREAKER_TRIPPED` status message archived in its Walrus memory. This stops all infinite polling traps and alerts operators via telemetry.
 
-## I. Reasoning Degradation & Human-in-the-Loop Escalation
-*   **The Issue:** An autonomous trading agent generates trades based on low-confidence reasoning paths (e.g. when LLM inputs are highly volatile, or when the model starts hallucinating strike pricing), leading to capital loss despite operating within budget rules.
-*   **The Resolution:** We establish a **Human-in-the-Loop (HITL) Escalation Path** in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts):
-    1. Before formatting any PTB, the agent calculates an internal `confidence_score` (between 0.0 and 1.0) derived from SVI modeling and historical win rates.
-    2. If this confidence score drops below a configurable threshold (e.g., `0.60`), the agent halts the autonomous loop execution.
-    3. The loop emits a suspended state notification `Escalated to Human Owner: Low Confidence Score (score: X)` to the dashboard, letting the owner manually review and resume execution, rather than executing high-risk, low-confidence orders.
-*   **Initial Registration Exemption:** This confidence-based HITL check operates exclusively during active trading cycles. It does not affect the initial agent registration on-chain (`register_agent`), which initializes the agent record with a default Bayesian prior reputation of 50%. The registration completes successfully regardless of the agent's current or subsequent confidence states.
+## I. Value Accuracy Hallucination, TS Sandbox, & Human-in-the-Loop Escalation
+*   **The Issue (Value Accuracy Hallucination):** Research shows that while LLMs achieve high JSON schema compliance (~95%), their actual numeric "Value Accuracy" peaks at ~83%. If a trading agent generates raw strike prices, an unexpected hallucination could commit options transactions at financially ruinous values.
+*   **The Resolution (Categorical Enums & TS Sanity Sandbox):**
+    1.  **Categorical Outputs Only:** The local executor (Gemma-4 Grunt) is restricted from outputting raw pricing numbers. Instead, it must select a **Categorical Enum** option (e.g., `WIDEN_SPREAD`, `MAINTAIN_SPREAD`, `REDUCE_SIZE`).
+    2.  **Deterministic Sandbox Bounds:** A TypeScript wrapper acts as a deterministic sanity sandbox. It intercepts the Grunt's chosen enum and maps it directly to hardcoded math functions calculated relative to the SVI volatility oracle. If the Grunt makes an illegal suggestion (e.g., suggesting narrow spreads when the SVI shows massive volatility), the Sandbox overrides the LLM, cancels the transaction, and logs a `LOGICAL_HALLUCINATION_CAUGHT` event to Walrus.
+    3.  **DecisionBench Emergent Delegation:** When a sandbox override occurs or when the Grunt emits a low confidence score, the runner uses DecisionBench delegation to request a second opinion from the heavy `nvidia/nemotron-3-ultra-550b-a55b:free` model.
+    4.  **Human Fallback & Escalation Inbox:** If the secondary heavy model also violates the TS Sandbox bounds, the bot halts trading entirely and submits an "Approval Request" to the owner's dashboard (`dashboard/src/components/EscalationInbox.tsx`). The human owner must manually review the intent and approve the trade before it can execute, stopping non-deterministic cascades.
+    5.  **Initial Registration Exemption:** This validation and confidence check operates exclusively during active trading cycles. It does not affect the initial agent registration on-chain (`register_agent`), which initializes the agent record with a default Bayesian prior reputation of 50%. The registration completes successfully regardless of the agent's current or subsequent confidence states.
 
 ## J. Volatility Risk Scaling & Context Overflows
 *   **Reflective Memory Risk Calibration:** To survive adverse market conditions, the agent monitors its Walrus history. Upon detecting a prior-cycle loss, it dynamically applies risk-aversion parameters:

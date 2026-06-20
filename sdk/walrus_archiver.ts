@@ -35,6 +35,7 @@ export interface AuditTrace {
   model_reasoning_hash: string;
   gas_balance_sui: number;
   timestamp: string;
+  confidence?: number;
 }
 
 // ── Seal Mock Encryption (AES-256-GCM) ──────────────────────────────────────
@@ -114,6 +115,7 @@ export function buildAuditTrace(
     refund: number;
     reasoningHash: string;
     gasBalance: number;
+    confidence?: number;
   },
   svi: any,
   policyWallet: string,
@@ -139,6 +141,7 @@ export function buildAuditTrace(
     model_reasoning_hash: tradeResult.reasoningHash,
     gas_balance_sui: tradeResult.gasBalance,
     timestamp: new Date().toISOString(),
+    confidence: tradeResult.confidence,
   };
 }
 

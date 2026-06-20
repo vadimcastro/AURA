@@ -1,6 +1,12 @@
 import { Transaction } from "@mysten/sui/transactions";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { 
   SUI_CLIENT, 
   AURA_PACKAGE_ID, 
@@ -415,6 +421,40 @@ app.post("/api/resume", requireAuth, (req, res) => {
   res.json({ success: true, message: "Agent execution resumed." });
 });
 
+app.get("/api/escalations", (req, res) => {
+  const escalationLogPath = path.join(__dirname, "escalations.json");
+  if (fs.existsSync(escalationLogPath)) {
+    try {
+      const list = JSON.parse(fs.readFileSync(escalationLogPath, "utf8"));
+      return res.json(list);
+    } catch (e) {}
+  }
+  res.json([]);
+});
+
+app.post("/api/escalations/approve", requireAuth, (req, res) => {
+  const { id } = req.body;
+  const escalationLogPath = path.join(__dirname, "escalations.json");
+  if (fs.existsSync(escalationLogPath)) {
+    try {
+      let list = JSON.parse(fs.readFileSync(escalationLogPath, "utf8"));
+      list = list.map((item: any) => {
+        if (item.id === id) item.status = "APPROVED";
+        return item;
+      });
+      fs.writeFileSync(escalationLogPath, JSON.stringify(list, null, 2));
+    } catch (e) {}
+  }
+  if (escalationResolver) {
+    escalationResolver();
+    escalationResolver = null;
+  }
+  isEscalated = false;
+  loopRunning = true;
+  console.log(green(`✅ Escalation ${id} approved by owner. Resuming execution...`));
+  res.json({ success: true, message: "Escalation approved, loops resumed." });
+});
+
 app.post("/api/start", requireAuth, async (req, res) => {
   if (loopRunning) {
     return res.json({ message: "Loop is already running." });
@@ -505,6 +545,28 @@ app.post("/api/start", requireAuth, async (req, res) => {
             console.log(red(`🚨 [${name}] Escalated to Human Owner: Low Confidence (${confidence.toFixed(2)} < ${CONFIDENCE_THRESHOLD})`));
             isEscalated = true;
             loopRunning = false;
+
+            // 9.13 - Log sandbox alerts to a local escalations.json file
+            try {
+              const escalationLogPath = path.join(__dirname, "escalations.json");
+              const newEscalation = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                agentName: name,
+                reason: confidence <= 0.40 ? "TS Sandbox bounds check failed / logical hallucination caught" : "Low confidence score",
+                confidence: confidence,
+                status: "PENDING"
+              };
+              let escalations = [];
+              if (fs.existsSync(escalationLogPath)) {
+                escalations = JSON.parse(fs.readFileSync(escalationLogPath, "utf8"));
+              }
+              escalations.push(newEscalation);
+              fs.writeFileSync(escalationLogPath, JSON.stringify(escalations, null, 2));
+              console.log(yellow("💾 Sandbox escalation successfully written to escalations.json."));
+            } catch (escalationErr) {
+              console.error("❌ Failed to log escalation event:", escalationErr);
+            }
             break;
           }
 

@@ -32,6 +32,10 @@ module aura::agent_nft {
         reputation_score: u64,
         /// Public metadata or display image URL
         image_url: String,
+        /// LLM model used for trade execution decisions
+        executor_model: String,
+        /// LLM panel used for off-loop strategy consensus updates
+        consensus_model: String,
     }
 
     // ── Events ────────────────────────────────────────────────────────────────
@@ -53,6 +57,8 @@ module aura::agent_nft {
         description: vector<u8>,
         strategy_type: vector<u8>,
         image_url: vector<u8>,
+        executor_model: vector<u8>,
+        consensus_model: vector<u8>,
         ctx: &mut TxContext
     ): AgentNFT {
         let sender = ctx.sender();
@@ -68,6 +74,8 @@ module aura::agent_nft {
         let description_str = string::utf8(description);
         let strategy_str = string::utf8(strategy_type);
         let image_str = string::utf8(image_url);
+        let executor_str = string::utf8(executor_model);
+        let consensus_str = string::utf8(consensus_model);
 
         let nft = AgentNFT {
             id,
@@ -77,6 +85,8 @@ module aura::agent_nft {
             strategy_type: strategy_str,
             reputation_score,
             image_url: image_str,
+            executor_model: executor_str,
+            consensus_model: consensus_str,
         };
 
         event::emit(AgentNFTMinted {
@@ -96,9 +106,11 @@ module aura::agent_nft {
         description: vector<u8>,
         strategy_type: vector<u8>,
         image_url: vector<u8>,
+        executor_model: vector<u8>,
+        consensus_model: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let nft = mint_nft(registry, name, description, strategy_type, image_url, ctx);
+        let nft = mint_nft(registry, name, description, strategy_type, image_url, executor_model, consensus_model, ctx);
         transfer::public_transfer(nft, ctx.sender());
     }
 
@@ -110,9 +122,11 @@ module aura::agent_nft {
         description: vector<u8>,
         strategy_type: vector<u8>,
         image_url: vector<u8>,
+        executor_model: vector<u8>,
+        consensus_model: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let nft = mint_nft(registry, name, description, strategy_type, image_url, ctx);
+        let nft = mint_nft(registry, name, description, strategy_type, image_url, executor_model, consensus_model, ctx);
         let (mut kiosk, cap) = kiosk::new(ctx);
         kiosk::place(&mut kiosk, &cap, nft);
         
@@ -132,6 +146,14 @@ module aura::agent_nft {
 
     public fun get_nft_reputation_score(nft: &AgentNFT): u64 {
         nft.reputation_score
+    }
+
+    public fun get_nft_executor_model(nft: &AgentNFT): String {
+        nft.executor_model
+    }
+
+    public fun get_nft_consensus_model(nft: &AgentNFT): String {
+        nft.consensus_model
     }
 
     // ── Unit Tests ────────────────────────────────────────────────────────────
@@ -178,6 +200,8 @@ module aura::agent_nft {
                 b"High-frequency arbitrage strategy",
                 b"Arbitrage",
                 b"https://aura.protocol/images/alpha.png",
+                b"google/gemma-4-26b-a4b:free",
+                b"Consensus Trio (Nemotron, Qwen3, Llama3.3)",
                 ctx
             );
 
@@ -186,6 +210,8 @@ module aura::agent_nft {
             assert!(nft.strategy_type == string::utf8(b"Arbitrage"), 0);
             // Reputation score should match initial 50%
             assert!(nft.reputation_score == 500_000, 0);
+            assert!(nft.executor_model == string::utf8(b"google/gemma-4-26b-a4b:free"), 0);
+            assert!(nft.consensus_model == string::utf8(b"Consensus Trio (Nemotron, Qwen3, Llama3.3)"), 0);
 
             transfer::public_transfer(nft, AGENT1);
             ts::return_shared(registry);
@@ -213,6 +239,8 @@ module aura::agent_nft {
                 b"High-frequency arbitrage strategy",
                 b"Arbitrage",
                 b"https://aura.protocol/images/alpha.png",
+                b"google/gemma-4-26b-a4b:free",
+                b"Consensus Trio (Nemotron, Qwen3, Llama3.3)",
                 ctx
             );
             transfer::public_transfer(nft, AGENT1);
@@ -248,6 +276,8 @@ module aura::agent_nft {
                 b"Placed directly inside Kiosk",
                 b"Arbitrage",
                 b"https://aura.protocol/images/kiosk.png",
+                b"google/gemma-4-26b-a4b:free",
+                b"Consensus Trio (Nemotron, Qwen3, Llama3.3)",
                 ctx
             );
             ts::return_shared(registry);
