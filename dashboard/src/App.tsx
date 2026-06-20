@@ -15,7 +15,7 @@ type TabType = 'landing' | 'agents' | 'intent' | 'volatility' | 'escalations' | 
 
 export interface WalletSession {
   address: string;
-  type: 'wallet' | 'zklogin_google' | 'zklogin_github' | 'zklogin_apple';
+  type: 'wallet' | 'zklogin_google' | 'zklogin_github';
   name: string;
   providerLabel: string;
 }
@@ -117,19 +117,12 @@ function App() {
           name: 'vadim.castro@gmail.com',
           providerLabel: 'Google zkLogin',
         };
-      } else if (type === 'zklogin_github') {
+      } else {
         newSession = {
           address: '0xzkL_github_3bf937ee2e95a129d1c0b392abde62551cf16757041a96f2ba1443f676ffb6a8',
           type,
           name: 'vadimcastro',
           providerLabel: 'GitHub zkLogin',
-        };
-      } else {
-        newSession = {
-          address: '0xzkL_apple_74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef',
-          type,
-          name: 'vadim.castro@icloud.com',
-          providerLabel: 'Apple zkLogin',
         };
       }
       setZkSession(newSession);
@@ -304,14 +297,14 @@ function App() {
                   </p>
                   {wallets.length === 0 ? (
                     <a
-                      href="https://chrome.google.com/webstore/detail/sui-wallet/opffaplhgoihhhacieghomeooapaakcb"
+                      href="https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left decoration-none block"
                       style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                     >
                       <Globe className="h-4 w-4 text-[var(--color-brand)]" />
-                      <span>Install Sui Wallet</span>
+                      <span>Install Slush Wallet</span>
                     </a>
                   ) : (
                     wallets.map((wallet) => (
@@ -366,14 +359,6 @@ function App() {
                   >
                     <Mail className="h-4 w-4 text-indigo-500" />
                     <span>Sign in with GitHub</span>
-                  </button>
-                  <button
-                    onClick={() => triggerZkLoginConnect('zklogin_apple')}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-[13px] font-semibold hover:bg-[var(--color-surface-2)] transition-all cursor-pointer text-left"
-                    style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                  >
-                    <span className="text-[13px] font-bold pl-0.5 pr-0.5"></span>
-                    <span>Sign in with Apple</span>
                   </button>
                 </div>
 

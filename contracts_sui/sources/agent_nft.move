@@ -200,7 +200,7 @@ module aura::agent_nft {
                 b"High-frequency arbitrage strategy",
                 b"Arbitrage",
                 b"https://aura.protocol/images/alpha.png",
-                b"google/gemma-4-26b-a4b:free",
+                b"google/gemma-4-26b-a4b-it:free",
                 b"Consensus Trio (Nemotron, Qwen3, Llama3.3)",
                 ctx
             );
@@ -210,7 +210,7 @@ module aura::agent_nft {
             assert!(nft.strategy_type == string::utf8(b"Arbitrage"), 0);
             // Reputation score should match initial 50%
             assert!(nft.reputation_score == 500_000, 0);
-            assert!(nft.executor_model == string::utf8(b"google/gemma-4-26b-a4b:free"), 0);
+            assert!(nft.executor_model == string::utf8(b"google/gemma-4-26b-a4b-it:free"), 0);
             assert!(nft.consensus_model == string::utf8(b"Consensus Trio (Nemotron, Qwen3, Llama3.3)"), 0);
 
             transfer::public_transfer(nft, AGENT1);
@@ -239,7 +239,7 @@ module aura::agent_nft {
                 b"High-frequency arbitrage strategy",
                 b"Arbitrage",
                 b"https://aura.protocol/images/alpha.png",
-                b"google/gemma-4-26b-a4b:free",
+                b"google/gemma-4-26b-a4b-it:free",
                 b"Consensus Trio (Nemotron, Qwen3, Llama3.3)",
                 ctx
             );
@@ -276,7 +276,7 @@ module aura::agent_nft {
                 b"Placed directly inside Kiosk",
                 b"Arbitrage",
                 b"https://aura.protocol/images/kiosk.png",
-                b"google/gemma-4-26b-a4b:free",
+                b"google/gemma-4-26b-a4b-it:free",
                 b"Consensus Trio (Nemotron, Qwen3, Llama3.3)",
                 ctx
             );

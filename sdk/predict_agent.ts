@@ -235,7 +235,7 @@ Provide a strategic direction (e.g. shift to widening spread, decrease trade siz
 
   const models = [
     "nvidia/nemotron-3-ultra-550b-a55b:free",
-    "qwen/qwen3-coder-480b-a35b:free",
+    "qwen/qwen3-coder:free",
     "meta-llama/llama-3.3-70b-instruct:free"
   ];
 
@@ -268,7 +268,7 @@ export async function queryOpenRouterLLM(
   svi: SVIParameters,
   previousSummary: string,
   apiKey: string,
-  model: string = "google/gemma-4-26b-a4b:free"
+  model: string = "google/gemma-4-26b-a4b-it:free"
 ): Promise<string> {
   const prompt = `You are AURA, an options trading executor on Sui.
 Volatility surface SVI parameters: a=${svi.a}, b=${svi.b}, rho=${svi.rho}, m=${svi.m}, sigma=${svi.sigma}.
@@ -516,7 +516,7 @@ export async function executeTradeCycle(
   if (openRouterApiKey && !openRouterApiKey.includes("placeholder") && !options.copyParams) {
     console.log("🤖 Querying live Gemma-4 Grunt model on OpenRouter for options pricing strategy decision...");
     try {
-      rawLLMOutputJSON = await queryOpenRouterLLM(svi, promptSummary, openRouterApiKey, "google/gemma-4-26b-a4b:free");
+      rawLLMOutputJSON = await queryOpenRouterLLM(svi, promptSummary, openRouterApiKey, "google/gemma-4-26b-a4b-it:free");
     } catch (e) {
       console.warn("⚠️ OpenRouter Gemma-4 Grunt query failed, falling back to local simulation schema:", (e as Error).message);
     }

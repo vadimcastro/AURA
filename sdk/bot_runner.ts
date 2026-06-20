@@ -521,11 +521,11 @@ app.post("/api/paymaster/sponsor", async (req, res) => {
       }
     }
 
-    // Rate limiter: max 20 requests per hour per IP
+    // Rate limiter: max 5 requests per 24 hours per IP
     const ip = req.ip || "unknown";
     const now = Date.now();
-    const rateWindow = 3600000;
-    const limitCount = 20;
+    const rateWindow = 86400000; // 24 hours
+    const limitCount = 5;
 
     const limitData = paymasterLimiter[ip] || { count: 0, resetTime: now + rateWindow };
     if (now > limitData.resetTime) {
@@ -537,7 +537,7 @@ app.post("/api/paymaster/sponsor", async (req, res) => {
     paymasterLimiter[ip] = limitData;
 
     if (limitData.count > limitCount) {
-      return res.status(429).json({ error: "Hourly paymaster quota exceeded. Please try again later." });
+      return res.status(429).json({ error: "Daily paymaster quota exceeded. Please try again tomorrow." });
     }
 
     // Sign the transaction bytes as the gas sponsor using the platform keypair

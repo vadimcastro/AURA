@@ -292,7 +292,7 @@ To remove the single-point-of-failure admin key in the reputation registry, intr
 ### 2. Sui Native Infrastructure Integrations
 To expand AURA's full-stack capabilities, we will integrate with key Sui ecosystem services:
 *   **Sui Name Service (SuiNS)**: Integrate reverse-lookup APIs in the dashboard so that instead of raw hex addresses, agent profiles display readable domains (e.g., `alpha-trader.sui`), dramatically upgrading visual design and clarity.
-*   **Sui zkLogin & Hybrid Wallet Strategy**: Implement OAuth-based authentication (Google, GitHub, and Facebook, falling back to Apple if GitHub setup is delayed) to remove the requirement of installing wallet extensions for Web2-native managers, while maintaining full support for traditional browser wallets (via `@mysten/dapp-kit` for Backpack, Sui Wallet, etc.). Traditional wallets act as the secure administration interface for the Owner/Supervisor (handling collateral deposits, strategy policy parameter adjustments, and liquidation), while zkLogin simplifies frictionless user onboarding.
+*   **Sui zkLogin & Hybrid Wallet Strategy**: Implement OAuth-based authentication (Google, GitHub, and Facebook, falling back to other protocols if GitHub setup is delayed) to remove the requirement of installing wallet extensions for Web2-native managers, while maintaining full support for traditional browser wallets (via `@mysten/dapp-kit` for Backpack, Sui Wallet, etc.). Traditional wallets act as the secure administration interface for the Owner/Supervisor (handling collateral deposits, strategy policy parameter adjustments, and liquidation), while zkLogin simplifies frictionless user onboarding.
 *   **Sui Kiosk**: Package agent profiles and their historical trade audit logs into transferable NFTs with royalty enforcement. This allows creators of high-performing autonomous strategies to monetize their algorithms securely.
 *   **DeepBook v3 Native Routing**: Directly submit limit and market orders from the agent loop into Sui's core orderbook liquidity pool, replacing mock-execution routes.
 
@@ -345,10 +345,10 @@ Introduce sustainable tokenomics, deterministic execution boundaries, and verifi
 Implement the hybrid validator-consensus execution pattern, dynamic reputation-based stake releases, and hackathon UX/product visualization dashboards to make AURA the definitive reference architecture for SUI AgentFi.
 
 ### 1. AI Orchestration & Hybrid Validator-Consensus
-*   ✅ **Gemma 4 "Grunt" Executor & Sandbox**: Integrate `google/gemma-4-26b-a4b:free` model as the primary executor in [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts). Enforce categorical enum outputs (`WIDEN_SPREAD`, `MAINTAIN_SPREAD`, etc.). Implement a TypeScript sanity sandbox that intercepts enums and maps them deterministically to hardcoded SVI volatility math.
+*   ✅ **Gemma 4 "Grunt" Executor & Sandbox**: Integrate `google/gemma-4-26b-a4b-it:free` model as the primary executor in [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts). Enforce categorical enum outputs (`WIDEN_SPREAD`, `MAINTAIN_SPREAD`, etc.). Implement a TypeScript sanity sandbox that intercepts enums and maps them deterministically to hardcoded SVI volatility math.
 *   ✅ **Asynchronous Consensus "Thinker" Panel**: Implement a background consensus task in [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) querying a trio of models:
     *   `nvidia/nemotron-3-ultra-550b-a55b:free` (1M context window)
-    *   `qwen/qwen3-coder-480b-a35b:free` (1.05M context window)
+    *   `qwen/qwen3-coder:free` (1.05M context window)
     *   `meta-llama/llama-3.3-70b-instruct:free` (~97% tool-calling precision)
     *   *Mechanism:* Periodically reads the last 50 traces from Walrus, computes a consensus summary, and updates the Grunt's active system prompt off the live trading path.
 *   ✅ **DecisionBench Emergent Delegation**: Set up automated escalation paths. If the TS sandbox catches a Grunt enum hallucination, automatically delegate option range selection to Nemotron 3 Ultra.
@@ -358,7 +358,7 @@ Implement the hybrid validator-consensus execution pattern, dynamic reputation-b
 *   ✅ **Asymmetric Risk ratio alignment**: Restructure registry parameters so SUI stake bond is 10x the dispute bond (e.g. 0.01 SUI Stake / 0.1 SUI Dispute Bond on Testnet to prevent faucet exhaustion; 5% TVL / 0.5% TVL on Mainnet).
 *   ✅ **Reputation-Based progressive stake release**: Expand `aura_registry.move` with `withdraw_excess_stake` allowing operators to unlock SUI stake as reputation increases.
 *   ✅ **Deflationary 0.5% protocol profit fee**: Route profit fees directly to `@buy_and_burn_insurance` to build the slashing insurance pool and burn AURA tokens.
-*   ✅ **Sui Kiosk strategy packaging**: Ensure `agent_nft.move` captures metadata snapshots of the agent's OR architecture (e.g. Grunt Gemma-4, Thinker Qwen-3) to create high developer switching costs.
+*   ✅ **Sui Kiosk strategy packaging**: Ensure `agent_nft.move` captures metadata snapshots of the agent's OR architecture (e.g. Grunt Gemma-4-it, Thinker Qwen-3) to create high developer switching costs.
 
 ### 3. Product & UX Amplification
 *   ✅ **Natural Language Intent Engine & Guardian**: Implement `dashboard/src/components/IntentEngine.tsx` parsing English user prompts into atomic PTBs with pre-flight Guardian budget checks.

@@ -1017,14 +1017,14 @@ To support the monetization of high-performing autonomous strategies, AURA enabl
 To balance latency, compute cost, and decision-making quality, AURA introduces a **Tiered Execution Curve** for off-chain agent logic, transitioning smoothly from fast local compute to heavy consensus panels:
 
 1. **Layer 1: Local Grunt Executor (Fast Path — On-Loop)**
-   * **Model:** `google/gemma-4-26b-a4b:free` (Mixture-of-Experts, 3.8B active parameters).
+   * **Model:** `google/gemma-4-26b-a4b-it:free` (Mixture-of-Experts, 3.8B active parameters).
    * **Latency:** < 2 seconds.
    * **Frequency:** Executed on every trading cycle (roughly every 30 seconds, adhering to the 15-second oracle freshness threshold).
    * **Role:** The Grunt acts as the hands-on trader. It never proposes raw pricing; instead, it outputs strict categorical enums.
    * **Firewall:** A deterministic TypeScript Sanity Sandbox catches any logical errors or schema hallucinations and maps the enums to hard mathematical bounds (e.g. SVI volatility spread adjustments).
 
 2. **Layer 2: Cloud Consensus "Thinker" Panel (Slow Path — Off-Loop)**
-   * **Models:** Trio of `nvidia/nemotron-3-ultra-550b-a55b:free` (1M window), `qwen/qwen3-coder-480b-a35b:free` (1.05M window), and `meta-llama/llama-3.3-70b-instruct:free`.
+   * **Models:** Trio of `nvidia/nemotron-3-ultra-550b-a55b:free` (1M window), `qwen/qwen3-coder:free` (1.05M window), and `meta-llama/llama-3.3-70b-instruct:free`.
    * **Latency:** 10–25 seconds.
    * **Frequency:** Asynchronous background task running every 5 cycles (aligned with state history compression).
    * **Role:** The Consensus Trio pulls the last 50 encrypted trace logs from Walrus, performs a Multi-Teacher Agreement Check, evaluates macro trends (e.g., historical option win/loss rates, SVI drift), and generates a dense strategy prompt update which is compiled and injected into the Grunt's active system prompt. This keeps slow reasoning off the live trade execution path.
@@ -1034,18 +1034,27 @@ To balance latency, compute cost, and decision-making quality, AURA introduces a
    * **Role:** The runner suspends the Grunt and delegates range selection to the 550B Nemotron model for heavy reasoning on that specific step. If this fallback also violates sandbox bounds, the trade halts entirely and escalates to the user's dashboard via the **Human-in-the-Loop Escalation Inbox**.
 
 ### G. Web2 zkLogin Onboarding & Gasless Capital Funding (First Principles)
-When onboarding Web2 users through social authentication (zkLogin via Google, Apple, or GitHub), they receive a newly generated, empty Sui address. To enable transaction execution and trading capital deployment without requiring them to install browser extensions or purchase SUI on centralized exchanges, AURA implements a native **Sui Sponsored Transaction & Paymaster** infrastructure:
+When onboarding Web2 users through social authentication (zkLogin via Google or GitHub), they receive a newly generated, empty Sui address. To enable transaction execution and trading capital deployment without requiring them to install browser extensions or purchase SUI on centralized exchanges, AURA implements a native **Sui Sponsored Transaction & Paymaster** infrastructure:
 
 1. **Gasless Signing (Sponsored Transactions):**
    * **Mechanism:** Web2 users interact with the dashboard entirely gasless. They do not need SUI tokens to pay for transaction fees.
-   * **Paymaster Flow:** When a user deploys a policy, updates constraints, or approves overrides, the AURA frontend drafts the transaction block and sends it to the AURA Gas Paymaster backend service (e.g. running on Railway).
+   * **Paymaster Flow:** When a user deploys a policy, updates constraints, or approves overrides, the AURA frontend drafts the transaction block and sends it to the AURA Gas Paymaster backend service (running on the operator daemon).
    * **Execution:** The Paymaster signs the transaction as the **Gas Sponsor** using its SUI gas object to pay the execution fees. The user's zkLogin browser signs as the sender. The transaction is then broadcast to the Sui blockchain.
-   
-2. **Fiat-to-DeFi On-Ramps:**
+
+2. **Stricter Sponsor Rate Limiting & Security Audit:**
+   * **IP Quota:** The Paymaster daemon enforces a strict rate-limiting window of **5 transactions per 24 hours per IP address** to prevent denial-of-service and gas exhaustion attacks.
+   * **Target Package Verification:** Every transaction block payload submitted to the Paymaster is parsed and inspected by the daemon. The Paymaster only sponsors transactions containing commands targeting allowlisted Sui packages (specifically the `AURA` package or approved trading interfaces like `DeepBook`). Any attempt to hijack the sponsor for general transfer or drain actions is immediately blocked.
+
+3. **Paymaster Economic Sustainability & Payback Loop:**
+   * **How Gas is Funded:** Initially, the Operator/Platform funds a reserve SUI gas object on the Paymaster node to bootstrap Web2 onboarding.
+   * **Automatic Payback Mechanics:** Because every option swap or trade routed through AURA collects a small protocol fee cut (configured inside the Move `WalletPolicy` rules), the platform collects yield-bearing dUSDC/USDC margins. 
+   * **SUI Gas Re-balancing:** Periodically, or during standard policy settlement/withdrawal cycles, a portion of the accumulated protocol fees is swapped back to SUI via DeepBook and routed directly back to the Paymaster's gas object address. This automatically replenishes the paymaster node's SUI balance, closing the loop. Hence, users "pay it back" implicitly via trading fees generated from execution.
+
+4. **Fiat-to-DeFi On-Ramps:**
    * **Mechanism:** To fund a `WalletPolicy` with capital (dUSDC/USDC), the AURA dashboard integrates standard Web2 payment gateways (such as Stripe Crypto Onramp, Transak, or MoonPay).
    * **Direct Routing:** The on-ramp purchase transaction is configured to deposit the minted USDC directly to the user's `WalletPolicy` shared object address on-chain. This routes fiat payments straight into the isolated Move sandbox without hitting the user's operational zkLogin address, maintaining clean capital boundaries.
 
-3. **LP-to-Agent Capital Delegation (Flywheel Separation):**
+5. **LP-to-Agent Capital Delegation (Flywheel Separation):**
    * **Mechanism:** Under AURA's first-principles architecture, the user who directs execution (via zkLogin) does not need to be the user who funds the capital.
    * **Delegated Authority:** A Web3 Liquidity Provider (funded via slush or backpack wallets) can create and fund a `WalletPolicy` on-chain, and delegate execution authority (specifying the allowlisted agent address) to the Web2 manager's zkLogin address.
    * **Decoupled Incentive:** This decouples capital provision from strategic execution, allowing professional LPs to fund large option pools while Web2 managers direct the trading loop securely within their Move sandbox constraints.
