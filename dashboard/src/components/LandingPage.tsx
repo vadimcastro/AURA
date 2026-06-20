@@ -335,7 +335,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           size: `${nlpResult.amount} dUSDC`,
           executionCost: '0.0024 SUI',
           telemetryTracePnL: `${nlpResult.isConservative ? '+' : '-'}${(Math.random() * 5 + 1).toFixed(2)} dUSDC`,
-          proof: 'Seal-V4 Immutable Cryptographic Hash verified'
+          proof: 'Seal Immutable Cryptographic Hash verified'
         },
         status: 'DECRYPTED'
       };
@@ -360,7 +360,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               size: isFirst ? '45 dUSDC' : '90 dUSDC',
               executionCost: isFirst ? '0.0021 SUI' : '0.0032 SUI',
               telemetryTracePnL: isFirst ? '+2.85 dUSDC' : '-4.50 dUSDC', // authentic PnL
-              proof: 'Seal-V4 cryptographic validation successful'
+              proof: 'Seal cryptographic validation successful'
             }
           };
         }
@@ -468,11 +468,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* How it works V4 */}
+      {/* How it works */}
       <div className="mx-auto mt-20 max-w-4xl">
         <div className="text-center">
           <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            V4 Advanced Trust Architecture
+            Advanced Trust Architecture
           </h2>
           <p className="mt-3 text-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
             Multiple cryptographic layers isolate execution authority, validate parameter boundaries, and record trading execution.
@@ -508,7 +508,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             Interactive Demo Showroom
           </span>
           <h2 className="text-3xl font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>
-            Test the V4 Safeguards
+            Test the Trust Safeguards
           </h2>
           <p className="mt-3 text-[14px] max-w-lg mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
             The landing page is part of the demo! Interact directly with AURA's key modules and trigger guard responses below.

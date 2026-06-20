@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Unlock, Key, Eye, EyeOff, ShieldCheck, Terminal, RotateCcw } from 'lucide-react';
+import { Lock, Unlock, Key, Eye, EyeOff, ShieldCheck, Terminal, RotateCcw, Loader2 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -109,6 +109,30 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
     setDecryptedData(null);
     setError(null);
     setViewerKey('');
+  };
+
+  const handleDaemonDecrypt = async () => {
+    if (!envelope) return;
+    setError(null);
+    setDecryptedData(null);
+    setDecrypting(true);
+
+    const daemonUrl = localStorage.getItem('aura_daemon_url') || import.meta.env.VITE_DAEMON_URL || 'http://localhost:3000';
+    try {
+      const res = await fetch(`${daemonUrl}/api/telemetry/decrypt?blobId=${envelope.blobId}`);
+      if (!res.ok) {
+        throw new Error(`Daemon returned HTTP ${res.status}: ${res.statusText}`);
+      }
+      const data = await res.json();
+      if (!data.success || !data.decrypted) {
+        throw new Error(data.error || 'Decryption unsuccessful or invalid trace structure.');
+      }
+      setDecryptedData(data.decrypted);
+    } catch (err) {
+      setError(`Daemon decryption failed: ${(err as Error).message}. You can fall back to manual AES key decryption below.`);
+    } finally {
+      setDecrypting(false);
+    }
   };
 
   const handleDecrypt = async (e: React.FormEvent) => {
@@ -256,80 +280,108 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
 
       <div className="p-5 space-y-5">
         {!decryptedData ? (
-          // ── Key entry form ───────────────────────────────────────────────
-          <form onSubmit={handleDecrypt} className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label
-                  htmlFor="viewer-key-input"
-                  className="text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--color-text-secondary)' }}
-                >
-                  AES-256 Viewer Key (Hex)
-                </label>
-                <button
-                  type="button"
-                  id="btn-use-demo-key"
-                  onClick={() => { setViewerKey(DEMO_KEY_HEX); setError(null); }}
-                  className="text-[11px] font-semibold cursor-pointer hover:underline"
-                  style={{ color: 'var(--color-brand)' }}
-                >
-                  Use Demo Key
-                  {/* Derived via Node.js crypto.scryptSync("mock-seal-passphrase", "aura-salt", 32) */}
-                </button>
-              </div>
-              <div className="relative">
-                <Key
-                  className="absolute left-3.5 top-3 h-4 w-4"
-                  style={{ color: 'var(--color-text-muted)' }}
-                />
-                <input
-                  id="viewer-key-input"
-                  type={showKey ? 'text' : 'password'}
-                  value={viewerKey}
-                  onChange={e => setViewerKey(e.target.value)}
-                  placeholder="e.g. e853b29e4574a1bf…"
-                  className="w-full pl-10 pr-11 py-2.5 rounded-xl font-mono text-[12px] outline-none transition-all"
-                  style={{
-                    background: 'var(--color-bg)',
-                    border: '1px solid var(--color-border)',
-                    color: 'var(--color-text-primary)',
-                  }}
-                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-brand)'; }}
-                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
-                />
-                <button
-                  type="button"
-                  id="btn-toggle-key-visibility"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-2.5 p-1 rounded transition-colors cursor-pointer"
-                  style={{ color: 'var(--color-text-muted)' }}
-                  aria-label={showKey ? 'Hide key' : 'Show key'}
-                >
-                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+          <div className="space-y-4">
+            {/* Decrypt via Daemon Action */}
+            <button
+              type="button"
+              onClick={handleDaemonDecrypt}
+              disabled={decrypting}
+              className="w-full py-2.5 rounded-xl text-[13px] font-bold text-white transition-all cursor-pointer hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-1.5 shadow-sm"
+              style={{ background: 'var(--color-success)', boxShadow: '0 2px 8px rgba(18,183,106,0.25)' }}
+            >
+              {decrypting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Contacting Daemon...
+                </>
+              ) : (
+                <>
+                  <Unlock className="h-4 w-4" />
+                  Decrypt via Connected Daemon (Pure)
+                </>
+              )}
+            </button>
+
+            <div className="flex items-center gap-3 my-4">
+              <div className="h-px bg-gray-200 flex-grow" />
+              <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">or decrypt manually</span>
+              <div className="h-px bg-gray-200 flex-grow" />
             </div>
 
-            {error && (
-              <div
-                className="px-3 py-2.5 rounded-xl text-[12px]"
-                style={{ background: 'var(--color-danger-bg)', border: '1px solid #fca5a5', color: '#991b1b' }}
-              >
-                {error}
+            {/* Key entry form */}
+            <form onSubmit={handleDecrypt} className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label
+                    htmlFor="viewer-key-input"
+                    className="text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    AES-256 Viewer Key (Hex)
+                  </label>
+                  <button
+                    type="button"
+                    id="btn-use-demo-key"
+                    onClick={() => { setViewerKey(DEMO_KEY_HEX); setError(null); }}
+                    className="text-[11px] font-semibold cursor-pointer hover:underline"
+                    style={{ color: 'var(--color-brand)' }}
+                  >
+                    Use Demo Key
+                  </button>
+                </div>
+                <div className="relative">
+                  <Key
+                    className="absolute left-3.5 top-3 h-4 w-4"
+                    style={{ color: 'var(--color-text-muted)' }}
+                  />
+                  <input
+                    id="viewer-key-input"
+                    type={showKey ? 'text' : 'password'}
+                    value={viewerKey}
+                    onChange={e => setViewerKey(e.target.value)}
+                    placeholder="e.g. e853b29e4574a1bf…"
+                    className="w-full pl-10 pr-11 py-2.5 rounded-xl font-mono text-[12px] outline-none transition-all"
+                    style={{
+                      background: 'var(--color-bg)',
+                      border: '1px solid var(--color-border)',
+                      color: 'var(--color-text-primary)',
+                    }}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-brand)'; }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                  />
+                  <button
+                    type="button"
+                    id="btn-toggle-key-visibility"
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute right-3 top-2.5 p-1 rounded transition-colors cursor-pointer"
+                    style={{ color: 'var(--color-text-muted)' }}
+                    aria-label={showKey ? 'Hide key' : 'Show key'}
+                  >
+                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
-            )}
 
-            <button
-              id="btn-execute-decryption"
-              type="submit"
-              disabled={decrypting || !viewerKey.trim()}
-              className="w-full py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all cursor-pointer hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              style={{ background: 'var(--color-brand)', boxShadow: '0 2px 8px rgba(79,110,247,0.25)' }}
-            >
-              {decrypting ? 'Decrypting…' : 'Execute Decryption'}
-            </button>
-          </form>
+              {error && (
+                <div
+                  className="px-3 py-2.5 rounded-xl text-[12px]"
+                  style={{ background: 'var(--color-danger-bg)', border: '1px solid #fca5a5', color: '#991b1b' }}
+                >
+                  {error}
+                </div>
+              )}
+
+              <button
+                id="btn-execute-decryption"
+                type="submit"
+                disabled={decrypting || !viewerKey.trim()}
+                className="w-full py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all cursor-pointer hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                style={{ background: 'var(--color-brand)', boxShadow: '0 2px 8px rgba(79,110,247,0.25)' }}
+              >
+                {decrypting ? 'Decrypting…' : 'Execute Decryption'}
+              </button>
+            </form>
+          </div>
         ) : (
           // ── Decrypted trace view ──────────────────────────────────────────
           <div className="space-y-4 text-[12px]">

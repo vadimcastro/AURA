@@ -58,11 +58,14 @@ const reputationPct = (raw: number) => (raw / 1_000_000) * 100;
 /**
  * Derives a dynamic PnL (dUSDC) based on successful/failed tasks + base seed reputation.
  */
-const getAgentPnL = (agent: AgentInfo): number => {
-  if (agent.totalPnl !== undefined) {
+const getAgentPnL = (agent: AgentInfo, daemonActiveAddress?: string | null): number => {
+  if (agent.totalPnl !== undefined && agent.totalPnl !== 0) {
     return agent.totalPnl;
   }
   const tradePnl = (agent.successfulTasks * 0.5) - ((agent.totalTasks - agent.successfulTasks) * 0.5);
+  if (daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase()) {
+    return tradePnl;
+  }
   const seed = parseInt(agent.address.substring(2, 8), 16) || 0;
   const initialPnl = agent.reputation > 0 ? (seed % 150) + 50.25 : 0;
   return tradePnl + initialPnl;
@@ -115,6 +118,34 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
   const [isExpanded, setIsExpanded] = useState(false);
   const [settingsAgent, setSettingsAgent] = useState<AgentInfo | null>(null);
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
+
+  // Daemon integration states for pure telemetry pnl overlay
+  const [daemonActiveAddress, setDaemonActiveAddress] = useState<string | null>(null);
+  const [daemonBalances, setDaemonBalances] = useState<{ sui: string; dUSDC: string } | null>(null);
+
+  useEffect(() => {
+    const daemonUrl = localStorage.getItem('aura_daemon_url') || import.meta.env.VITE_DAEMON_URL || 'http://localhost:3000';
+    if (!daemonUrl) return;
+    const checkDaemon = async () => {
+      try {
+        const res = await fetch(`${daemonUrl}/api/status`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ownerAddress) {
+            setDaemonActiveAddress(data.ownerAddress);
+          }
+          if (data.ownerBalances) {
+            setDaemonBalances(data.ownerBalances);
+          }
+        }
+      } catch (e) {
+        console.warn('Dashboard daemon sync error:', e);
+      }
+    };
+    checkDaemon();
+    const interval = setInterval(checkDaemon, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Onboarding Dock States
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -1211,8 +1242,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                             {repPercent.toFixed(1)}% Rep
                           </span>
                           {(() => {
-                            const pnlVal = getAgentPnL(agent);
-                            const isPositive = pnlVal >= 0;
+                             const pnlVal = getAgentPnL(agent, daemonActiveAddress);
+                             const isPositive = pnlVal >= 0;
                             return (
                               <div className={`text-[12px] font-bold font-mono flex items-center gap-0.5 mt-0.5 ${isPositive ? 'text-[#12b76a]' : 'text-[#f04438]'}`}>
                                 {isPositive ? <ArrowUpRight className="h-3.5 w-3.5 shrink-0" /> : <ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
@@ -1305,6 +1336,11 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                                   New
                                 </span>
                               )}
+                              {daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase() && (
+                                <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0 flex items-center gap-1 pulse-dot">
+                                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Live Node
+                                </span>
+                              )}
                               {copiedAddress === agent.address && (
                                 <span className="px-1 py-0.5 rounded text-[8px] font-bold uppercase bg-[#ecfdf3] text-[#065f46] border border-[#a7f3d0] shrink-0 animate-pulse">
                                   Copied!
@@ -1360,12 +1396,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                           </div>
                         </td>
 
-                        {/* PnL column */}
                         <td className="px-5 py-3.5">
                           {(() => {
-                            const pnlVal = getAgentPnL(agent);
+                            const pnlVal = getAgentPnL(agent, daemonActiveAddress);
                             const isPositive = pnlVal >= 0;
-                            const budgetVal = agent.budget !== undefined ? agent.budget : 25.0;
+                            const isLiveDaemon = daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase();
+                            const budgetVal = isLiveDaemon && daemonBalances
+                              ? parseFloat(daemonBalances.dUSDC)
+                              : (agent.budget !== undefined ? agent.budget : 25.0);
                             return (
                               <div className="flex items-center gap-1 select-none">
                                 {isPositive ? (

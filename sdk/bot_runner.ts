@@ -16,6 +16,7 @@ import {
   getAgentKeypair 
 } from "./config.js";
 import { executeTradeCycle } from "./predict_agent.js";
+import { downloadFromWalrus, decryptWithSeal } from "./walrus_archiver.js";
 
 const green = (text: string) => `\x1b[32m${text}\x1b[0m`;
 const red = (text: string) => `\x1b[31m${text}\x1b[0m`;
@@ -453,6 +454,32 @@ app.post("/api/escalations/approve", requireAuth, (req, res) => {
   loopRunning = true;
   console.log(green(`✅ Escalation ${id} approved by owner. Resuming execution...`));
   res.json({ success: true, message: "Escalation approved, loops resumed." });
+});
+
+app.get("/api/telemetry/decrypt", async (req, res) => {
+  const blobId = req.query.blobId as string;
+  if (!blobId) {
+    return res.status(400).json({ error: "Missing blobId query parameter" });
+  }
+
+  try {
+    console.log(`🌐 API Telemetry: Decrypting Walrus blob ${blobId}...`);
+    // Determine mock status based on env vars
+    const mockMode = process.env.WALRUS_MOCK === "true";
+    const encryptedTrace = await downloadFromWalrus(blobId, mockMode);
+    const decryptedBytes = await decryptWithSeal(encryptedTrace);
+    const decryptedStr = new TextDecoder().decode(decryptedBytes);
+    
+    try {
+      const traceJson = JSON.parse(decryptedStr);
+      res.json({ success: true, decrypted: traceJson });
+    } catch {
+      res.json({ success: true, raw: decryptedStr });
+    }
+  } catch (err) {
+    console.error(`❌ Telemetry decryption failed for blob ${blobId}:`, err);
+    res.status(500).json({ error: (err as Error).message });
+  }
 });
 
 app.post("/api/start", requireAuth, async (req, res) => {
