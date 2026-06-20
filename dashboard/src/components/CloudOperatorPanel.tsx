@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Square, RefreshCw, Settings, ShieldCheck, Activity, Database } from 'lucide-react';
+import { Play, Square, RefreshCw, Settings, ShieldCheck, Activity, Database, AlertTriangle } from 'lucide-react';
 
 export const CloudOperatorPanel: React.FC = () => {
-  const [daemonUrl, setDaemonUrl] = useState(() => localStorage.getItem('aura_daemon_url') || 'http://localhost:3000');
+  const [daemonUrl, setDaemonUrl] = useState(() => localStorage.getItem('aura_daemon_url') || import.meta.env.VITE_DAEMON_URL || 'http://localhost:3000');
   const [adminKey, setAdminKey] = useState(() => localStorage.getItem('aura_admin_key') || '');
   const [daemonStatus, setDaemonStatus] = useState<'STOPPED' | 'RUNNING' | 'ERROR' | 'UNKNOWN'>('UNKNOWN');
   const [daemonBalances, setDaemonBalances] = useState<{ sui: string; dUSDC: string } | null>(null);
@@ -116,12 +116,18 @@ export const CloudOperatorPanel: React.FC = () => {
                   setDaemonUrl(e.target.value);
                   localStorage.setItem('aura_daemon_url', e.target.value);
                 }}
-                placeholder="e.g. http://localhost:3000"
+                placeholder="e.g. https://your-daemon.up.railway.app"
                 className="w-full p-2.5 rounded-xl border focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
                 style={{ background: 'var(--color-bg)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               />
+              {daemonUrl.includes('.vercel.app') && (
+                <div className="mt-2 text-[10px] text-red-500 font-semibold flex items-center gap-1">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  <span>Error: Do not use the Vercel frontend URL here. Use your Railway backend service URL (e.g. https://your-daemon.up.railway.app).</span>
+                </div>
+              )}
               <span className="text-[10px] mt-1 block italic" style={{ color: 'var(--color-text-muted)' }}>
-                Local default: http://localhost:3000
+                Note: This is the Railway API backend URL, not the Vercel frontend dashboard.
               </span>
             </div>
 
@@ -140,6 +146,9 @@ export const CloudOperatorPanel: React.FC = () => {
                 className="w-full p-2.5 rounded-xl border focus:outline-none"
                 style={{ background: 'var(--color-bg)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               />
+              <span className="text-[10px] mt-1 block italic" style={{ color: 'var(--color-text-muted)' }}>
+                Note: This matches the `ADMIN_API_KEY` set in your Railway environment variables.
+              </span>
             </div>
 
             <button
