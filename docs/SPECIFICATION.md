@@ -101,7 +101,7 @@ To stand out, stay on top, and provide unparalleled value, AURA builds its moat 
     *   Deploy Move contracts to Sui Testnet using `sui client publish`.
     *   Execute a full end-to-end demo: create policy → agent registers → agent borrows → trades on Predict → returns funds → logs to Walrus → owner revokes.
     *   Simulate adversarial scenarios: budget exhaustion, expired policy, unauthorized agent, admin slashing.
-    *   Record a video walkthrough demonstrating every flow for hackathon submission.
+    *   Record a video walkthrough demonstrating every flow for final validation.
 
 ### B. Dependency & Toolchain Table
 
@@ -283,16 +283,30 @@ module aura::agent_wallet_policy {
 
     /// Consumes the hot potato TradeTicket. Unused/earned balance is refunded to the policy.
     /// Uses clamped subtraction to handle profitable trades where refund > borrowed amount.
+    /// Also enforces a 0.5% protocol fee on profitable executions, routed to a Buy-and-Burn
+    /// module or a Slashing Insurance Pool backing top-reputation agents.
     public fun return_and_complete<T>(
         policy: &mut WalletPolicy<T>,
         coin: Coin<T>,
         ticket: TradeTicket<T>,
-        _ctx: &mut TxContext,
+        ctx: &mut TxContext,
     ) {
-        let TradeTicket { policy_id, amount: _, target_contract: _ } = ticket;
+        let TradeTicket { policy_id, amount: borrowed_amount, target_contract: _ } = ticket;
         assert!(object::id(policy) == policy_id, ETicketPolicyMismatch);
 
-        let amount_returned = coin.value();
+        let mut amount_returned = coin.value();
+
+        // Enforce 0.5% protocol fee on profit if the trade was profitable (refund > borrowed_amount)
+        if (amount_returned > borrowed_amount) {
+            let profit = amount_returned - borrowed_amount;
+            let protocol_fee = (profit * 5) / 1000; // 0.5%
+            if (protocol_fee > 0) {
+                // Split fee and transfer to the protocol fee destination (e.g., insurance pool or buy-and-burn module)
+                let fee_coin = coin::split(&mut coin, protocol_fee, ctx);
+                transfer::public_transfer(fee_coin, @0x_buy_and_burn_insurance);
+                amount_returned = amount_returned - protocol_fee;
+            };
+        };
 
         // Clamped subtraction: if the trade was profitable, amount_returned > budget_spent.
         // Without clamping, this would underflow and abort — locking winning trades.
@@ -535,6 +549,41 @@ module aura::aura_registry {
         let slashed = balance::withdraw_all(&mut meta.stake_bond);
         transfer::public_transfer(coin::from_balance(slashed, ctx), recipient);
         event::emit(AgentSlashed { agent, slashed_amount, recipient });
+    }
+
+    /// Operator-only: withdraw excess SUI stake progressively as reputation score increases.
+    /// Over time, reputational collateral replaces financial collateral.
+    public fun withdraw_excess_stake(
+        registry: &mut AgentRegistry,
+        amount: u64,
+        ctx: &mut TxContext
+    ) {
+        let sender = tx_context::sender(ctx);
+        assert!(table::contains(&registry.agents, sender), EAgentNotFound);
+        let meta = table::borrow_mut(&mut registry.agents, sender);
+        
+        // Ensure owner is calling
+        assert!(meta.owner == sender, ENotOwner);
+        
+        let current_stake = balance::value(&meta.stake_bond);
+        
+        // Determine dynamic minimum stake based on reputation score
+        // formula: min_required_stake = base_min_stake * (1,000,000 - reputation) / 1,000,000
+        let base_min_stake = 100_000_000; // 0.1 SUI testnet target
+        let min_required = if (meta.reputation_score >= 1_000_000) {
+            10_000_000 // 90% reduction at max reputation
+        } else {
+            (base_min_stake * (1_000_000 - meta.reputation_score)) / 1_000_000
+        };
+        
+        assert!(current_stake >= amount, EInsufficientBalance);
+        assert!(current_stake - amount >= min_required, EStakeFloorViolation);
+        
+        let split_balance = balance::split(&mut meta.stake_bond, amount);
+        let coin = coin::from_balance(split_balance, ctx);
+        transfer::public_transfer(coin, meta.owner);
+        
+        event::emit(StakeWithdrawn { agent: sender, amount_withdrawn: amount });
     }
 
     /// Agent owner: withdraw stake bond and remove from registry (clean exit).
@@ -897,7 +946,7 @@ async function archiveTradeAudit(tradeResult: any, svi: any, policyWallet: strin
 
 ## 🌐 8. System Expansion & Strategic Positioning
 
-Beyond the core hackathon deliverable, AURA's architecture is designed to expand into a general-purpose infrastructure layer for the Sui AgentFi ecosystem.
+Beyond the core system, AURA's architecture is designed to expand into a general-purpose infrastructure layer for the Sui AgentFi ecosystem.
 
 ### A. General-Purpose Security Middleware Primitive
 The `WalletPolicy<T>` and `AgentRegistry` are intentionally generic — they are not coupled to DeepBook Predict or any specific strategy. Any third-party DeFi agent, market maker, or copy-trading vault on Sui can deploy AURA's policy wallet and register in the reputation registry to signal trust to their LPs. The `TradeTicket` hot potato pattern composes with any Move contract that accepts `Coin<T>`, making AURA a **plug-and-play security layer** rather than a monolithic application.

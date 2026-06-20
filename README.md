@@ -139,16 +139,16 @@ npm run dev
 
 ---
 
-## Hackathon Tracks
+## Ecosystem Alignment
 
-AURA is designed to contribute across multiple Sui hackathon tracks:
+AURA is designed to align with and contribute across multiple Sui ecosystem tracks:
 
 | Track | Alignment |
 |---|---|
-| **Agentic Web → Autonomous Agent Wallet** | Primary — policy-enforced delegation, budget ceiling, on-chain activity log, owner revocation |
-| **DeFi & Payments** | Strong — programmable financial workflows via PTB-atomic trade execution |
-| **Walrus** | Strong — verifiable long-term agent memory with Seal encryption |
-| **DeepBook Predict** | Supporting — SVI oracle integration, volatility-aware trading strategy |
+| **Agentic Web → Autonomous Agent Wallet** | Primary — AURA is the ultimate *Autonomous Agent Wallet* utilizing the Hot Potato `TradeTicket` pattern to enforce policy budgets, delegating secure execution boundaries to third-party scripts. |
+| **DeFi & Payments** | Strong — programmable financial workflows via PTB-atomic trade execution and fee mechanics. |
+| **Walrus** | Strong — verifiable long-term agent memory with Seal encryption, including Reflective Memory loops for dynamic strategy optimization and Crash-Recovery State Machines. |
+| **DeepBook Predict** | Supporting — volatility-aware trading strategy backed by verifiable `OracleSVI` calculations logged in audit traces to prove active volatility-surface pricing. |
 
 ---
 

@@ -10,7 +10,7 @@
 /// Design:
 ///   • `Registry` is a shared singleton created once at package publish time.
 ///   • Each agent's record lives in a `Table<address, AgentRecord>`.
-///   • Admin is the publisher address for hackathon; TODO Phase 6: replace with DAO.
+///   • Admin is the publisher address; TODO Phase 6: replace with DAO.
 ///
 /// TODO Phase 6: replace admin key with DAO/optimistic-slashing governance module.
 module aura::aura_registry {

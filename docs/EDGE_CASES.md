@@ -20,15 +20,17 @@
 *   **The Resolution:** The blast radius is bounded by design: the attacker can only trade within the `budget_limit`, only against `allowed_contracts`, and only until `expiration_epoch`. The user can immediately call `revoke_policy` to destroy the policy and reclaim all funds. The short expiration window (typically 24h) limits the exposure period. Post-compromise, the user deploys a new policy with a fresh agent key.
 
 ## E. Staking, Deregistration, and Slashing Mechanics
-*   **The SUI Stake Bond:** When an agent registers on the AURA Registry (`aura_registry.move`), they must lock a SUI stake bond. In a production Mainnet environment, this is targeted at **0.5 SUI** to provide high-fidelity security. For the Hackathon Testnet prototype, the minimum stake (`MIN_STAKE`) is set to **0.01 SUI** (10,000,000 MIST) to prevent faucet exhaustion. This stake serves as a performance bond/collateral.
+*   **The SUI Stake Bond & Asymmetric Risk Ratio:** When an agent registers on the AURA Registry (`aura_registry.move`), they must lock a SUI stake bond. To prevent gridlock or economic exploitation, the Agent Stake must always be heavily disproportionate to the Dispute Bond (10:1 ratio). This ensures a lucrative reward for honest whistleblowers while charging a penalty that exceeds the cost of disputing.
+    *   **Testnet Targets:** Minimum stake is **0.1 SUI** (100,000,000 MIST) and the dispute bond is **0.01 SUI** (10,000,000 MIST). This keeps SUI requirements low enough to avoid testnet faucet exhaustion while preserving the 10:1 economic ratio.
+    *   **Mainnet Targets:** The Agent Stake is set dynamically to **5% of the WalletPolicy's TVL** (or a 500 SUI minimum), and the Dispute Bond is **0.5% of the TVL** (or 50 SUI).
 *   **Voluntary Deregistration:** If an agent wishes to exit the system (e.g., they have completed their trading lifecycle and earned high reputation), they call `deregister_agent()`. This returns the entire SUI stake bond back to the agent's hot-key address and deactivates their registry record.
 *   **Slashing vs. Poor Performance:** 
     *   *Protocol Infraction (Dispute Game):* If the agent commits a protocol infraction (e.g., fails to submit telemetry log references or attempts malicious trades), any user can challenge their audit trail on-chain.
 *   **Optimistic Slashing Dispute Resolution:** Rather than relying on a centralized admin, challenges are handled optimistically:
-    1. A disputer submits a challenge by locking a dispute bond (0.1 SUI on Testnet, 1.0 SUI on Mainnet) and calling `submit_dispute()`.
+    1. A disputer submits a challenge by locking a dispute bond (0.01 SUI on Testnet, 0.5% TVL on Mainnet) and calling `submit_dispute()`.
     2. The operator is granted a 24-hour window to disclose the decryption key for the suspect telemetry log by calling `disclose_telemetry_key()`.
     3. If the operator discloses the key, they prove compliance: the dispute is marked resolved, and the disputer is refunded.
-    4. If the operator fails to disclose the key within 24 hours, anyone can call `resolve_dispute()`, which slashes the operator's collateral stake, awards it to the disputer as a bounty, and deactivates the agent.
+    4. If the operator fails to disclose the key within 24 hours, anyone can call `resolve_dispute()`, which slashes the operator's collateral stake, awards it to the disputer as a bounty (the 10x multiplier reward), and deactivates the agent.
 *   **Front-Run-Slash Prevention:** Timed suspensions via `blacklist_agent()` remain as an admin/DAO option during active investigations. However, the 24-hour dispute window programmatically closes the front-run-slash escape path. An operator cannot call `deregister_agent` to reclaim their stake once an active dispute has been registered against them; their stake remains locked in the registry until the dispute is resolved.
 *   **The "Liquidate" UI Option:** The "Liquidate" button in the frontend settings modal revokes the policy wallet (`revoke_policy`) and returns the remaining quote capital (dUSDC) to the owner's main wallet. It is separate from the agent's SUI stake bond and the dispute game, which reside in the shared Registry.
 
@@ -50,4 +52,18 @@ AURA manages resource depletion at both the on-chain execution layer and the bro
     *   *Virtual Budgeting:* Each registered agent tracks an active `budget` field in their React state, initialized by their deposit amount.
     *   *Real-time Budget Decay/Growth:* Simulated trade cycle outcomes modify this budget (success increases it by `+$0.50` dUSDC, failure decreases it by `-$0.50` dUSDC). The current budget is rendered dynamically in the dashboard directory table (under the *PnL* column).
     *   *Automatic Out-of-Funds Halting:* If an active simulation loop drains an agent's budget to `0.00 dUSDC`, the scheduler immediately halts the loop, removes it from active scheduler loops, logs a warning `❌ Simulation halted: Agent has exhausted its policy wallet dUSDC budget! Please deposit funds to resume.`, and blocks manual "Step" triggers.
+
+## H. The "Non-Deterministic Polling Trap" (Circuit Breakers)
+*   **The Issue:** A failing smart contract execution or a bug in the off-chain keeper bot runner creates an infinite polling loop that repeatedly issues transaction dry-runs. This exhausts node resources and leaks computational state, showing up as endless log warnings.
+*   **The Resolution:** We introduce a deterministic **Circuit Breaker** pattern in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts):
+    1. The runner tracks consecutive failures of `dryRunTransactionBlock` or transaction submission.
+    2. It implements exponential backoff intervals between attempts (e.g. 2s, 4s, 8s).
+    3. If the runner encounters **three consecutive failures**, it trips the circuit breaker: programmatically halting all loop execution, halting trades, and emitting a critical `CIRCUIT_BREAKER_TRIPPED` status message archived in its Walrus memory. This stops all infinite polling traps and alerts operators via telemetry.
+
+## I. Reasoning Degradation & Human-in-the-Loop Escalation
+*   **The Issue:** An autonomous trading agent generates trades based on low-confidence reasoning paths (e.g. when LLM inputs are highly volatile, or when the model starts hallucinating strike pricing), leading to capital loss despite operating within budget rules.
+*   **The Resolution:** We establish a **Human-in-the-Loop (HITL) Escalation Path** in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts):
+    1. Before formatting any PTB, the agent calculates an internal `confidence_score` (between 0.0 and 1.0) derived from SVI modeling and historical win rates.
+    2. If this confidence score drops below a configurable threshold (e.g., `0.60`), the agent halts the autonomous loop execution.
+    3. The loop emits a suspended state notification `Escalated to Human Owner: Low Confidence Score (score: X)` to the dashboard, letting the owner manually review and resume execution, rather than executing high-risk, low-confidence orders.
 

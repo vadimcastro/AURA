@@ -1,6 +1,6 @@
 # Roadmap & Dependencies
 
-**Progress: [████████████████████] 100% Complete (100/100) — Phase 7 E2E Live Copy Trading & Optimistic Slashing complete, ready for submission**
+**Progress: [███████████████░░░░░] 77% Complete (7/9 Phases Completed) — Phase 7 E2E Live Copy Trading & Optimistic Slashing complete, Phase 8 Protocol Hardening & Cryptoeconomic Alignment planned**
 
 ## ✅ Dev Environment Status
 
@@ -170,7 +170,7 @@ Cross-referenced every dashboard data value against `sdk/walrus_archiver.ts`, `s
 
 ### ✅ Phase 5.3: Phase 1-4 Dynamic Execution Refactor — COMPLETE (2026-06-17)
 
-Performed a deep audit of all previous phase logic to eliminate mock data for hackathon presentation:
+Performed a deep audit of all previous phase logic to eliminate mock data for protocol verification:
 *   ✅ **Conservative Balances:** `MIN_STAKE` reverted to `10_000_000` (0.01 SUI) in `aura_registry.move` to prevent faucet drain. `tradeAmount` lowered to 10 dUSDC to support >100 live execution cycles.
 *   ✅ **Dynamic Strikes:** `predict_agent.ts` now dynamically calculates DeepBook `lowerStrike` and `higherStrike` based on the real `svi.sigma` spread instead of hardcoding 68k-72k.
 *   ✅ **Real On-Chain Telemetry:** Walrus audit trace generation now queries `SUI_CLIENT.getLatestSuiSystemState()` for real epoch data and computes a deterministic `reasoningHash` directly from the SVI metrics.
@@ -229,25 +229,25 @@ To generate highly authentic market activity without needing complex predictive 
 ---
 
 
-## 🏆 Hackathon Submission Strategy & Costs
+## 🏆 Evaluation Strategy & Testing Costs
 
 ### 1. Mainnet Costs vs. Testnet Demonstrations
 *   **Mainnet Gas & Collateral:** Deploying to Sui Mainnet requires real SUI for gas and real USDC/dUSDC for trading capital. 
-*   **The Zero-Cost Solution:** For hackathon evaluations, **Sui Testnet and Walrus Testnet are 100% free and functional**. They execute the exact same Move VM logic, transaction fee structures, and cryptographic boundary checks as Mainnet. 
-*   **Standard Practice:** Judges do not expect (and often discourage) developers from deploying experimental, un-audited agentic smart contracts on Mainnet with real funds. A fully functional Testnet prototype is the standard for a winning hackathon entry.
+*   **The Zero-Cost Solution:** For validation and testing, **Sui Testnet and Walrus Testnet are 100% free and functional**. They execute the exact same Move VM logic, transaction fee structures, and cryptographic boundary checks as Mainnet. 
+*   **Standard Practice:** Industry reviewers do not expect (and often discourage) developers from deploying experimental, un-audited agentic smart contracts on Mainnet with real funds. A fully functional Testnet prototype is the standard for proving viability.
 
-### 2. Hackathon Submission Readiness & Strength
+### 2. Testing Readiness & Strategy Strength
 *   **Current Prototype Strength:** **High.** AURA implements a complete AgentFi loop: an on-chain atomic security boundary (Hot Potato `TradeTicket`), dynamic budget enforcement (`WalletPolicy`), collateral-backed reputation (`aura_registry`), a fully functional off-chain agent script (`run_demo.ts`), and decentralized storage integration (Walrus).
-*   **Is Production Hardening Required?** No. Hackathons reward technical novelty, architecture viability, and functional demos. Hardening items (like zkLogin, threshold key networks, and professional audits) are standard items for the "Future Roadmap".
+*   **Is Production Hardening Required?** No. Prototyping and sandbox evaluation reward technical novelty, architecture viability, and functional demos. Hardening items (like zkLogin, threshold key networks, and professional audits) are standard items for the "Future Roadmap".
 
-### 3. Live Demo Execution Flow (How to Present)
+### 3. Live Demo Execution Flow (How to Evaluate)
 AURA is architected with a strict separation of concerns: **Agents run as headless Node.js processes** (simulating external off-chain operators), while the **Dashboard strictly monitors** them on-chain as a read-only auditor. We do not run the agents in the browser.
 
-For your hackathon demo / video walkthrough, follow this flow:
+For a live demo / video walkthrough, follow this flow:
 1. **Start the Frontend:** Open your Vercel URL (or `npm run dev` in `dashboard/`). Show the empty/initial state of the Audit Studio.
 2. **Launch the Autonomous Agents:** Open a terminal on your Mac, navigate to `sdk/`, and run `npx tsx run_multi_agent.ts`.
 3. **Show the Background Loop:** Explain that these are 3 separate "hedge funds" operating their own off-chain trading logic, injecting real historical DeepBook traces to simulate authentic trading, but constrained by the Move WalletPolicy.
-4. **Watch the UI Evolve (The "Aha!" Moment):** Switch back to the dashboard. As the terminal prints out success/failure outcomes and Walrus uploads, refresh the UI. The judges will watch the agents' reputations fracture dynamically (100% vs 90% vs 50%) and the "Audit Telemetry" buttons light up as Walrus blob IDs hit the blockchain.
+4. **Watch the UI Evolve (The "Aha!" Moment):** Switch back to the dashboard. As the terminal prints out success/failure outcomes and Walrus uploads, refresh the UI. Observers will watch the agents' reputations fracture dynamically (100% vs 90% vs 50%) and the "Audit Telemetry" buttons light up as Walrus blob IDs hit the blockchain.
 
 ---
 
@@ -281,7 +281,7 @@ To deploy the completed Phase 5 dashboard to Vercel, configure the following set
 To remove the single-point-of-failure admin key in the reputation registry, introduce an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
 1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a SUI bond and submitting a `Dispute` object on-chain referencing the suspect `blob_id`.
     *   *Mainnet Target (Future Scope):* Enforces a **1.0 SUI** dispute bond and a **0.5 SUI** initial agent stake bond to ensure strong economic security.
-    *   *Hackathon Testnet Version (Active):* Targets a **0.1 SUI** (100,000,000 MIST) dispute bond and maintains our **0.01 SUI** (10,000,000 MIST) initial agent stake to prevent faucet drain and allow testers to run multiple cycles.
+    *   *Testnet Version (Active):* Targets a **0.1 SUI** (100,000,000 MIST) dispute bond and maintains our **0.01 SUI** (10,000,000 MIST) initial agent stake to prevent faucet drain and allow testers to run multiple cycles.
 2.  **Disclosure Window:** The agent operator has a configurable challenge period (e.g. 24 hours, enforced via `sui::clock`) to publish the Seal decryption key for the corresponding Walrus trace.
 3.  **Resolution:**
     *   If the operator fails to publish the key within the window → automatic slashing of the performance bond, dispute bond refunded to the user.
@@ -311,15 +311,43 @@ To transition from browser-tab simulation to continuous, persistent headless exe
 
 ---
 
-## 🚀 Phase 8: Live Walkthrough Demo & Submission — PLANNED
+## 🚀 Phase 8: Protocol Hardening & Cryptoeconomic Alignment — PLANNED
+
+Introduce sustainable tokenomics, deterministic execution boundaries, and verifiable crash-recovery memory frameworks derived from first-principles Web3 AI agent research.
+
+### 1. Cryptoeconomic Restructuring & Sustainable Tokenomics
+*   🔲 **Asymmetric Risk Ratios**: Adjust economic incentives to ensure Agent Stake is heavily disproportionate to Dispute Bond (10:1 ratio).
+    *   *Testnet Target:* Set Agent Stake to **0.1 SUI** (100,000,000 MIST) and Dispute Bond to **0.01 SUI** (10,000,000 MIST).
+    *   *Mainnet Target:* Dynamically lock Agent Stake to **5% of WalletPolicy TVL** (or 500 SUI min) and Dispute Bond to **0.5% of TVL** (or 50 SUI).
+*   🔲 **Reputation-Based Progressive Stake Release**: Implement `withdraw_excess_stake` in [aura_registry.move](file:///Users/vadim/Desktop/AURA/contracts_sui/sources/aura_registry.move). Allow operators to progressively unlock tiers of their original SUI bond as their `reputation_score` increases organically via `record_task_outcome`.
+*   🔲 **Programmable Yield/Burn (Deflationary Value Capture)**: Add a **0.5% protocol fee** on profitable executions inside `return_and_complete` in [agent_wallet_policy.move](file:///Users/vadim/Desktop/AURA/contracts_sui/sources/agent_wallet_policy.move). Route fees to a Buy-and-Burn module or a Slashing Insurance Pool backing top-reputation agents.
+*   🔲 **Financialization Bridge (Sui Kiosk)**: Enforce registry validation for tradeable `AgentNFT` minting so operators must lock base SUI stake before strategy tokenization.
+
+### 2. Deterministic Execution & System Resilience
+*   🔲 **Idempotency Keys**: Generate unique `Idempotency_UUID` for every trade cycle in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Check blockchain history before retrying failed transactions to prevent duplicate trade commitments.
+*   🔲 **Circuit Breakers**: Implement exponential backoff and a hard iteration cap in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Halt execution loop programmatically and emit `CIRCUIT_BREAKER_TRIPPED` state trace to Walrus if `dryRunTransactionBlock` fails 3 consecutive times.
+*   🔲 **Strict Schema Validation & Runtime Checks**: Enforce strict JSON Schema validation and parsing of LLM outputs in [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) before constructing the PTB. Enforce runtime type assertions on all smart contract arguments.
+*   🔲 **Human-in-the-Loop Escalation**: Add confidence scoring thresholds in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Pause execution loop and alert the owner if the internal confidence score regarding a trade decision falls below the threshold.
+
+### 3. Verifiable Memory & Walrus Integration
+*   🔲 **Crash-Recovery State Machine**: Implement Durable Workflows in [run_multi_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/run_multi_agent.ts). Query the most recent Walrus `blob_id` on startup, parse the audit trace, and resume the exact last state (e.g., `HOLDING_PREDICT_RANGE`).
+*   🔲 **Reflective Memory Loop**: Update [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) to read the last Walrus trace. Program the agent to dynamically reduce its `tradeAmount` or widen SVI margin tolerance if the last trace recorded a net loss.
+*   🔲 **State Compression (Hierarchical Summarization)**: Implement strategic state compression in [walrus_archiver.ts](file:///Users/vadim/Desktop/AURA/sdk/walrus_archiver.ts). Periodically compile raw JSON traces into a dense "Strategy Summary String" to prevent context window overflow.
+
+### 4. DeepBook Predict Track Alignment
+*   🔲 **SVI Simulation Hardening**: Expand audit trace schemas in [walrus_archiver.ts](file:///Users/vadim/Desktop/AURA/sdk/walrus_archiver.ts) to log raw `OracleSVI` calculations (`a`, `b`, `rho`, `sigma`) used for range selection, proving volatility-aware pricing.
+
+---
+
+## 🚀 Phase 9: Live Walkthrough Demo & Submission — PLANNED
 
 *   🔲 **Walkthrough Video Recording**: Record the live walk-through demo video showcasing the user-driven browser registration, copy-trading loop, telemetry decryption, and contract liquidation.
 *   🔲 **Cloud-Only Demo Strategy (Vercel + Railway Service Toggle)**:
     *   **Deployment Setup:** Deploy the off-chain SDK bot runner folder to Railway connected to your GitHub repo. Configure the required environment variables (`SUI_RPC_URL`, `AURA_PACKAGE_ID`, `REGISTRY_OBJECT_ID`, `AGENT_PRIVATE_KEY`, etc.) inside the Railway service settings.
     *   **Gas Preservation State:** Keep the Railway service **paused** or scaled down by default to prevent gas/faucet depletion.
-    *   **Execution:** When recording the demo or presenting to judges, click **Resume / Redeploy** inside the Railway control panel. The cloud worker will boot, execute live on-chain DeepBook trades, and log telemetry to Walrus. The Vercel Audit Studio will stream these events live.
+    *   **Execution:** When recording the demo or presenting to reviewers, click **Resume / Redeploy** inside the Railway control panel. The cloud worker will boot, execute live on-chain DeepBook trades, and log telemetry to Walrus. The Vercel Audit Studio will stream these events live.
     *   **Cleanup:** Click **Pause Service** in Railway once the demo concludes to preserve testnet gas.
-*   🔲 **Hackathon Submission Compilation**: Package the final submission assets, links to the deployed Vercel dashboard, GitHub repository, and YouTube walkthrough video.
+*   🔲 **Final Release Compilation**: Package the final release assets, links to the deployed Vercel dashboard, GitHub repository, and YouTube walkthrough video.
 
 ---
 
