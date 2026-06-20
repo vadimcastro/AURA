@@ -281,7 +281,7 @@ npx tsx run_copy_trader.ts <TARGET_AGENT_ADDRESS>
 
 ---
 
-## 🛡️ 7. Policy Funds Recovery Tool
+## 🛡️ 8. Policy Funds Recovery Tool
 
 A TS recovery utility is available inside the SDK folder to sweep expired or abandoned policy wallets. It fetches `PolicyCreated` events matching the active operator key address and executes `revoke_policy` transactions to return funds.
 
@@ -300,4 +300,53 @@ To target a specific package ID exclusively, run:
 ```bash
 npm run recover <TARGET_PACKAGE_ID>
 ```
+
+---
+
+## 🌐 9. Cloud Operator Control REST API
+
+When deployed to Railway, the bot runner SDK boots a secure, lightweight Express API server listening on `PORT` (default `3000`) instead of running active transactions unconditionally. This prevents gas faucet drainage until activated.
+
+All state-modifying endpoints require an `x-api-key` header matching the `ADMIN_API_KEY` configured in the backend environment.
+
+### API Endpoint Index
+
+#### 1. Check Status
+*   **Endpoint:** `GET /api/status`
+*   **Auth Required:** None
+*   **Returns:** Execution status, operator address, SUI/dUSDC balances.
+*   **Response Model:**
+    ```json
+    {
+      "status": "RUNNING | STOPPED",
+      "ownerAddress": "0x534...1d80",
+      "ownerBalances": {
+        "sui": "1.4502",
+        "dUSDC": "50.0000"
+      },
+      "activeIntervalsCount": 3
+    }
+    ```
+
+#### 2. Start Execution Loop
+*   **Endpoint:** `POST /api/start`
+*   **Auth Required:** Yes (`x-api-key: <ADMIN_API_KEY>`)
+*   **Payload:** `{ "intervalMs": 30000 }` (default 30s)
+*   **Returns:** Success message confirming background loop initialization.
+
+#### 3. Stop Execution Loop
+*   **Endpoint:** `POST /api/stop`
+*   **Auth Required:** Yes (`x-api-key: <ADMIN_API_KEY>`)
+*   **Returns:** Confirmation that all continuous trading tasks have been stopped.
+
+#### 4. Reclaim Locked Policy Funds
+*   **Endpoint:** `POST /api/recover`
+*   **Auth Required:** Yes (`x-api-key: <ADMIN_API_KEY>`)
+*   **Returns:** Sweeps all policy wallets on-chain and returns final reclaimed count:
+    ```json
+    {
+      "success": true,
+      "message": "Reclaim completed. Swept 3 policy wallets."
+    }
+    ```
 

@@ -312,7 +312,7 @@ DUSDC_TYPE_TAG=0xe95040085976bfd54a1a072...
 
 ---
 
-## 🛡️ 7. Policy Funds Recovery & Sweeper Tool
+## 🛡️ 8. Policy Funds Recovery & Sweeper Tool
 
 AURA supports a multi-deployment funds recovery script to reclaim all dUSDC locked inside historical or active policy wallets.
 
@@ -336,4 +336,35 @@ This script:
 ```bash
 npm run recover 0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd922
 ```
+
+---
+
+## 🌐 9. Cloud Operator Control REST API
+
+When deployed to Railway, the bot runner SDK boots a secure, lightweight Express API server listening on `PORT` (default `3000`) instead of running active transactions unconditionally. This prevents gas faucet drainage until activated.
+
+All state-modifying endpoints require an `x-api-key` header matching the `ADMIN_API_KEY` configured in the backend environment.
+
+### API Endpoint Index
+
+#### 1. Check Status
+*   **Endpoint:** `GET /api/status`
+*   **Auth Required:** None
+*   **Returns:** Execution status, operator address, SUI/dUSDC balances.
+
+#### 2. Start Execution Loop
+*   **Endpoint:** `POST /api/start`
+*   **Auth Required:** Yes (`x-api-key: <ADMIN_API_KEY>`)
+*   **Payload:** `{ "intervalMs": 30000 }` (default 30s)
+*   **Returns:** Success message confirming background loop initialization.
+
+#### 3. Stop Execution Loop
+*   **Endpoint:** `POST /api/stop`
+*   **Auth Required:** Yes (`x-api-key: <ADMIN_API_KEY>`)
+*   **Returns:** Confirmation that all continuous trading tasks have been stopped.
+
+#### 4. Reclaim Locked Policy Funds
+*   **Endpoint:** `POST /api/recover`
+*   **Auth Required:** Yes (`x-api-key: <ADMIN_API_KEY>`)
+*   **Returns:** Sweeps all policy wallets on-chain and returns final reclaimed count.
 
