@@ -75,3 +75,10 @@ AURA manages resource depletion at both the on-chain execution layer and the bro
     *   These parameters (25% size reduction, 20% margin expansion) are mathematically calibrated to provide a robust risk-off response without rendering the agent non-competitive or disabling its recovery potential.
 *   **Context Window Bloating (State Compression):** Continuous telemetry logging quickly overflows the LLM context window. To resolve this, AURA implements periodic state compression: after every 5 cycles, the agent aggregates raw logs into a single dense "Strategy Summary String" (containing metrics like win-rate and net PnL) uploaded to Walrus, committing the summary blob ID to the on-chain registry. Subsequent cycles read this summary context directly, optimizing context utilization.
 
+## K. LLM Infrastructure Availability & OpenRouter Fallbacks
+*   **The Issue:** The agent relies on an external router API (OpenRouter) to fetch options parameters. If OpenRouter is offline, throttled, or under heavy latency spikes, the agent could freeze.
+*   **The Resolution:** 
+    1.  **Deterministic Volatility Fallback:** In [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts#L386-L396), the agent implements a robust catch-and-fallback logic. If the OpenRouter query fails, the agent immediately computes strikes locally using the deterministic SVI volatility spread model.
+    2.  **Robust Error Handling:** The exception is logged cleanly as a warning, and the cycle continues uninterrupted using the local fallback values.
+    3.  **Circuit Breaker Coupling:** If the local fallback runs but the underlying contract calls revert three consecutive times, the core bot runner's circuit breaker will trip, pausing the worker process to protect capital.
+
