@@ -482,6 +482,77 @@ app.get("/api/telemetry/decrypt", async (req, res) => {
   }
 });
 
+const paymasterLimiter: Record<string, { count: number; resetTime: number }> = {};
+
+app.post("/api/paymaster/sponsor", async (req, res) => {
+  const { txBytes } = req.body;
+  if (!txBytes) {
+    return res.status(400).json({ error: "Missing txBytes in request body" });
+  }
+
+  try {
+    const txBytesUint8 = Buffer.from(txBytes, "base64");
+    const tx = Transaction.from(txBytesUint8);
+    const data = (tx as any).getData ? (tx as any).getData() : null;
+    const commands = data?.commands || data?.transactions || [];
+
+    for (const cmd of commands) {
+      let target = "";
+      if (cmd.kind === "MoveCall" && cmd.target) {
+        target = cmd.target;
+      } else if (cmd.MoveCall && cmd.MoveCall.package) {
+        target = `${cmd.MoveCall.package}::${cmd.MoveCall.module}::${cmd.MoveCall.function}`;
+      } else if (cmd.$kind === "MoveCall" && cmd.MoveCall) {
+        target = `${cmd.MoveCall.package}::${cmd.MoveCall.module}::${cmd.MoveCall.function}`;
+      }
+
+      if (target) {
+        const parts = target.split("::");
+        const packageId = parts[0];
+        const cleanPackage = packageId.replace(/^0x0*/, "").toLowerCase();
+        const cleanAura = AURA_PACKAGE_ID.replace(/^0x0*/, "").toLowerCase();
+        const cleanDeepbook = DEEPBOOK_PREDICT_PACKAGE_ID.replace(/^0x0*/, "").toLowerCase();
+        
+        if (cleanPackage !== cleanAura && cleanPackage !== cleanDeepbook) {
+          return res.status(400).json({
+            error: `Security Alert: Paymaster can only sponsor transactions calling allowlisted packages (AURA or DeepBook). Target: ${target}`
+          });
+        }
+      }
+    }
+
+    // Rate limiter: max 20 requests per hour per IP
+    const ip = req.ip || "unknown";
+    const now = Date.now();
+    const rateWindow = 3600000;
+    const limitCount = 20;
+
+    const limitData = paymasterLimiter[ip] || { count: 0, resetTime: now + rateWindow };
+    if (now > limitData.resetTime) {
+      limitData.count = 1;
+      limitData.resetTime = now + rateWindow;
+    } else {
+      limitData.count += 1;
+    }
+    paymasterLimiter[ip] = limitData;
+
+    if (limitData.count > limitCount) {
+      return res.status(429).json({ error: "Hourly paymaster quota exceeded. Please try again later." });
+    }
+
+    // Sign the transaction bytes as the gas sponsor using the platform keypair
+    const sponsorKeypair = getAgentKeypair();
+    const { signature } = await sponsorKeypair.signTransaction(txBytesUint8);
+
+    console.log(green(`📡 Paymaster sponsored transaction block for IP ${ip}. Sponsor: ${sponsorKeypair.toSuiAddress()}`));
+    res.json({ success: true, signature });
+  } catch (err) {
+    console.error("❌ Paymaster sponsorship failed:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+
 app.post("/api/start", requireAuth, async (req, res) => {
   if (loopRunning) {
     return res.json({ message: "Loop is already running." });
