@@ -262,113 +262,198 @@ async function bootstrapAgent(
   return { agentKeypair, policyId };
 }
 
-async function main() {
-  // Parse command line arguments
-  // Usage: npm run start [cycles] [intervalMs]
-  // e.g. npm run start 1 30000 (runs 1 cycle and exits)
-  // e.g. npm run start infinite 10000 (runs infinitely with 10s interval)
-  const argCycles = process.argv[2];
-  const argInterval = process.argv[3];
+async function runSweep(ownerKeypair: Ed25519Keypair): Promise<number> {
+  const ownerAddress = ownerKeypair.toSuiAddress();
+  const targetPackages = [
+    AURA_PACKAGE_ID,
+    "0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd922",
+    "0x74093b562d7d979a962336854234d1d6962417b17bad4543ed6e85e339fd7cef"
+  ];
+  let policiesRecovered = 0;
 
-  let maxCycles = 1; // default to 1 cycle
-  if (argCycles === "infinite") {
-    maxCycles = Infinity;
-  } else if (argCycles) {
-    const parsed = parseInt(argCycles, 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      maxCycles = parsed;
+  for (const pkgId of targetPackages) {
+    if (pkgId.includes("placeholder")) continue;
+    let hasNextPage = true;
+    let cursor: any = null;
+
+    while (hasNextPage) {
+      try {
+        const events = await SUI_CLIENT.queryEvents({
+          query: { MoveEventType: `${pkgId}::agent_wallet_policy::PolicyCreated` },
+          cursor,
+          limit: 50
+        });
+
+        for (const ev of events.data) {
+          if (ev.sender !== ownerAddress) continue;
+          const policyId = (ev.parsedJson as any)?.policy_id;
+          if (!policyId) continue;
+          
+          try {
+            const tx = new Transaction();
+            tx.moveCall({
+              target: `${pkgId}::agent_wallet_policy::revoke_policy`,
+              typeArguments: [DUSDC_TYPE_TAG],
+              arguments: [tx.object(policyId)]
+            });
+
+            const txRes = await SUI_CLIENT.signAndExecuteTransaction({
+              signer: ownerKeypair,
+              transaction: tx,
+            });
+            await SUI_CLIENT.waitForTransaction({ digest: txRes.digest });
+            policiesRecovered++;
+          } catch (err) {
+            // Already revoked or deleted
+          }
+        }
+        hasNextPage = events.hasNextPage;
+        cursor = events.nextCursor ?? null;
+      } catch (err) {
+        hasNextPage = false;
+      }
     }
   }
+  return policiesRecovered;
+}
 
-  let delayMs = 30000; // default 30s
-  if (argInterval) {
-    const parsed = parseInt(argInterval, 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      delayMs = parsed;
-    }
+import express from "express";
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY || "aura-admin-secret-pass";
+
+app.use(express.json());
+
+// CORS configuration to allow Vercel frontend control
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-api-key");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
   }
+  next();
+});
 
-  console.log(magenta("========================================================="));
-  console.log(magenta("🛡️  AURA Off-Chain Bot Runner                             "));
-  console.log(magenta("=========================================================\n"));
-  console.log(`Execution Mode: ${maxCycles === Infinity ? "Continuous (Infinite)" : `${maxCycles} Cycle(s)`}`);
-  console.log(`Interval Delay: ${delayMs / 1000}s`);
-  if (maxCycles !== Infinity) {
-    console.log(yellow(`Process will auto-terminate after executing ${maxCycles} cycle(s).\n`));
-  } else {
-    console.log(`Press Ctrl+C to terminate runner.\n`);
+const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const apiKey = req.headers["x-api-key"];
+  if (apiKey !== ADMIN_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized. Invalid Admin API Key." });
   }
+  next();
+};
 
+let activeIntervals: NodeJS.Timeout[] = [];
+let loopRunning = false;
+
+app.get("/api/status", async (req, res) => {
   const ownerKeypair = getAgentKeypair();
   const ownerAddress = ownerKeypair.toSuiAddress();
-  console.log(`Owner Account: ${ownerAddress}\n`);
-
-  console.log(green("🔄 Deriving agent keys and performing on-chain audit..."));
   
-  // Derive 3 deterministic agents
+  let ownerSui = 0n;
+  let ownerUsdc = 0n;
+  try {
+    const balS = await SUI_CLIENT.getBalance({ owner: ownerAddress });
+    const balU = await SUI_CLIENT.getBalance({ owner: ownerAddress, coinType: DUSDC_TYPE_TAG });
+    ownerSui = BigInt(balS.totalBalance);
+    ownerUsdc = BigInt(balU.totalBalance);
+  } catch (e) {}
+
+  res.json({
+    status: loopRunning ? "RUNNING" : "STOPPED",
+    ownerAddress,
+    ownerBalances: {
+      sui: (Number(ownerSui) / 1e9).toFixed(4),
+      dUSDC: (Number(ownerUsdc) / 1e9).toFixed(4)
+    },
+    activeIntervalsCount: activeIntervals.length
+  });
+});
+
+app.post("/api/start", requireAuth, async (req, res) => {
+  if (loopRunning) {
+    return res.json({ message: "Loop is already running." });
+  }
+
+  const delayMs = parseInt(req.body.intervalMs as string, 10) || 30000;
+  loopRunning = true;
+  console.log(`📡 Control API triggered start: Running bots in background (Interval: ${delayMs/1000}s)`);
+  
+  const ownerKeypair = getAgentKeypair();
   const key1 = deriveAgentKeypair(ownerKeypair, "conservative");
   const key2 = deriveAgentKeypair(ownerKeypair, "aggressive");
   const key3 = deriveAgentKeypair(ownerKeypair, "deltaneutral");
 
-  // Bootstrap agents (SUI Gas + dUSDC + Registry registration)
-  // Each agent gets 0.1 SUI and 25 dUSDC budget
-  const agent1 = await bootstrapAgent(ownerKeypair, key1, "Conservative Yield Hunter", 25_000_000, 100_000_000);
-  const agent2 = await bootstrapAgent(ownerKeypair, key2, "Aggressive Vol Trader", 25_000_000, 100_000_000);
-  const agent3 = await bootstrapAgent(ownerKeypair, key3, "Delta-Neutral Bot", 25_000_000, 100_000_000);
+  try {
+    const agent1 = await bootstrapAgent(ownerKeypair, key1, "Conservative Yield Hunter", 25_000_000, 100_000_000);
+    const agent2 = await bootstrapAgent(ownerKeypair, key2, "Aggressive Vol Trader", 25_000_000, 100_000_000);
+    const agent3 = await bootstrapAgent(ownerKeypair, key3, "Delta-Neutral Bot", 25_000_000, 100_000_000);
 
-  console.log(green("\n🚀 Start Autonomous Trading Loops"));
-
-  const runLoop = async (name: string, agentKeypair: Ed25519Keypair, policyId: string, delayMs: number, maxCycles: number) => {
-    let iteration = 0;
-    while (iteration < maxCycles) {
-      iteration++;
-      console.log(cyan(`\n[${new Date().toISOString()}] >>> [${name}] Waking up (Cycle #${iteration}/${maxCycles === Infinity ? "infinite" : maxCycles})`));
-      
+    const runCycle = async (name: string, keypair: Ed25519Keypair, policyId: string) => {
+      if (!loopRunning) return;
       let successOverride = true;
       if (name.includes("Aggressive")) {
-        successOverride = Math.random() > 0.5; // 50% success
+        successOverride = Math.random() > 0.5;
       } else if (name.includes("Delta-Neutral")) {
-        successOverride = Math.random() > 0.1; // 90% success
+        successOverride = Math.random() > 0.1;
       }
-      
       try {
         console.log(`[${name}] Executing trade cycle...`);
-        const res = await executeTradeCycle(agentKeypair, policyId, {
+        await executeTradeCycle(keypair, policyId, {
           mockMode: false,
           walrusMockFallback: false,
           successOverride,
         });
-        if (res.success) {
-          console.log(green(`[${name}] ✅ Trade cycle succeeded (Tx: ${res.txDigest})`));
-        } else {
-          console.log(red(`[${name}] ❌ Trade cycle execution failed.`));
-        }
-      } catch (error) {
-        console.error(red(`[${name}] 💥 Fatal error in cycle:`), (error as Error).message);
+      } catch (err) {
+        console.error(`[${name}] Error in trade cycle:`, (err as Error).message);
       }
+    };
 
-      if (iteration < maxCycles) {
-        console.log(`[${name}] Sleeping for ${delayMs/1000}s...`);
-        await sleep(delayMs);
-      }
-    }
-    console.log(green(`[${name}] Finished all ${maxCycles} cycles.`));
-  };
+    const t1 = setInterval(() => runCycle("Conservative Yield", agent1.agentKeypair, agent1.policyId), delayMs);
+    await sleep(2000);
+    const t2 = setInterval(() => runCycle("Aggressive Vol", agent2.agentKeypair, agent2.policyId), delayMs);
+    await sleep(2000);
+    const t3 = setInterval(() => runCycle("Delta-Neutral", agent3.agentKeypair, agent3.policyId), delayMs);
 
-  // Stagger loop launches slightly to avoid immediate transaction collisions or gas conflicts
-  const p1 = runLoop("Conservative Yield", agent1.agentKeypair, agent1.policyId, delayMs, maxCycles);
-  await sleep(2000);
-  const p2 = runLoop("Aggressive Vol", agent2.agentKeypair, agent2.policyId, delayMs, maxCycles);
-  await sleep(2000);
-  const p3 = runLoop("Delta-Neutral", agent3.agentKeypair, agent3.policyId, delayMs, maxCycles);
+    activeIntervals = [t1, t2, t3];
+    
+    // Initial staggered run
+    runCycle("Conservative Yield", agent1.agentKeypair, agent1.policyId);
+    sleep(2000).then(() => runCycle("Aggressive Vol", agent2.agentKeypair, agent2.policyId));
+    sleep(4000).then(() => runCycle("Delta-Neutral", agent3.agentKeypair, agent3.policyId));
 
-  await Promise.all([p1, p2, p3]);
-  console.log(magenta("\n========================================================="));
-  console.log(magenta("🛡️  AURA Off-Chain Bot Runner: All cycles complete. Exiting."));
-  console.log(magenta("========================================================="));
-}
+    res.json({ success: true, message: "Backend execution loop started successfully." });
+  } catch (err) {
+    loopRunning = false;
+    res.status(500).json({ error: `Failed to start bots: ${(err as Error).message}` });
+  }
+});
 
-main().catch(err => {
-  console.error(red("\n💥 Fatal error starting bot runner daemon:"), err);
-  process.exit(1);
+app.post("/api/stop", requireAuth, (req, res) => {
+  if (!loopRunning) {
+    return res.json({ message: "Loop is already stopped." });
+  }
+  
+  activeIntervals.forEach(clearInterval);
+  activeIntervals = [];
+  loopRunning = false;
+  console.log("📡 Control API triggered stop: Paused continuous bots loop.");
+  res.json({ success: true, message: "Backend execution loop stopped." });
+});
+
+app.post("/api/recover", requireAuth, async (req, res) => {
+  console.log("📡 Control API triggered sweep: Sweeping all policy wallets...");
+  try {
+    const ownerKeypair = getAgentKeypair();
+    const count = await runSweep(ownerKeypair);
+    res.json({ success: true, message: `Reclaim completed. Swept ${count} policy wallets.` });
+  } catch (err) {
+    res.status(500).json({ error: `Sweep failed: ${(err as Error).message}` });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`\n🚀 AURA Daemon Server listening on port ${PORT}`);
+  console.log(`   Admin API Endpoints are protected by header 'x-api-key'\n`);
 });
