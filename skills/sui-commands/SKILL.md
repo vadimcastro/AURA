@@ -358,7 +358,7 @@ npm run recover 0x7cb617c78407fdae14a8e51f12da5cd7c7abf2dc67f6c0c58c5fdb8ce40dd9
 
 ## 🌐 9. Cloud Operator Control REST API
 
-When deployed to Railway, the bot runner SDK boots a secure, lightweight Express API server listening on `PORT` (default `3000`) instead of running active transactions unconditionally. This prevents gas faucet drainage until activated.
+When deployed to Railway (accessible at `https://auraregistry.up.railway.app`), the bot runner SDK boots a secure, lightweight Express API server listening on `PORT` (default `3000`) instead of running active transactions unconditionally. This prevents gas faucet drainage until activated.
 
 All state-modifying endpoints require an `x-api-key` header matching the `ADMIN_API_KEY` configured in the backend environment.
 
