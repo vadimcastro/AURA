@@ -6,11 +6,12 @@ import { SealDecrypter } from './components/SealDecrypter';
 import { IntentEngine } from './components/IntentEngine';
 import { VolatilityStudio } from './components/VolatilityStudio';
 import { EscalationInbox } from './components/EscalationInbox';
-import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
+import { CloudOperatorPanel } from './components/CloudOperatorPanel';
+import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle, Settings } from 'lucide-react';
 import type React from 'react';
-import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets } from '@mysten/dapp-kit';
+import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets, useSuiClient } from '@mysten/dapp-kit';
 
-type TabType = 'landing' | 'agents' | 'intent' | 'volatility' | 'escalations';
+type TabType = 'landing' | 'agents' | 'intent' | 'volatility' | 'escalations' | 'operator';
 
 export interface WalletSession {
   address: string;
@@ -48,6 +49,36 @@ function App() {
         providerLabel: 'Browser Wallet',
       }
     : zkSession;
+
+  const suiClient = useSuiClient();
+  const [suiBalance, setSuiBalance] = useState<string | null>(null);
+  const [dusdcBalance, setDusdcBalance] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!session?.address) {
+      setSuiBalance(null);
+      setDusdcBalance(null);
+      return;
+    }
+
+    const fetchBalances = async () => {
+      try {
+        const suiBal = await suiClient.getBalance({ owner: session.address });
+        const dusdcBal = await suiClient.getBalance({
+          owner: session.address,
+          coinType: import.meta.env.VITE_DUSDC_TYPE_TAG || '0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC',
+        });
+        setSuiBalance((parseFloat(suiBal.totalBalance) / 1e9).toFixed(3));
+        setDusdcBalance((parseFloat(dusdcBal.totalBalance) / 1e6).toFixed(2));
+      } catch (err) {
+        console.warn('Failed to fetch user wallet balances:', err);
+      }
+    };
+
+    fetchBalances();
+    const interval = setInterval(fetchBalances, 10000);
+    return () => clearInterval(interval);
+  }, [session?.address, suiClient]);
 
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [connectingType, setConnectingType] = useState<string | null>(null);
@@ -176,11 +207,29 @@ function App() {
                 {navBtn('intent', 'Intent Engine', Sparkles)}
                 {navBtn('volatility', 'Volatility Surface', TrendingUp)}
                 {navBtn('escalations', 'Escalations', AlertTriangle)}
+                {navBtn('operator', 'Operator Console', Settings)}
               </nav>
             </div>
 
             {/* Right: Unified Wallet / zkLogin connection controller */}
-            <div className="relative">
+            <div className="relative flex items-center gap-3">
+              {session && (suiBalance !== null || dusdcBalance !== null) && (
+                <div className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl border text-[11px] font-semibold font-mono" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                  {suiBalance !== null && (
+                    <span>
+                      {suiBalance} SUI
+                    </span>
+                  )}
+                  {suiBalance !== null && dusdcBalance !== null && (
+                    <span className="w-px h-3 bg-[var(--color-border)]" />
+                  )}
+                  {dusdcBalance !== null && (
+                    <span className="text-[var(--color-brand)] font-bold">
+                      {dusdcBalance} dUSDC
+                    </span>
+                  )}
+                </div>
+              )}
               {session ? (
                 <div className="relative">
                   <button
@@ -385,6 +434,11 @@ function App() {
         {activeTab === 'escalations' && (
           <section className="pt-6">
             <EscalationInbox />
+          </section>
+        )}
+        {activeTab === 'operator' && (
+          <section className="pt-6">
+            <CloudOperatorPanel />
           </section>
         )}
       </main>
