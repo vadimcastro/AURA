@@ -11,13 +11,14 @@
 | **Sui CLI** | ✅ Installed | `sui 1.73.1-ff1fe0ec4551` |
 | **Active Network** | ✅ Testnet | `sui client active-env` → `testnet` |
 | **Active Address** | ✅ Configured | `0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676` |
-| **Testnet SUI Balance** | ✅ Funded | **5.36 SUI** (5,364,106,364 MIST) — gas remaining |
+| **Testnet SUI Balance** | ✅ Funded | **4.86 SUI** (4,861,770,968 MIST) — gas remaining |
+| **Testnet WAL Balance** | ✅ Funded | **0.50 WAL** (500,000,000 raw) — telemetry storage |
 | **Testnet dUSDC Balance** | ✅ Funded | **925.00 DUSDC** (925,000,000 raw) — recovered, ready for trading |
 
 ## Wallet Profiles
 **Owner** (`0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676`)
 *   **Role**: Instantiates agents, funds initial capital.
-*   **Balance**: `~5.36 SUI` (Gas), `~925.00 dUSDC` (Capital).
+*   **Balance**: `~4.86 SUI` (Gas), `~0.50 WAL` (Storage), `~925.00 dUSDC` (Capital).
 
 ## Managing the Agent Roster
 1. **Starting Fresh (Resetting Agents to 0)**: To completely wipe the slate and start with 0 agents, simply republish the smart contracts (`sui client publish --skip-dependency-verification` inside `contracts_sui/`) and paste the new `Package ID` and `Registry ID` into the `.env` and `ROADMAP.md`. 
