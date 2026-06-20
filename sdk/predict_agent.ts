@@ -11,7 +11,15 @@ import {
   DUSDC_TYPE_TAG, 
   getAgentKeypair 
 } from "./config.js";
-import { archiveTradeAudit } from "./walrus_archiver.js";
+import { 
+  archiveTradeAudit, 
+  downloadFromWalrus, 
+  decryptWithSeal,
+  buildAuditTrace,
+  compressStateHistory,
+  commitBlobIdOnChain,
+  AuditTrace
+} from "./walrus_archiver.js";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -32,6 +40,8 @@ export interface DeepBookTrace {
 }
 
 let tracesCache: DeepBookTrace[] | null = null;
+// Keep track of the recent raw audit traces in-memory for state compression
+const recentTracesMap: Record<string, AuditTrace[]> = {};
 function popTrace(): DeepBookTrace | null {
   if (tracesCache === null) {
     const tracePath = path.join(__dirname, "deepbook_traces.json");
@@ -57,6 +67,113 @@ export interface SVIParameters {
   timestamp?: number;
 }
 
+// Helper validators for strict parameter schema check
+export interface LLMReasoningOutput {
+  lowerStrike: number;
+  higherStrike: number;
+  expiry: number;
+  tradeAmount: number;
+  confidence: number;
+  reasoning: string;
+}
+
+const green = (text: string) => `\x1b[32m${text}\x1b[0m`;
+const yellow = (text: string) => `\x1b[33m${text}\x1b[0m`;
+
+export function validateLLMReasoning(jsonStr: string): LLMReasoningOutput {
+  const parsed = JSON.parse(jsonStr);
+  if (typeof parsed !== "object" || parsed === null) {
+    throw new Error("Invalid JSON: LLM output must be an object");
+  }
+  if (typeof parsed.lowerStrike !== "number" || parsed.lowerStrike <= 0) {
+    throw new Error("Invalid lowerStrike: must be a positive number");
+  }
+  if (typeof parsed.higherStrike !== "number" || parsed.higherStrike <= 0) {
+    throw new Error("Invalid higherStrike: must be a positive number");
+  }
+  if (parsed.lowerStrike >= parsed.higherStrike) {
+    throw new Error("Invalid strikes: lowerStrike must be less than higherStrike");
+  }
+  if (typeof parsed.expiry !== "number" || parsed.expiry <= 0) {
+    throw new Error("Invalid expiry: must be a positive number");
+  }
+  if (typeof parsed.tradeAmount !== "number" || parsed.tradeAmount <= 0) {
+    throw new Error("Invalid tradeAmount: must be a positive number");
+  }
+  if (typeof parsed.confidence !== "number" || parsed.confidence < 0 || parsed.confidence > 1) {
+    throw new Error("Invalid confidence: must be a number between 0 and 1");
+  }
+  if (typeof parsed.reasoning !== "string") {
+    throw new Error("Invalid reasoning: must be a string");
+  }
+  return parsed as LLMReasoningOutput;
+}
+
+export function isValidSuiAddress(addr: any): boolean {
+  if (typeof addr !== "string") return false;
+  return /^0x[a-fA-F0-9]{1,64}$/.test(addr);
+}
+
+export function isValidNumber(val: any): boolean {
+  return typeof val === "number" && !isNaN(val) && val >= 0;
+}
+
+// ── OpenRouter Live LLM Integration ──────────────────────────────────────────
+
+/**
+ * Queries a free model on OpenRouter to generate options strike range decisions
+ * using live SVI volatility parameters and reflective memory context.
+ */
+export async function queryOpenRouterLLM(
+  svi: SVIParameters,
+  previousSummary: string,
+  apiKey: string
+): Promise<string> {
+  try {
+    const prompt = `You are AURA, an options market maker trading SUI options.
+Volatility surface SVI parameters: a=${svi.a}, b=${svi.b}, rho=${svi.rho}, m=${svi.m}, sigma=${svi.sigma}.
+Previous Cycle Status: "${previousSummary}".
+Base SUI price is 70000.
+Compute the lower strike, higher strike, expiry (Unix timestamp in seconds, e.g., current time + 86400), trade amount (in MIST, default 5000000), and your decision confidence score (between 0.0 and 1.0).
+Respond ONLY with a valid JSON object matching this schema:
+{
+  "lowerStrike": number,
+  "higherStrike": number,
+  "expiry": number,
+  "tradeAmount": number,
+  "confidence": number,
+  "reasoning": string
+}`;
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://aura.finance",
+        "X-Title": "AURA AgentFi"
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-3-8b-instruct:free",
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+    if (!content) throw new Error("Empty response from OpenRouter");
+
+    const cleaned = content.replace(/```json/g, "").replace(/```/g, "").trim();
+    return cleaned;
+  } catch (err) {
+    throw new Error(`OpenRouter query failed: ${(err as Error).message}`);
+  }
+}
+
 // ── Arbitrage Verification ──────────────────────────────────────────────────
 
 /**
@@ -71,14 +188,12 @@ export function isArbitrageFree(svi: SVIParameters): boolean {
   if (svi.b < 0) return false;
   
   // 2. Non-negativity check: w(x) >= 0 for all strikes x.
-  // The minimum variance occurs at x = m, with w(m) = a + b * sigma * sqrt(1 - rho^2).
   const minVariance = svi.a + svi.b * svi.sigma * Math.sqrt(1 - svi.rho * svi.rho);
   if (minVariance < 0) {
     return false;
   }
 
   // 3. Butterfly arbitrage check: probability density g(x) >= 0.
-  // Asymptotically as |strike| -> infinity, density is non-negative if: b * (1 + |rho|) < 2.
   if (svi.b * (1 + Math.abs(svi.rho)) >= 2) {
     return false;
   }
@@ -137,6 +252,8 @@ export async function executeTradeCycle(
     mockMode?: boolean; 
     walrusMockFallback?: boolean; 
     successOverride?: boolean;
+    lastBlobId?: string;
+    idempotencyUuid?: string;
     copyParams?: {
       lowerStrike: number;
       higherStrike: number;
@@ -144,7 +261,7 @@ export async function executeTradeCycle(
       amount: number;
     }
   } = {}
-): Promise<{ success: boolean; txDigest?: string; blobId?: string }> {
+): Promise<{ success: boolean; txDigest?: string; blobId?: string; confidence?: number }> {
   const mockMode = options.mockMode ?? false;
   const walrusMockFallback = options.walrusMockFallback ?? true;
   const successOverride = options.successOverride ?? true;
@@ -152,6 +269,47 @@ export async function executeTradeCycle(
  
   console.log(`🤖 Starting trade cycle for agent: ${agentAddress}`);
   console.log(`  Policy Wallet: ${policyObjectId}`);
+
+  // Reflective Memory learning loop parameters
+  let reflectiveTradeAmountAdjustment = 1.0;
+  let reflectiveMarginWidenFactor = 1.0;
+  let previousSummary = "No previous memory recorded.";
+
+  if (options.lastBlobId) {
+    try {
+      console.log(`🧠 Reflective Memory: Fetching and decrypting previous trace ${options.lastBlobId}...`);
+      const encryptedTrace = await downloadFromWalrus(options.lastBlobId, mockMode || walrusMockFallback);
+      const decryptedBytes = await decryptWithSeal(encryptedTrace);
+      const decryptedStr = new TextDecoder().decode(decryptedBytes);
+      
+      if (decryptedStr.startsWith("Strategy Summary")) {
+        previousSummary = decryptedStr;
+        console.log(`🧠 Reflective Memory: Loaded compressed strategy summary: "${decryptedStr}"`);
+        if (decryptedStr.includes("Bias: BEARISH_HEAVY") || decryptedStr.includes("Net PnL: -")) {
+          console.log(yellow("🧠 Reflective Memory: Compressed history indicates net loss. Decreasing trade amount by 25% and widening volatility margin by 20%."));
+          reflectiveTradeAmountAdjustment = 0.75;
+          reflectiveMarginWidenFactor = 1.20;
+        } else {
+          console.log(green("🧠 Reflective Memory: Compressed history indicates profitability. Maintaining default risk parameters."));
+        }
+      } else {
+        const lastTrace = JSON.parse(decryptedStr);
+        if (lastTrace && typeof lastTrace.pnl_dusdc === "number") {
+          previousSummary = `Previous cycle PnL was ${lastTrace.pnl_dusdc / 1e6} dUSDC. Status: ${lastTrace.trade_decision}`;
+          console.log(`🧠 Reflective Memory: Previous cycle PnL was ${lastTrace.pnl_dusdc / 1e6} dUSDC`);
+          if (lastTrace.pnl_dusdc < 0) {
+            console.log(yellow("🧠 Reflective Memory: Last cycle recorded a loss. Decreasing trade amount by 25% and widening volatility margin by 20%."));
+            reflectiveTradeAmountAdjustment = 0.75;
+            reflectiveMarginWidenFactor = 1.20;
+          } else {
+            console.log(green("🧠 Reflective Memory: Last cycle was profitable. Maintaining default risk parameters."));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`⚠️ Failed to parse previous Walrus trace for Reflective Memory:`, (err as Error).message);
+    }
+  }
 
   let svi: SVIParameters;
   let lowerStrike = 0;
@@ -214,28 +372,88 @@ export async function executeTradeCycle(
   }
  
   // Step 4: Construct Sui PTB
-  const tx = new Transaction();
   if (!options.copyParams) {
     const trace = popTrace();
     if (trace) {
-      // Normalize massive historical trades down to our 25 dUSDC testnet limits
-      // Whales (>1000) use 20 dUSDC, Retail use 5 dUSDC
       const isWhale = trace.tradeAmount > 1000_000_000;
       tradeAmount = isWhale ? 20_000_000 : 5_000_000;
+      tradeAmount = Math.floor(tradeAmount * reflectiveTradeAmountAdjustment);
       expiry = trace.expiry;
       lowerStrike = trace.lowerStrike;
       higherStrike = trace.higherStrike;
-      svi.sigma = trace.volatilityEstimate; // align SVI logic with the historical data
+      svi.sigma = trace.volatilityEstimate;
       console.log(`📊 Ingested DeepBook User Trace: ${trace.id} | Amount: ${tradeAmount / 1_000_000} dUSDC | Spread: ${lowerStrike}-${higherStrike}`);
     } else {
-      tradeAmount = 5_000_000;
-      // Dynamically calculate strikes (baseline 70,000 adjusted by SVI volatility)
+      tradeAmount = Math.floor(5_000_000 * reflectiveTradeAmountAdjustment);
       const basePrice = 70000;
-      const spread = Math.floor(basePrice * svi.sigma); // e.g. 70000 * 0.15 = 10500
+      const spread = Math.floor(basePrice * svi.sigma * reflectiveMarginWidenFactor); 
       lowerStrike = basePrice - spread;
       higherStrike = basePrice + spread;
       expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours expiry
     }
+  }
+
+  // 8.9 Enforce strict JSON Schema validation and parsing
+  let rawLLMOutputJSON = "";
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+
+  if (openRouterApiKey && !openRouterApiKey.includes("placeholder") && !options.copyParams) {
+    console.log("🤖 Querying live Llama-3 model on OpenRouter for options pricing reasoning...");
+    try {
+      rawLLMOutputJSON = await queryOpenRouterLLM(svi, previousSummary, openRouterApiKey);
+    } catch (e) {
+      console.warn("⚠️ OpenRouter query failed, falling back to local simulation schema:", (e as Error).message);
+    }
+  }
+
+  // Fallback to local deterministic simulated LLM reasoning output if not queried or failed
+  if (!rawLLMOutputJSON) {
+    rawLLMOutputJSON = JSON.stringify({
+      lowerStrike,
+      higherStrike,
+      expiry,
+      tradeAmount,
+      confidence: 0.85, // mock confidence score
+      reasoning: `SVI parameters: a=${svi.a}, b=${svi.b}. Volatility spread determined strikes.`
+    });
+  }
+
+  console.log("🔍 Running strict schema validation on LLM output JSON...");
+  const validatedOutput = validateLLMReasoning(rawLLMOutputJSON);
+  
+  // Use validated parameters
+  lowerStrike = validatedOutput.lowerStrike;
+  higherStrike = validatedOutput.higherStrike;
+  expiry = validatedOutput.expiry;
+  tradeAmount = validatedOutput.tradeAmount;
+  const confidence = validatedOutput.confidence;
+  console.log("✅ Schema validation passed. Confirmed inputs are type-safe.");
+
+  // Add explicit type checks to ensure all arguments passed to Sui transaction inputs are properly formed hex addresses, numbers, or BCS-compatible types
+  if (!isValidSuiAddress(REGISTRY_OBJECT_ID)) {
+    throw new Error(`Invalid SUI registry address: ${REGISTRY_OBJECT_ID}`);
+  }
+  if (!isValidSuiAddress(agentAddress)) {
+    throw new Error(`Invalid SUI agent address: ${agentAddress}`);
+  }
+  if (!isValidSuiAddress(policyObjectId)) {
+    throw new Error(`Invalid SUI policy wallet address: ${policyObjectId}`);
+  }
+  if (!isValidSuiAddress(DEEPBOOK_PREDICT_PACKAGE_ID)) {
+    throw new Error(`Invalid DeepBook Predict Package address: ${DEEPBOOK_PREDICT_PACKAGE_ID}`);
+  }
+  if (!isValidSuiAddress(DEEPBOOK_POOL_ID)) {
+    throw new Error(`Invalid DeepBook Pool ID: ${DEEPBOOK_POOL_ID}`);
+  }
+  if (!isValidNumber(lowerStrike) || !isValidNumber(higherStrike) || !isValidNumber(expiry) || !isValidNumber(tradeAmount)) {
+    throw new Error("Invalid numeric arguments for trading cycle");
+  }
+
+  const tx = new Transaction();
+
+  // If idempotency UUID is provided, insert it into the transaction block as a pure input
+  if (options.idempotencyUuid) {
+    tx.pure.string(options.idempotencyUuid);
   }
 
   // 4.1 Verify reputation on-chain
@@ -307,7 +525,7 @@ export async function executeTradeCycle(
     arguments: [
       tx.object(REGISTRY_OBJECT_ID),
       tx.pure.address(agentAddress),
-      tx.pure.bool(successOverride), // Success (in production derived from settlement)
+      tx.pure.bool(successOverride),
     ],
   });
 
@@ -325,7 +543,7 @@ export async function executeTradeCycle(
           version: coin.version,
           digest: coin.digest
         })));
-        tx.setGasBudget(2_000_000); // 0.002 SUI budget
+        tx.setGasBudget(2_000_000);
       }
       
       const transactionBlockBytes = await tx.build({ client: SUI_CLIENT });
@@ -357,12 +575,10 @@ export async function executeTradeCycle(
   // Step 6: Trigger the Walrus verifiable audit archiving pipeline
   console.log("💾 Archiving trade execution trace...");
   
-  // Create a dynamic reasoning hash from actual inputs to prove determinism
   const reasoningInput = `SVI(sigma=${svi.sigma.toFixed(3)},rho=${svi.rho.toFixed(3)}) -> spread=${higherStrike - lowerStrike}`;
   const reasoningHash = crypto.createHash("sha256").update(reasoningInput).digest("hex");
   const decisionStr = `Mint Range ${(lowerStrike/1000).toFixed(1)}k-${(higherStrike/1000).toFixed(1)}k`;
 
-  // Fetch actual epoch if possible, otherwise derive from timestamp
   let currentEpoch = 100;
   let currentGasBalance = 5_200_000_000;
   if (!mockMode) {
@@ -376,14 +592,14 @@ export async function executeTradeCycle(
       console.warn("⚠️ Could not query on-chain epoch/gas. Using mock fallback.");
     }
   } else {
-    currentEpoch = Math.floor(Date.now() / 1000 / 86400); // 1 epoch ~ 1 day fallback
+    currentEpoch = Math.floor(Date.now() / 1000 / 86400);
   }
 
   const simulatedTradeResult = {
     epoch: currentEpoch,
     decision: decisionStr,
     amount: tradeAmount,
-    refund: Math.floor(tradeAmount * 0.98), // Real slippage/fees will be parsed from tx.effects in production
+    refund: Math.floor(tradeAmount * 0.98),
     reasoningHash: reasoningHash,
     gasBalance: currentGasBalance,
   };
@@ -402,13 +618,42 @@ export async function executeTradeCycle(
     return { success: false, txDigest };
   }
 
+  // Push trace to history map for state compression
+  const trace = buildAuditTrace(simulatedTradeResult, svi, policyObjectId, agentAddress);
+  if (!recentTracesMap[agentAddress]) {
+    recentTracesMap[agentAddress] = [];
+  }
+  recentTracesMap[agentAddress].push(trace);
+
+  let finalBlobId = archiveResult.blobId;
+
+  // Periodically compress state history after every 5 cycles to prevent context window overflow
+  if (recentTracesMap[agentAddress].length >= 5) {
+    try {
+      console.log(`🗜️ State History Compression: Compressing last 5 traces for agent ${agentAddress}...`);
+      const compressionBlobId = await compressStateHistory(
+        recentTracesMap[agentAddress],
+        agentKeypair,
+        mockMode,
+        walrusMockFallback
+      );
+      // Overwrite the on-chain registry history blob with the compressed summary blob ID
+      await commitBlobIdOnChain(compressionBlobId, agentKeypair, mockMode);
+      console.log(`🗜️ State History Compression: Successfully committed compressed summary blob ${compressionBlobId} on-chain.`);
+      finalBlobId = compressionBlobId;
+      recentTracesMap[agentAddress] = []; // Reset history
+    } catch (compressErr) {
+      console.error(`❌ State History Compression failed:`, (compressErr as Error).message);
+    }
+  }
+
   console.log("🎉 Trade cycle completed successfully!");
-  
 
   return {
     success: true,
     txDigest,
-    blobId: archiveResult.blobId,
+    blobId: finalBlobId,
+    confidence,
   };
 }
 

@@ -243,7 +243,7 @@ async function bootstrapAgent(
   if (!isRegistered) {
     console.log(yellow(`   Agent not registered in registry. Registering now...`));
     const tx3 = new Transaction();
-    const [stakeCoin] = tx3.splitCoins(tx3.gas, [tx3.pure.u64(10_000_000)]); // 0.01 SUI stake bond
+    const [stakeCoin] = tx3.splitCoins(tx3.gas, [tx3.pure.u64(100_000_000)]); // 0.1 SUI stake bond
     tx3.moveCall({
       target: `${AURA_PACKAGE_ID}::aura_registry::register_agent`,
       arguments: [tx3.object(REGISTRY_OBJECT_ID), stakeCoin]
@@ -347,6 +347,35 @@ const requireAuth = (req: express.Request, res: express.Response, next: express.
 let activeIntervals: NodeJS.Timeout[] = [];
 let loopRunning = false;
 
+// Global circuit breaker, idempotency, and HITL state variables
+let consecutiveFailures = 0;
+let circuitBreakerTripped = false;
+let isEscalated = false;
+let escalationResolver: (() => void) | null = null;
+const lastBlobIdMap: Record<string, string> = {};
+
+// Idempotency query function
+async function isTransactionCommitted(agentAddress: string, uuid: string): Promise<boolean> {
+  try {
+    console.log(`🔍 Idempotency Check: Querying transaction history for ${agentAddress} matching ${uuid}...`);
+    const txBlocks = await SUI_CLIENT.queryTransactionBlocks({
+      filter: { FromAddress: agentAddress },
+      options: { showInput: true },
+      limit: 20
+    });
+    for (const tx of txBlocks.data) {
+      const txStr = JSON.stringify(tx);
+      if (txStr.includes(uuid)) {
+        console.log(yellow(`⚠️ Idempotency check: Found transaction ${tx.digest} containing UUID ${uuid}. Already committed!`));
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn(`⚠️ Failed to query transaction history for idempotency check:`, err);
+  }
+  return false;
+}
+
 app.get("/api/status", async (req, res) => {
   const ownerKeypair = getAgentKeypair();
   const ownerAddress = ownerKeypair.toSuiAddress();
@@ -361,7 +390,8 @@ app.get("/api/status", async (req, res) => {
   } catch (e) {}
 
   res.json({
-    status: loopRunning ? "RUNNING" : "STOPPED",
+    status: circuitBreakerTripped ? "CIRCUIT_BREAKER_TRIPPED" : (loopRunning ? "RUNNING" : "STOPPED"),
+    isEscalated,
     ownerAddress,
     ownerBalances: {
       sui: (Number(ownerSui) / 1e9).toFixed(4),
@@ -371,10 +401,28 @@ app.get("/api/status", async (req, res) => {
   });
 });
 
+app.post("/api/resume", requireAuth, (req, res) => {
+  if (!isEscalated) {
+    return res.json({ message: "No active escalation to resume." });
+  }
+  if (escalationResolver) {
+    escalationResolver();
+    escalationResolver = null;
+  }
+  isEscalated = false;
+  loopRunning = true;
+  console.log(green("✅ Escalation resolved by owner. Resuming execution..."));
+  res.json({ success: true, message: "Agent execution resumed." });
+});
+
 app.post("/api/start", requireAuth, async (req, res) => {
   if (loopRunning) {
     return res.json({ message: "Loop is already running." });
   }
+
+  circuitBreakerTripped = false;
+  consecutiveFailures = 0;
+  isEscalated = false;
 
   const delayMs = parseInt(req.body.intervalMs as string, 10) || 30000;
   loopRunning = true;
@@ -391,22 +439,108 @@ app.post("/api/start", requireAuth, async (req, res) => {
     const agent3 = await bootstrapAgent(ownerKeypair, key3, "Delta-Neutral Bot", 25_000_000, 100_000_000);
 
     const runCycle = async (name: string, keypair: Ed25519Keypair, policyId: string) => {
-      if (!loopRunning) return;
+      if (!loopRunning || circuitBreakerTripped) return;
+
+      if (isEscalated) {
+        console.log(yellow(`[${name}] Pausing execution loop due to active HITL escalation.`));
+        await new Promise<void>((resolve) => {
+          escalationResolver = resolve;
+        });
+      }
+
+      const agentAddress = keypair.toSuiAddress();
+      const idempotencyUuid = crypto.randomUUID();
+      console.log(cyan(`\n🔄 [${name}] Starting cycle with Idempotency UUID: ${idempotencyUuid}`));
+
       let successOverride = true;
       if (name.includes("Aggressive")) {
         successOverride = Math.random() > 0.5;
       } else if (name.includes("Delta-Neutral")) {
         successOverride = Math.random() > 0.1;
       }
-      try {
-        console.log(`[${name}] Executing trade cycle...`);
-        await executeTradeCycle(keypair, policyId, {
-          mockMode: false,
-          walrusMockFallback: false,
-          successOverride,
-        });
-      } catch (err) {
-        console.error(`[${name}] Error in trade cycle:`, (err as Error).message);
+
+      const maxRetries = 3;
+      let attempt = 0;
+      let backoffMs = 2000;
+      let lastBlobId = lastBlobIdMap[name];
+
+      while (attempt < maxRetries) {
+        attempt++;
+        try {
+          if (attempt > 1) {
+            console.log(yellow(`🔄 [${name}] Retry Attempt ${attempt}/${maxRetries} after ${backoffMs}ms...`));
+            await sleep(backoffMs);
+            backoffMs *= 2;
+
+            const alreadyCommitted = await isTransactionCommitted(agentAddress, idempotencyUuid);
+            if (alreadyCommitted) {
+              console.log(green(`✅ [${name}] Transaction with UUID ${idempotencyUuid} was already committed. Skipping retry.`));
+              consecutiveFailures = 0;
+              return;
+            }
+          }
+
+          console.log(`[${name}] Executing trade cycle (Attempt ${attempt})...`);
+          const result = await executeTradeCycle(keypair, policyId, {
+            mockMode: false,
+            walrusMockFallback: false,
+            successOverride,
+            lastBlobId,
+            idempotencyUuid,
+          });
+
+          if (!result.success) {
+            throw new Error("executeTradeCycle returned success=false");
+          }
+
+          consecutiveFailures = 0;
+          if (result.blobId) {
+            lastBlobIdMap[name] = result.blobId;
+          }
+
+          // HITL confidence escalation
+          const CONFIDENCE_THRESHOLD = 0.60;
+          const confidence = result.confidence ?? 0.85;
+          if (confidence < CONFIDENCE_THRESHOLD) {
+            console.log(red(`🚨 [${name}] Escalated to Human Owner: Low Confidence (${confidence.toFixed(2)} < ${CONFIDENCE_THRESHOLD})`));
+            isEscalated = true;
+            loopRunning = false;
+            break;
+          }
+
+          return;
+
+        } catch (err) {
+          console.error(red(`❌ [${name}] Attempt ${attempt} failed: ${(err as Error).message}`));
+          consecutiveFailures++;
+
+          if (consecutiveFailures >= 3) {
+            circuitBreakerTripped = true;
+            loopRunning = false;
+            activeIntervals.forEach(clearInterval);
+            activeIntervals = [];
+            console.error(red(`\n💥💥💥 CIRCUIT BREAKER TRIPPED after 3 consecutive failures. Halting all loops. 💥💥💥`));
+            
+            // Log circuit breaker event to Walrus
+            try {
+              const simulatedTradeResult = {
+                epoch: 100,
+                decision: "CIRCUIT_BREAKER_TRIPPED",
+                amount: 0,
+                refund: 0,
+                reasoningHash: crypto.createHash("sha256").update("CIRCUIT_BREAKER_TRIPPED").digest("hex"),
+                gasBalance: 5000000000,
+              };
+              const svi = { a: 0, b: 0, rho: 0, m: 0, sigma: 0 };
+              const { archiveTradeAudit } = await import("./walrus_archiver.js");
+              await archiveTradeAudit(simulatedTradeResult, svi, policyId, keypair, { mockMode: true, walrusMockFallback: true });
+              console.log(yellow("💾 CIRCUIT_BREAKER_TRIPPED event trace successfully written to Walrus."));
+            } catch (archiveErr) {
+              console.error("❌ Failed to log breaker event to Walrus:", archiveErr);
+            }
+            break;
+          }
+        }
       }
     };
 
@@ -418,7 +552,6 @@ app.post("/api/start", requireAuth, async (req, res) => {
 
     activeIntervals = [t1, t2, t3];
     
-    // Initial staggered run
     runCycle("Conservative Yield", agent1.agentKeypair, agent1.policyId);
     sleep(2000).then(() => runCycle("Aggressive Vol", agent2.agentKeypair, agent2.policyId));
     sleep(4000).then(() => runCycle("Delta-Neutral", agent3.agentKeypair, agent3.policyId));

@@ -6,6 +6,7 @@ import {
   AURA_PACKAGE_ID, 
   REGISTRY_OBJECT_ID, 
   WALRUS_PUBLISHER, 
+  WALRUS_AGGREGATOR,
   MEMWAL_API_URL,
   MEMWAL_TOKEN,
   getAgentKeypair 
@@ -19,6 +20,13 @@ export interface AuditTrace {
   policy_wallet: string;
   agent_address: string;
   svi_surface: object;
+  svi_calculations?: {
+    a: number;
+    b: number;
+    rho: number;
+    sigma: number;
+    m: number;
+  };
   trade_decision: string;
   trade_amount_dusdc: number;
   refund_amount_dusdc: number;
@@ -42,6 +50,9 @@ export interface SealEnvelope {
 
 // Secure mock key derived deterministically for testing round-trips
 const MOCK_SEAL_KEY = crypto.scryptSync("mock-seal-passphrase", "aura-salt", 32);
+
+// Local in-memory mock blob storage cache for simulation round-trips
+export const mockBlobStorage: Record<string, Uint8Array> = {};
 
 /**
  * Mocks the client-side Seal threshold encryption by encrypting the payload
@@ -113,6 +124,13 @@ export function buildAuditTrace(
     policy_wallet: policyWallet,
     agent_address: agentAddress,
     svi_surface: svi,
+    svi_calculations: {
+      a: svi.a,
+      b: svi.b,
+      rho: svi.rho,
+      sigma: svi.sigma,
+      m: svi.m,
+    },
     trade_decision: tradeResult.decision,
     trade_amount_dusdc: tradeResult.amount,
     refund_amount_dusdc: tradeResult.refund,
@@ -154,12 +172,14 @@ export async function uploadToWalrus(
     if (!blobId) {
       throw new Error("No blobId returned in Walrus response");
     }
+    mockBlobStorage[blobId] = encryptedPayload;
     return blobId;
   } catch (error) {
     if (useMockFallback) {
       const hash = crypto.createHash("sha256").update(encryptedPayload).digest("hex");
       const simulatedBlobId = `mock-blob-${hash.substring(0, 32)}`;
       console.log(`⚠️ Walrus offline or unreachable. Using simulated blob ID: ${simulatedBlobId}`);
+      mockBlobStorage[simulatedBlobId] = encryptedPayload;
       return simulatedBlobId;
     }
     throw new Error(`Walrus upload failed: ${(error as Error).message}`);
@@ -279,4 +299,74 @@ export async function archiveTradeAudit(
   console.log(`🔗 On-chain blob_id committed: ${txDigest}`);
 
   return { blobId, txDigest };
+}
+
+/**
+ * Strategy state compression to prevent context window overflow.
+ * Compiles a dense Strategy Summary String and uploads to Walrus.
+ */
+export async function compressStateHistory(
+  traces: AuditTrace[],
+  agentKeypair: Ed25519Keypair,
+  mockMode: boolean = false,
+  walrusMockFallback: boolean = true
+): Promise<string> {
+  const total = traces.length;
+  if (total === 0) return "";
+  const wins = traces.filter(t => t.pnl_dusdc > 0).length;
+  const winRate = (wins / total) * 100;
+  const netPnl = traces.reduce((acc, t) => acc + t.pnl_dusdc, 0);
+  const bias = netPnl > 0 ? "BULLISH_WINNING" : "BEARISH_HEAVY";
+
+  const summary = `Strategy Summary | Total Cycles: ${total} | Win-rate: ${winRate.toFixed(1)}% | Net PnL: ${netPnl / 1e6} dUSDC | Bias: ${bias}`;
+  console.log(`🗜️ Compressing state history of ${total} traces: "${summary}"`);
+  
+  const rawBytes = new TextEncoder().encode(summary);
+  const encrypted = await encryptWithSeal(rawBytes, "compression-policy");
+  const blobId = await uploadToWalrus(encrypted, walrusMockFallback);
+  console.log(`🗜️ Uploaded compressed strategy summary to Walrus. Blob ID: ${blobId}`);
+  return blobId;
+}
+
+/**
+ * Downloads a blob from Walrus using the aggregator.
+ */
+export async function downloadFromWalrus(
+  blobId: string,
+  useMockFallback: boolean = false
+): Promise<Uint8Array> {
+  if (useMockFallback || blobId.startsWith("mock-")) {
+    console.log(`⚠️ Mock Mode: Simulating Walrus download for blob ID: ${blobId}`);
+    if (mockBlobStorage[blobId]) {
+      return mockBlobStorage[blobId];
+    }
+    // Return a mocked encrypted payload that decrypts to a default trace as fallback
+    const defaultTrace: AuditTrace = {
+      epoch: 100,
+      policy_wallet: "0x123",
+      agent_address: "0x456",
+      svi_surface: {},
+      trade_decision: "HOLDING_PREDICT_RANGE",
+      trade_amount_dusdc: 20_000_000,
+      refund_amount_dusdc: 15_000_000, // simulated loss (15 < 20)
+      pnl_dusdc: -5_000_000,
+      arbitrage_check_passed: true,
+      model_reasoning_hash: "hash",
+      gas_balance_sui: 5_000_000_000,
+      timestamp: new Date().toISOString(),
+    };
+    const rawBytes = new TextEncoder().encode(JSON.stringify(defaultTrace));
+    return await encryptWithSeal(rawBytes, "0x123");
+  }
+
+  try {
+    const response = await fetch(`${WALRUS_AGGREGATOR}/v1/blobs/${blobId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+    }
+    const buffer = await response.arrayBuffer();
+    return new Uint8Array(buffer);
+  } catch (error) {
+    throw new Error(`Walrus download failed: ${(error as Error).message}`);
+  }
 }

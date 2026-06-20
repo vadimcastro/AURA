@@ -23,12 +23,12 @@ module aura::aura_registry {
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
-    /// Minimum SUI stake to register as an agent (0.01 SUI in MIST).
+    /// Minimum SUI stake to register as an agent (0.1 SUI in MIST).
     /// Recalibrate for mainnet based on expected value at risk.
-    const MIN_STAKE: u64 = 10_000_000;
+    const MIN_STAKE: u64 = 100_000_000;
 
-    /// Dispute bond required to prevent griefing (0.1 SUI in MIST for Testnet).
-    const DISPUTE_BOND_AMOUNT: u64 = 100_000_000;
+    /// Dispute bond required to prevent griefing (0.01 SUI in MIST for Testnet).
+    const DISPUTE_BOND_AMOUNT: u64 = 10_000_000;
 
     /// Reputation score denominator — 10^6 for precision without floats.
     const SCORE_PRECISION: u64 = 1_000_000;
@@ -52,6 +52,7 @@ module aura::aura_registry {
     const EDisputeAlreadyResolved: u64 = 7;
     const ENotAgentOperator: u64       = 8;
     const EDeadlineNotReached: u64     = 9;
+    const EStakeFloorViolation: u64    = 10;
 
     // ── Structs ───────────────────────────────────────────────────────────────
 
@@ -132,6 +133,12 @@ module aura::aura_registry {
     public struct AgentDeregistered has copy, drop {
         agent: address,
         stake_returned: u64,
+    }
+
+    /// Emitted when an agent operator withdraws excess stake.
+    public struct StakeWithdrawn has copy, drop {
+        agent: address,
+        amount: u64,
     }
 
     /// Emitted when admin issues a timed suspension.
@@ -364,6 +371,40 @@ module aura::aura_registry {
         event::emit(AgentDeregistered { agent: agent_addr, stake_returned });
 
         transfer::public_transfer(stake_coin, agent_addr);
+    }
+
+    /// Withdraw excess stake above the reputation-based floor.
+    /// Only the registered active agent's operator/owner can call this.
+    /// Aligns operator incentives by swapping capital lockups for proven reputation scores.
+    #[allow(lint(self_transfer))]
+    public fun withdraw_excess_stake(
+        registry: &mut Registry,
+        amount: u64,
+        ctx: &mut TxContext,
+    ) {
+        let agent_addr = ctx.sender();
+        assert!(table::contains(&registry.agents, agent_addr), ENotRegistered);
+        let record = table::borrow_mut(&mut registry.agents, agent_addr);
+        assert!(record.active, EAgentInactive);
+        assert!(ctx.epoch() >= record.blacklist_until, EAgentBlacklisted);
+
+        let current_stake = balance::value(&record.stake);
+        assert!(current_stake >= amount, EStakeFloorViolation);
+
+        let remaining_stake = current_stake - amount;
+        let min_required_stake = (((MIN_STAKE as u128) * ((SCORE_PRECISION - record.reputation_score) as u128)) / (SCORE_PRECISION as u128) as u64);
+
+        assert!(remaining_stake >= min_required_stake, EStakeFloorViolation);
+
+        let withdrawn_balance = balance::split(&mut record.stake, amount);
+        let withdrawn_coin = coin::from_balance(withdrawn_balance, ctx);
+
+        event::emit(StakeWithdrawn {
+            agent: agent_addr,
+            amount,
+        });
+
+        transfer::public_transfer(withdrawn_coin, agent_addr);
     }
 
     /// Submit a dispute challenging an agent's telemetry audit blob.
@@ -1065,6 +1106,88 @@ module aura::aura_registry {
 
             ts::return_shared(registry);
             clock::destroy_for_testing(clock);
+        };
+
+        ts::end(scenario);
+    }
+
+    // 8.4 — Withdraw excess stake successfully when reputation floor allows it
+    #[test]
+    fun test_withdraw_excess_stake_success() {
+        let mut scenario = ts::begin(ADMIN);
+        { init_for_testing(ts::ctx(&mut scenario)); };
+
+        // Register agent with MIN_STAKE (which is now 100_000_000 MIST)
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let stake = coin::mint_for_testing<SUI>(MIN_STAKE, ctx);
+            register_agent(&mut registry, stake, ctx);
+            ts::return_shared(registry);
+        };
+
+        // Complete 1 successful task outcome to raise reputation score to 100% (1_000_000)
+        ts::next_tx(&mut scenario, ADMIN);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            record_task_outcome(&mut registry, AGENT1, true, ctx);
+            std::unit_test::assert_eq!(get_reputation_score(&registry, AGENT1), 1_000_000);
+            ts::return_shared(registry);
+        };
+
+        // Call withdraw_excess_stake to withdraw 50_000_000 MIST
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            // With 100% reputation, min_required_stake = MIN_STAKE * (1M - 1M) / 1M = 0
+            // So we can withdraw up to the entire stake. Let's withdraw 50_000_000
+            withdraw_excess_stake(&mut registry, 50_000_000, ctx);
+            std::unit_test::assert_eq!(get_stake_amount(&registry, AGENT1), 50_000_000);
+            ts::return_shared(registry);
+        };
+
+        // Verify AGENT1 has received the coin back
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let withdrawn_coin = ts::take_from_sender<Coin<SUI>>(&scenario);
+            std::unit_test::assert_eq!(withdrawn_coin.value(), 50_000_000);
+            ts::return_to_sender(&scenario, withdrawn_coin);
+        };
+
+        ts::end(scenario);
+    }
+
+    // 8.5 — Attempting to withdraw below dynamic reputation floor reverts with StakeFloorViolation
+    #[test]
+    #[expected_failure(abort_code = EStakeFloorViolation)]
+    fun test_withdraw_excess_stake_floor_violation() {
+        let mut scenario = ts::begin(ADMIN);
+        { init_for_testing(ts::ctx(&mut scenario)); };
+
+        // Register agent with MIN_STAKE
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let stake = coin::mint_for_testing<SUI>(MIN_STAKE, ctx);
+            register_agent(&mut registry, stake, ctx);
+            ts::return_shared(registry);
+        };
+
+        // Agent has initial reputation 50% (500_000)
+        // With 50% reputation, min_required_stake = MIN_STAKE * (1M - 500k) / 1M = 50_000_000 MIST
+        // If agent attempts to withdraw 60_000_000 MIST:
+        // Remaining stake = 100_000_000 - 60_000_000 = 40_000_000 MIST < 50_000_000 MIST.
+        // This should abort with EStakeFloorViolation!
+        ts::next_tx(&mut scenario, AGENT1);
+        {
+            let mut registry = ts::take_shared<Registry>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            withdraw_excess_stake(&mut registry, 60_000_000, ctx);
+            ts::return_shared(registry);
         };
 
         ts::end(scenario);

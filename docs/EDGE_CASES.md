@@ -66,4 +66,12 @@ AURA manages resource depletion at both the on-chain execution layer and the bro
     1. Before formatting any PTB, the agent calculates an internal `confidence_score` (between 0.0 and 1.0) derived from SVI modeling and historical win rates.
     2. If this confidence score drops below a configurable threshold (e.g., `0.60`), the agent halts the autonomous loop execution.
     3. The loop emits a suspended state notification `Escalated to Human Owner: Low Confidence Score (score: X)` to the dashboard, letting the owner manually review and resume execution, rather than executing high-risk, low-confidence orders.
+*   **Initial Registration Exemption:** This confidence-based HITL check operates exclusively during active trading cycles. It does not affect the initial agent registration on-chain (`register_agent`), which initializes the agent record with a default Bayesian prior reputation of 50%. The registration completes successfully regardless of the agent's current or subsequent confidence states.
+
+## J. Volatility Risk Scaling & Context Overflows
+*   **Reflective Memory Risk Calibration:** To survive adverse market conditions, the agent monitors its Walrus history. Upon detecting a prior-cycle loss, it dynamically applies risk-aversion parameters:
+    *   *Trade Size Reduction (-25%):* Scales down the Value at Risk (VaR) to protect owner capital.
+    *   *Spread Widening (+20%):* Widens option strike ranges relative to SVI volatility estimates. This demands a higher volatility risk premium and reduces exposure to toxic flow.
+    *   These parameters (25% size reduction, 20% margin expansion) are mathematically calibrated to provide a robust risk-off response without rendering the agent non-competitive or disabling its recovery potential.
+*   **Context Window Bloating (State Compression):** Continuous telemetry logging quickly overflows the LLM context window. To resolve this, AURA implements periodic state compression: after every 5 cycles, the agent aggregates raw logs into a single dense "Strategy Summary String" (containing metrics like win-rate and net PnL) uploaded to Walrus, committing the summary blob ID to the on-chain registry. Subsequent cycles read this summary context directly, optimizing context utilization.
 

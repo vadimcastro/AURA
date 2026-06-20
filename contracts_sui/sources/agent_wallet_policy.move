@@ -242,14 +242,26 @@ module aura::agent_wallet_policy {
     /// handful of trades even if every trade was profitable — operationally broken.
     public fun return_and_complete<T>(
         policy: &mut WalletPolicy<T>,
-        coin: Coin<T>,
+        mut coin: Coin<T>,
         ticket: TradeTicket<T>,
-        _ctx: &mut TxContext,
+        ctx: &mut TxContext,
     ) {
         // Destructure hot potato — this is the only way to consume it.
-        let TradeTicket { policy_id: _, amount: _, target_contract: _ } = ticket;
+        let TradeTicket { policy_id: _, amount: borrowed_amount, target_contract: _ } = ticket;
 
-        let amount_returned = coin.value();
+        let mut amount_returned = coin.value();
+
+        // 0.5% protocol fee on profit if the trade was profitable (refund > borrowed_amount)
+        if (amount_returned > borrowed_amount) {
+            let profit = amount_returned - borrowed_amount;
+            let protocol_fee = (profit * 5) / 1000; // 0.5%
+            if (protocol_fee > 0) {
+                // Split fee and transfer to the protocol fee destination
+                let fee_coin = coin::split(&mut coin, protocol_fee, ctx);
+                transfer::public_transfer(fee_coin, @buy_and_burn_insurance);
+                amount_returned = amount_returned - protocol_fee;
+            }
+        };
 
         // Clamped subtraction: reduce budget_spent by however much was returned.
         // If the trade was profitable (amount_returned > budget_spent) clamp to 0
@@ -573,9 +585,9 @@ module aura::agent_wallet_policy {
             let mut combined = coin2;
             coin::join(&mut combined, profit);
             return_and_complete(&mut policy, combined, ticket2, ctx);
-            // Policy balance grew by profit.
-            std::unit_test::assert_eq!(get_balance(&policy), 550_000_000);
-            // Profitable return: 250M returned > 200M spent → clamps to 0.
+            // Policy balance grew by profit (50M profit minus 0.5% protocol fee = 49.75M net).
+            std::unit_test::assert_eq!(get_balance(&policy), 549_750_000);
+            // Profitable return: 249.75M net returned > 200M spent → clamps to 0.
             std::unit_test::assert_eq!(get_budget_spent(&policy), 0);
 
             ts::return_shared(policy);
@@ -627,6 +639,59 @@ module aura::agent_wallet_policy {
             let policy = ts::take_shared<WalletPolicy<SUI>>(&scenario);
             let ctx = ts::ctx(&mut scenario);
             revoke_policy(policy, ctx);
+        };
+
+        ts::end(scenario);
+    }
+
+    // 8.6 — Deflationary protocol fee on profitable execution.
+    #[test]
+    fun test_profitable_execution_protocol_fee() {
+        let mut scenario = setup_policy(1_000_000_000, 0, 9999);
+
+        // Deposit 500,000,000 MIST to the policy wallet
+        ts::next_tx(&mut scenario, OWNER);
+        {
+            let mut policy = ts::take_shared<WalletPolicy<SUI>>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let coin = coin::mint_for_testing<SUI>(500_000_000, ctx);
+            deposit(&mut policy, coin, ctx);
+            ts::return_shared(policy);
+        };
+
+        // Borrow 200,000,000 MIST
+        ts::next_tx(&mut scenario, AGENT);
+        {
+            let mut policy = ts::take_shared<WalletPolicy<SUI>>(&scenario);
+            let ctx = ts::ctx(&mut scenario);
+            let (borrowed_coin, ticket) = borrow_for_trade(&mut policy, 200_000_000, TARGET, ctx);
+
+            // Simulate profitable execution: trade returns 300,000,000 MIST (100,000,000 profit)
+            // Destroy the original borrowed coin, mint a new one with the profit.
+            coin::burn_for_testing(borrowed_coin);
+            let refund_coin = coin::mint_for_testing<SUI>(300_000_000, ctx);
+
+            // Return and complete trade.
+            // Profit = 300,000,000 - 200,000_000 = 100,000_000
+            // Protocol Fee = (100,000,000 * 5) / 1000 = 500,000 (0.5%)
+            // Net return = 300,000,000 - 500,000 = 299,500,000
+            return_and_complete(&mut policy, refund_coin, ticket, ctx);
+
+            // Verify policy balance is updated with net return (500M - 200M + 299.5M = 599,500,000)
+            std::unit_test::assert_eq!(get_balance(&policy), 599_500_000);
+
+            // Verify budget spent is fully restored to 0 (since 299.5M returned > 200M borrowed)
+            std::unit_test::assert_eq!(get_budget_spent(&policy), 0);
+
+            ts::return_shared(policy);
+        };
+
+        // Verify the 0.5% protocol fee (500,000 MIST) was routed to @buy_and_burn_insurance
+        ts::next_tx(&mut scenario, @buy_and_burn_insurance);
+        {
+            let fee_coin = ts::take_from_sender<Coin<SUI>>(&scenario);
+            std::unit_test::assert_eq!(fee_coin.value(), 500_000);
+            ts::return_to_sender(&scenario, fee_coin);
         };
 
         ts::end(scenario);

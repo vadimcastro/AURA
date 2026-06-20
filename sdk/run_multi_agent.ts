@@ -9,6 +9,7 @@ import {
   getAgentKeypair 
 } from "./config.js";
 import { executeTradeCycle } from "./predict_agent.js";
+import { downloadFromWalrus, decryptWithSeal } from "./walrus_archiver.js";
 
 const green = (text: string) => `\x1b[32m${text}\x1b[0m`;
 const red = (text: string) => `\x1b[31m${text}\x1b[0m`;
@@ -128,7 +129,7 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
 
   // 3. Register Agent on-chain
   const tx3 = new Transaction();
-  const [stakeCoin] = tx3.splitCoins(tx3.gas, [tx3.pure.u64(10_000_000)]); // 0.01 SUI
+  const [stakeCoin] = tx3.splitCoins(tx3.gas, [tx3.pure.u64(100_000_000)]); // 0.1 SUI
   tx3.moveCall({
     target: `${AURA_PACKAGE_ID}::aura_registry::register_agent`,
     arguments: [
@@ -160,6 +161,11 @@ async function main() {
   const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", 25_000_000, 100_000_000);
   const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", 25_000_000, 100_000_000);
   const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", 25_000_000, 100_000_000);
+
+  // Run crash recovery workflow for each agent
+  await recoverAgentState(agent1.agentKeypair.toSuiAddress());
+  await recoverAgentState(agent2.agentKeypair.toSuiAddress());
+  await recoverAgentState(agent3.agentKeypair.toSuiAddress());
 
   console.log(green("\n[Phase 2] Starting Continuous Autonomous Trading Loops..."));
 
@@ -193,6 +199,58 @@ async function main() {
   runLoop("Aggressive", agent2, 30000); // Every 30s
   await sleep(10000);
   runLoop("Delta-Neutral", agent3, 30000); // Every 30s
+}
+
+async function recoverAgentLastBlobId(agentAddress: string): Promise<string | null> {
+  try {
+    console.log(`🔍 Crash Recovery: Querying registry dynamic fields for agent ${agentAddress}...`);
+    const regObj = await SUI_CLIENT.getObject({ id: REGISTRY_OBJECT_ID, options: { showContent: true } });
+    const content = regObj.data?.content as any;
+    const tableId = content?.fields?.agents?.fields?.id?.id;
+    if (!tableId) return null;
+
+    const df = await SUI_CLIENT.getDynamicFieldObject({
+      parentId: tableId,
+      name: { type: "address", value: agentAddress }
+    });
+    
+    const record = (df.data?.content as any)?.fields?.value?.fields;
+    const blobOption = record?.walrus_history_blob;
+    if (blobOption && (blobOption.type === "some" || (blobOption.fields && blobOption.fields.vec))) {
+      const vec = blobOption.fields.vec;
+      if (Array.isArray(vec) && vec.length > 0) {
+        const blobIdBytes = vec[0];
+        const blobId = Buffer.from(blobIdBytes).toString("utf8");
+        console.log(green(`   Crash Recovery: Found last committed blob ID: ${blobId}`));
+        return blobId;
+      }
+    }
+  } catch (e) {
+    console.warn(`⚠️ Crash Recovery: Failed to retrieve last blob ID from registry:`, (e as Error).message);
+  }
+  return null;
+}
+
+async function recoverAgentState(agentAddress: string): Promise<string> {
+  const lastBlobId = await recoverAgentLastBlobId(agentAddress);
+  if (!lastBlobId) {
+    console.log(yellow(`ℹ️ No previous state trace found for agent ${agentAddress}. Starting fresh.`));
+    return "FRESH_START";
+  }
+
+  try {
+    console.log(`🔍 Crash Recovery: Fetching last audit trace from Walrus for blob ID ${lastBlobId}...`);
+    const encryptedTrace = await downloadFromWalrus(lastBlobId, true);
+    const decryptedBytes = await decryptWithSeal(encryptedTrace);
+    const trace = JSON.parse(new TextDecoder().decode(decryptedBytes));
+    
+    const lastStatus = trace.trade_decision || "HOLDING_PREDICT_RANGE";
+    console.log(green(`🎉 Crash Recovery: Successfully recovered agent state! Last Status: ${lastStatus}`));
+    return lastStatus;
+  } catch (err) {
+    console.warn(`⚠️ Crash Recovery: Failed to download/decrypt last state trace:`, (err as Error).message);
+  }
+  return "FRESH_START";
 }
 
 main().catch(console.error);

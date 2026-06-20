@@ -1,6 +1,6 @@
 # Roadmap & Dependencies
 
-**Progress: [███████████████░░░░░] 77% Complete (7/9 Phases Completed) — Phase 7 E2E Live Copy Trading & Optimistic Slashing complete, Phase 8 Protocol Hardening & Cryptoeconomic Alignment planned**
+**Progress: [█████████████████░░░] 88% Complete (8/9 Phases Completed) — Phase 8 Protocol Hardening & Cryptoeconomic Alignment completed, Phase 9 Live Walkthrough Demo planned**
 
 ## ✅ Dev Environment Status
 
@@ -311,31 +311,31 @@ To transition from browser-tab simulation to continuous, persistent headless exe
 
 ---
 
-## 🚀 Phase 8: Protocol Hardening & Cryptoeconomic Alignment — PLANNED
+## ✅ Phase 8: Protocol Hardening & Cryptoeconomic Alignment — COMPLETED
 
 Introduce sustainable tokenomics, deterministic execution boundaries, and verifiable crash-recovery memory frameworks derived from first-principles Web3 AI agent research.
 
 ### 1. Cryptoeconomic Restructuring & Sustainable Tokenomics
-*   🔲 **Asymmetric Risk Ratios**: Adjust economic incentives to ensure Agent Stake is heavily disproportionate to Dispute Bond (10:1 ratio).
+*   ✅ **Asymmetric Risk Ratios**: Adjust economic incentives to ensure Agent Stake is heavily disproportionate to Dispute Bond (10:1 ratio).
     *   *Testnet Target:* Set Agent Stake to **0.1 SUI** (100,000,000 MIST) and Dispute Bond to **0.01 SUI** (10,000,000 MIST).
     *   *Mainnet Target:* Dynamically lock Agent Stake to **5% of WalletPolicy TVL** (or 500 SUI min) and Dispute Bond to **0.5% of TVL** (or 50 SUI).
-*   🔲 **Reputation-Based Progressive Stake Release**: Implement `withdraw_excess_stake` in [aura_registry.move](file:///Users/vadim/Desktop/AURA/contracts_sui/sources/aura_registry.move). Allow operators to progressively unlock tiers of their original SUI bond as their `reputation_score` increases organically via `record_task_outcome`.
-*   🔲 **Programmable Yield/Burn (Deflationary Value Capture)**: Add a **0.5% protocol fee** on profitable executions inside `return_and_complete` in [agent_wallet_policy.move](file:///Users/vadim/Desktop/AURA/contracts_sui/sources/agent_wallet_policy.move). Route fees to a Buy-and-Burn module or a Slashing Insurance Pool backing top-reputation agents.
-*   🔲 **Financialization Bridge (Sui Kiosk)**: Enforce registry validation for tradeable `AgentNFT` minting so operators must lock base SUI stake before strategy tokenization.
+*   ✅ **Reputation-Based Progressive Stake Release**: Implement `withdraw_excess_stake` in [aura_registry.move](file:///Users/vadim/Desktop/AURA/contracts_sui/sources/aura_registry.move). Allow operators to progressively unlock tiers of their original SUI bond as their `reputation_score` increases organically via `record_task_outcome`.
+*   ✅ **Programmable Yield/Burn (Deflationary Value Capture)**: Add a **0.5% protocol fee** on profitable executions inside `return_and_complete` in [agent_wallet_policy.move](file:///Users/vadim/Desktop/AURA/contracts_sui/sources/agent_wallet_policy.move). Route fees to a Buy-and-Burn module or a Slashing Insurance Pool backing top-reputation agents.
+*   ✅ **Financialization Bridge (Sui Kiosk)**: Enforce registry validation for tradeable `AgentNFT` minting so operators must lock base SUI stake before strategy tokenization.
 
 ### 2. Deterministic Execution & System Resilience
-*   🔲 **Idempotency Keys**: Generate unique `Idempotency_UUID` for every trade cycle in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Check blockchain history before retrying failed transactions to prevent duplicate trade commitments.
-*   🔲 **Circuit Breakers**: Implement exponential backoff and a hard iteration cap in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Halt execution loop programmatically and emit `CIRCUIT_BREAKER_TRIPPED` state trace to Walrus if `dryRunTransactionBlock` fails 3 consecutive times.
-*   🔲 **Strict Schema Validation & Runtime Checks**: Enforce strict JSON Schema validation and parsing of LLM outputs in [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) before constructing the PTB. Enforce runtime type assertions on all smart contract arguments.
-*   🔲 **Human-in-the-Loop Escalation**: Add confidence scoring thresholds in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Pause execution loop and alert the owner if the internal confidence score regarding a trade decision falls below the threshold.
+*   ✅ **Idempotency Keys**: Generate unique `Idempotency_UUID` for every trade cycle in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Check blockchain history before retrying failed transactions to prevent duplicate trade commitments.
+*   ✅ **Circuit Breakers**: Implement exponential backoff and a hard iteration cap in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Halt execution loop programmatically and emit `CIRCUIT_BREAKER_TRIPPED` state trace to Walrus if `dryRunTransactionBlock` fails 3 consecutive times.
+*   ✅ **Strict Schema Validation & Runtime Checks**: Enforce strict JSON Schema validation and parsing of LLM outputs in [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) before constructing the PTB. Enforce runtime type assertions on all smart contract arguments.
+*   ✅ **Human-in-the-Loop Escalation**: Add confidence scoring thresholds in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts). Pause execution loop and alert the owner if the internal confidence score regarding a trade decision falls below the threshold.
 
 ### 3. Verifiable Memory & Walrus Integration
-*   🔲 **Crash-Recovery State Machine**: Implement Durable Workflows in [run_multi_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/run_multi_agent.ts). Query the most recent Walrus `blob_id` on startup, parse the audit trace, and resume the exact last state (e.g., `HOLDING_PREDICT_RANGE`).
-*   🔲 **Reflective Memory Loop**: Update [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) to read the last Walrus trace. Program the agent to dynamically reduce its `tradeAmount` or widen SVI margin tolerance if the last trace recorded a net loss.
-*   🔲 **State Compression (Hierarchical Summarization)**: Implement strategic state compression in [walrus_archiver.ts](file:///Users/vadim/Desktop/AURA/sdk/walrus_archiver.ts). Periodically compile raw JSON traces into a dense "Strategy Summary String" to prevent context window overflow.
+*   ✅ **Crash-Recovery State Machine**: Implement Durable Workflows in [run_multi_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/run_multi_agent.ts). Query the most recent Walrus `blob_id` on startup, parse the audit trace, and resume the exact last state (e.g., `HOLDING_PREDICT_RANGE`).
+*   ✅ **Reflective Memory Loop**: Update [predict_agent.ts](file:///Users/vadim/Desktop/AURA/sdk/predict_agent.ts) to read the last Walrus trace. Program the agent to dynamically reduce its `tradeAmount` or widen SVI margin tolerance if the last trace recorded a net loss.
+*   ✅ **State Compression (Hierarchical Summarization)**: Implement strategic state compression in [walrus_archiver.ts](file:///Users/vadim/Desktop/AURA/sdk/walrus_archiver.ts). Periodically compile raw JSON traces into a dense "Strategy Summary String" to prevent context window overflow.
 
 ### 4. DeepBook Predict Track Alignment
-*   🔲 **SVI Simulation Hardening**: Expand audit trace schemas in [walrus_archiver.ts](file:///Users/vadim/Desktop/AURA/sdk/walrus_archiver.ts) to log raw `OracleSVI` calculations (`a`, `b`, `rho`, `sigma`) used for range selection, proving volatility-aware pricing.
+*   ✅ **SVI Simulation Hardening**: Expand audit trace schemas in [walrus_archiver.ts](file:///Users/vadim/Desktop/AURA/sdk/walrus_archiver.ts) to log raw `OracleSVI` calculations (`a`, `b`, `rho`, `sigma`) used for range selection, proving volatility-aware pricing.
 
 ---
 

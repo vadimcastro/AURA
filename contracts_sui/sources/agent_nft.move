@@ -148,7 +148,7 @@ module aura::agent_nft {
     #[test_only]
     const AGENT1: address = @0xA1;
     #[test_only]
-    const MIN_STAKE: u64 = 10_000_000;
+    const MIN_STAKE: u64 = 100_000_000;
 
     #[test]
     fun test_mint_nft_success() {

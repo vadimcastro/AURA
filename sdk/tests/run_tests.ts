@@ -4,6 +4,7 @@ import {
   decryptWithSeal, 
   buildAuditTrace, 
   uploadToWalrus,
+  downloadFromWalrus,
   SealEnvelope
 } from "../walrus_archiver.js";
 import { MemWalClient } from "../memwal_client.js";
@@ -206,6 +207,39 @@ async function testEndToEndIntegration() {
   console.log("  Successfully verified local MemWal telemetry database record.");
 }
 
+async function testStateCompression() {
+  console.log("\n🧪 Running State Compression Loop Tests...");
+
+  const agentKeypair = new Ed25519Keypair();
+  const policyObjectId = "0x0000000000000000000000000000000000000000000000000000000000000003";
+
+  let lastBlobId: string | undefined;
+
+  // Run 5 cycles to trigger state compression
+  for (let i = 0; i < 5; i++) {
+    const result = await executeTradeCycle(agentKeypair, policyObjectId, {
+      mockMode: true,
+      walrusMockFallback: true,
+      lastBlobId,
+    });
+    assert(result.success === true, `Cycle #${i + 1} must succeed`);
+    lastBlobId = result.blobId;
+  }
+
+  // At the 5th cycle, the returned blob ID should represent the compressed strategy summary
+  assert(lastBlobId !== undefined, "Compression must return a valid blob ID");
+  
+  // Download the compressed blob and verify it is a summary
+  const encrypted = await downloadFromWalrus(lastBlobId!, true);
+  const decrypted = await decryptWithSeal(encrypted);
+  const summaryStr = new TextDecoder().decode(decrypted);
+
+  console.log(`  Decrypted 5th-cycle blob contents: "${summaryStr}"`);
+  assert(summaryStr.startsWith("Strategy Summary"), "5th-cycle blob must be a compressed Strategy Summary string");
+  assert(summaryStr.includes("Total Cycles: 5"), "Summary must reflect total cycles of 5");
+  assert(summaryStr.includes("Net PnL:"), "Summary must reflect net PnL calculations");
+}
+
 // ── Main Runner ─────────────────────────────────────────────────────────────
 
 async function runAllTests() {
@@ -219,6 +253,7 @@ async function runAllTests() {
     await testWalrusUploadMock();
     await testExecuteTradeCycleMock();
     await testEndToEndIntegration();
+    await testStateCompression();
 
     const duration = Date.now() - startTime;
     console.log(`\n🎉 ALL TESTS PASSED! (${passedCount}/${testCount} assertions in ${duration}ms)\n`);

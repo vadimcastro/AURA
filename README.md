@@ -45,6 +45,12 @@ AURA solves all three with a protocol-level architecture built on Sui Move primi
 
 - **💰 Budget Ceiling & Safety Floor** — Per-policy `budget_limit` caps cumulative spend. `min_balance_floor` prevents over-commitment. Clamped subtraction handles profitable trades without underflow.
 
+- **🔥 Deflationary Buy/Burn Insurance** — Implements a 0.5% fee on profitable options executions inside `agent_wallet_policy.move` routed directly to `@buy_and_burn_insurance`, executing a twin function of deflationary token value capture and a slashing insurance backstop for high-reputation operators.
+
+- **🗜️ Verifiable State History Compression** — Aggregates raw Walrus telemetry logs periodically (every 5 cycles) into a dense, encrypted "Strategy Summary String" on Walrus to prevent LLM context window overflow while preserving long-term memory.
+
+- **🧠 Reflective Memory & Live OpenRouter Reasoning** — Falls back to OpenRouter's live free Llama-3 model (`meta-llama/llama-3-8b-instruct:free`) for option strike generation, validated against strict JSON schemas, and dynamically scales down trade size by 25% and widens spread by 20% on prior losses.
+
 - **📊 Optimistic Slashing Dispute Game** — Replaces trusted admin slashing. Users submit disputes by locking a dispute bond. Operators must disclose the decryption key within 24 hours. Failure automatically slashes the operator's performance bond and awards it to the challenger.
 
 - **🏬 Sui Kiosk Strategy NFT wrapping** — High-performing strategy records and reputations can be packaged into an `AgentNFT` and placed in a shared `sui::kiosk::Kiosk`, enabling secure strategy renting and tradeable algorithms.

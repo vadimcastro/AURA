@@ -283,8 +283,23 @@ module aura::agent_wallet_policy {
 
     /// Consumes the hot potato TradeTicket. Unused/earned balance is refunded to the policy.
     /// Uses clamped subtraction to handle profitable trades where refund > borrowed amount.
-    /// Also enforces a 0.5% protocol fee on profitable executions, routed to a Buy-and-Burn
-    /// module or a Slashing Insurance Pool backing top-reputation agents.
+    /// 
+    /// ### Cryptoeconomic Design: Buy/Burn Insurance vs. Yield Approach
+    /// Rather than routing trading profits to generate yield (which introduces capital lock-up
+    /// delays, centralizes voting power in third-party pools, and risks downstream smart contract
+    /// failures), AURA implements a **0.5% protocol fee on net trading profits**.
+    ///
+    /// This fee is transferred directly to `@buy_and_burn_insurance`, executing a twin function:
+    /// 1. **Deflationary Value Capture:** Accumulated fees buy back and burn the protocol token,
+    ///    creating immediate, programmatic buy pressure that directly ties token value to 
+    ///    marketplace success.
+    /// 2. **Slashing Insurance Backstop:** The insurance pool acts as a mutual backing reservoir.
+    ///    In the event of network partitions or transient oracle issues resulting in honest
+    ///    operators being slashed, this pool dynamically re-collateralizes them, reducing risk.
+    ///
+    /// In contrast to a Yield approach (which yields slow, variable interest and introduces sell
+    /// pressure as yield-earnings are constantly dumped), AURA's Buy/Burn Insurance hardcodes
+    /// deflationary token capture directly into the Move runtime's execution boundary.
     public fun return_and_complete<T>(
         policy: &mut WalletPolicy<T>,
         coin: Coin<T>,
@@ -303,7 +318,7 @@ module aura::agent_wallet_policy {
             if (protocol_fee > 0) {
                 // Split fee and transfer to the protocol fee destination (e.g., insurance pool or buy-and-burn module)
                 let fee_coin = coin::split(&mut coin, protocol_fee, ctx);
-                transfer::public_transfer(fee_coin, @0x_buy_and_burn_insurance);
+                transfer::public_transfer(fee_coin, @buy_and_burn_insurance);
                 amount_returned = amount_returned - protocol_fee;
             };
         };
@@ -911,6 +926,27 @@ async function archiveTradeAudit(tradeResult: any, svi: any, policyWallet: strin
   console.log(`🔗 On-chain blob_id committed: ${digest}`);
 }
 ```
+
+### D. State History Compression & Context Optimization
+To prevent LLM context window overflow when reasoning over long histories of trade executions, AURA implements **State History Compression (Hierarchical Summarization)**:
+1. **Periodic Accumulation:** The agent tracks recent raw audit traces in-memory (`recentTracesMap`).
+2. **Dense Compaction:** After every 5 trade cycles, the agent compiles these traces into a dense **Strategy Summary String** containing metrics such as total cycles, win-rate, net PnL, and trading bias (e.g. `BULLISH_WINNING` or `BEARISH_HEAVY`).
+3. **Registry Compression Commit:** The agent uploads this compressed summary to Walrus, decrypts the generated blob, and calls `commitBlobIdOnChain` to overwrite the on-chain history reference.
+4. **Reflective Context Loading:** When initializing subsequent trade cycles, the agent downloads the latest history blob. If the blob is a compressed summary, it parses the summary metrics directly into the LLM prompt as context, preventing context window bloating.
+
+### E. OpenRouter Live LLM Integration
+When `OPENROUTER_API_KEY` is present, the agent automatically queries a live OpenRouter model (`meta-llama/llama-3-8b-instruct:free`) to generate options pricing parameters. The LLM is provided with:
+- SVI volatility parameters from the DeepBook SVI Oracle.
+- The compressed history summary or the previous cycle's PnL.
+It outputs a JSON response matching a strict schema, including its reasoning and confidence score, which is validated before executing any Programmable Transaction Block.
+
+#### Pros and Cons of Using OpenRouter in AURA AgentFi:
+| Category | Pros | Cons |
+|---|---|---|
+| **API Architecture** | **Unified Interface:** Accesses hundreds of open-source and proprietary models (Llama, Claude, GPT, Gemini) through a single, standardized OpenAI-compatible API payload. Avoids multi-client library bloating. | **Centralized Dependency:** If OpenRouter's routing proxy layer experiences downtime, the fallback pipeline fails even if individual underlying providers are active. |
+| **Economics & Testing** | **Free Model Tier:** Offers free instructs (e.g. Llama-3-8B-Instruct, Mistral-7B) perfect for low-cost hackathon demos and community developer testing without faucet/credit card friction. | **Provider Latency Overhead:** Proxied requests travel through routing hops, adding a 100ms - 500ms latency overhead compared to direct API endpoint calls. |
+| **Resilience & Fallback** | **Dynamic Routing Fallbacks:** Allows switching underlying model paths dynamically via simple configuration changes without rewriting core SDK execution blocks. | **Free Tier Reliability:** Best-effort hosting models are susceptible to transient timeouts, high queue delays, and sudden rate limits during peak usage. |
+| **Compliance** | **Privacy Protection:** Decouples user-specific account generation from commercial AI companies, reducing exposure to downstream API key harvesting. | **Strict Output Verification:** Some free hosts route without native JSON formatting modes, requiring robust schema validators (like AURA's `validateLLMReasoning`) to prevent output hallucinations. |
 
 ### C. Verifiable Upload & Privacy Flow (MemWal + Seal)
 *   **MemWal Playground Key Auth:** The agent authenticates to the MemWal (Walrus Memory) platform using a delegated API client key, gaining access to its persistent storage bucket.
