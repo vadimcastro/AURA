@@ -1032,3 +1032,21 @@ To balance latency, compute cost, and decision-making quality, AURA introduces a
 3. **Layer 3: DecisionBench Emergent Delegation (Exception Path)**
    * **Trigger:** Initiated if the TS Sanity Sandbox intercepts a logical hallucination or if the Grunt emits a low-confidence flag.
    * **Role:** The runner suspends the Grunt and delegates range selection to the 550B Nemotron model for heavy reasoning on that specific step. If this fallback also violates sandbox bounds, the trade halts entirely and escalates to the user's dashboard via the **Human-in-the-Loop Escalation Inbox**.
+
+### G. Web2 zkLogin Onboarding & Gasless Capital Funding (First Principles)
+When onboarding Web2 users through social authentication (zkLogin via Google, Apple, or GitHub), they receive a newly generated, empty Sui address. To enable transaction execution and trading capital deployment without requiring them to install browser extensions or purchase SUI on centralized exchanges, AURA implements a native **Sui Sponsored Transaction & Paymaster** infrastructure:
+
+1. **Gasless Signing (Sponsored Transactions):**
+   * **Mechanism:** Web2 users interact with the dashboard entirely gasless. They do not need SUI tokens to pay for transaction fees.
+   * **Paymaster Flow:** When a user deploys a policy, updates constraints, or approves overrides, the AURA frontend drafts the transaction block and sends it to the AURA Gas Paymaster backend service (e.g. running on Railway).
+   * **Execution:** The Paymaster signs the transaction as the **Gas Sponsor** using its SUI gas object to pay the execution fees. The user's zkLogin browser signs as the sender. The transaction is then broadcast to the Sui blockchain.
+   
+2. **Fiat-to-DeFi On-Ramps:**
+   * **Mechanism:** To fund a `WalletPolicy` with capital (dUSDC/USDC), the AURA dashboard integrates standard Web2 payment gateways (such as Stripe Crypto Onramp, Transak, or MoonPay).
+   * **Direct Routing:** The on-ramp purchase transaction is configured to deposit the minted USDC directly to the user's `WalletPolicy` shared object address on-chain. This routes fiat payments straight into the isolated Move sandbox without hitting the user's operational zkLogin address, maintaining clean capital boundaries.
+
+3. **LP-to-Agent Capital Delegation (Flywheel Separation):**
+   * **Mechanism:** Under AURA's first-principles architecture, the user who directs execution (via zkLogin) does not need to be the user who funds the capital.
+   * **Delegated Authority:** A Web3 Liquidity Provider (funded via slush or backpack wallets) can create and fund a `WalletPolicy` on-chain, and delegate execution authority (specifying the allowlisted agent address) to the Web2 manager's zkLogin address.
+   * **Decoupled Incentive:** This decouples capital provision from strategic execution, allowing professional LPs to fund large option pools while Web2 managers direct the trading loop securely within their Move sandbox constraints.
+
