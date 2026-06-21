@@ -19,7 +19,9 @@ export const EscalationInbox: React.FC = () => {
   const [actionId, setActionId] = useState<string | null>(null);
 
   const fetchEscalations = async () => {
-    setLoading(true);
+    if (escalations.length === 0) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const res = await fetch(`${daemonUrl}/api/escalations`);

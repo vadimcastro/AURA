@@ -108,11 +108,16 @@ interface AgentDashboardProps {
     name: string;
     providerLabel: string;
   } | null;
+  onTriggerStripeOnramp?: () => void;
 }
 
 
 
-export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, activeSession }) => {
+export const AgentDashboard: React.FC<AgentDashboardProps> = ({ 
+  onSelectAgent, 
+  activeSession, 
+  onTriggerStripeOnramp 
+}) => {
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const [agents, setAgents]       = useState<AgentInfo[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -495,7 +500,9 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
     let active = true;
 
     const fetchAgents = async () => {
-      setLoading(true);
+      if (agents.length === 0) {
+        setLoading(true);
+      }
       setError(null);
       try {
         if (!PACKAGE_ID || !REGISTRY_OBJECT_ID) {
@@ -981,6 +988,29 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({ onSelectAgent, a
                   className="w-full px-3.5 py-2 rounded-lg text-[13px] outline-none"
                   style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
                 />
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-1 text-[10px] font-medium text-[var(--color-text-muted)] leading-relaxed">
+                  <span>Need capital?</span>
+                  <a 
+                    href="https://tally.so/r/Xx102L" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-[var(--color-brand)] hover:underline cursor-pointer font-bold"
+                  >
+                    Request Testnet dUSDC Faucet
+                  </a>
+                  {onTriggerStripeOnramp && (
+                    <>
+                      <span>·</span>
+                      <button
+                        type="button"
+                        onClick={onTriggerStripeOnramp}
+                        className="text-[var(--color-brand)] hover:underline cursor-pointer border-0 bg-transparent p-0 font-bold text-[10px]"
+                      >
+                        Fund with Stripe Onramp
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 

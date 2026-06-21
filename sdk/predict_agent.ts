@@ -239,16 +239,20 @@ Provide a strategic direction (e.g. shift to widening spread, decrease trade siz
     "meta-llama/llama-3.3-70b-instruct:free"
   ];
 
-  const results: string[] = [];
-  for (const model of models) {
+  console.log(`🧠 Thinker Panel: Dispatching ${models.length} model queries in parallel...`);
+  const promises = models.map(async (model) => {
     try {
-      console.log(`🧠 Thinker Panel: Querying model ${model}...`);
+      console.log(`🧠 Thinker Panel: Querying model ${model} in parallel...`);
       const response = await queryOpenRouter(model, consensusPrompt, apiKey);
-      results.push(response);
+      return response;
     } catch (e) {
       console.warn(`⚠️ Thinker Panel: Model ${model} query failed:`, (e as Error).message);
+      return null;
     }
-  }
+  });
+
+  const resolved = await Promise.all(promises);
+  const results = resolved.filter((r): r is string => r !== null);
 
   if (results.length === 0) {
     console.warn("⚠️ Thinker Panel: All consensus models failed. Using fallback summary.");

@@ -7,7 +7,7 @@ import { IntentEngine } from './components/IntentEngine';
 import { VolatilityStudio } from './components/VolatilityStudio';
 import { EscalationInbox } from './components/EscalationInbox';
 import { CloudOperatorPanel } from './components/CloudOperatorPanel';
-import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle, Settings } from 'lucide-react';
+import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle, Settings, X, CreditCard } from 'lucide-react';
 import type React from 'react';
 import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets, useSuiClient } from '@mysten/dapp-kit';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
@@ -157,8 +157,9 @@ function App() {
   const [connectingType, setConnectingType] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
-  const [faucetLoading, setFaucetLoading] = useState(false);
-  const [faucetStatus, setFaucetStatus] = useState<string | null>(null);
+  const [showStripeOnramp, setShowStripeOnramp] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
   const handleCopyWalletAddress = (address: string) => {
     navigator.clipboard.writeText(address);
@@ -166,36 +167,104 @@ function App() {
     setTimeout(() => setCopiedWallet(false), 2000);
   };
 
-  const handleRequestFaucet = async (address: string) => {
-    setFaucetLoading(true);
-    setFaucetStatus(null);
-    try {
-      const response = await fetch('https://faucet.testnet.sui.io/v1/gas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          FixedAmountRequest: {
-            recipient: address,
-          },
-        }),
+  useEffect(() => {
+    if (!showStripeOnramp || !session?.address) return;
+    
+    let activeSession: any = null;
+    let isMounted = true;
+    
+    const loadScript = (src: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+          resolve();
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+        document.head.appendChild(script);
       });
+    };
 
-      if (!response.ok) {
-        throw new Error(`Faucet error: ${response.statusText}`);
+    const initStripeOnramp = async () => {
+      setStripeLoading(true);
+      setStripeError(null);
+      
+      try {
+        await loadScript('https://js.stripe.com/v3/');
+        await loadScript('https://crypto-js.stripe.com/crypto-onramp-outer.js');
+
+        if (!isMounted) return;
+
+        const stripeOnrampGlobal = (window as any).StripeOnramp;
+        if (!stripeOnrampGlobal) {
+          throw new Error('StripeOnramp script failed to initialize on window object.');
+        }
+
+        const daemonUrl = localStorage.getItem('aura_daemon_url') || import.meta.env.VITE_DAEMON_URL || 'http://localhost:3000';
+        
+        const res = await fetch(`${daemonUrl}/api/stripe/create-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ walletAddress: session.address }),
+        });
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Failed to create Stripe onramp session: ${errText || res.statusText}`);
+        }
+        
+        const data = await res.json();
+        if (!data.clientSecret) {
+          throw new Error('No clientSecret returned from backend daemon.');
+        }
+
+        if (!isMounted) return;
+
+        const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51TkY23C53TDTRt9MrX2SlU50ls3sXtWLnqEO0VpBSMQFf9QfH8uMsyJ6Uv4K6qLmPFkK3aqYFyHYpP8j6rU5rSTZ00bbAmCcuo';
+        const onrampInstance = stripeOnrampGlobal(publishableKey);
+        
+        const onrampSession = onrampInstance.createSession({
+          clientSecret: data.clientSecret,
+          appearance: {
+            theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+          }
+        });
+        
+        activeSession = onrampSession;
+        
+        if (isMounted) {
+          setTimeout(() => {
+            if (isMounted) {
+              onrampSession.mount('#stripe-wallet-onramp-container');
+              setStripeLoading(false);
+            }
+          }, 100);
+        }
+      } catch (err) {
+        console.error('Stripe onramp initialization failed:', err);
+        if (isMounted) {
+          setStripeError((err as Error).message);
+          setStripeLoading(false);
+        }
       }
-
-      setFaucetStatus('SUI Requested!');
-    } catch (err) {
-      console.warn('Faucet request failed, opening web portal:', err);
-      setFaucetStatus('Redirecting to Faucet...');
-      window.open('https://faucet.blockvision.org/', '_blank');
-    } finally {
-      setFaucetLoading(false);
-      setTimeout(() => setFaucetStatus(null), 3000);
-    }
-  };
+    };
+    
+    initStripeOnramp();
+    
+    return () => {
+      isMounted = false;
+      if (activeSession && typeof activeSession.unmount === 'function') {
+        try {
+          activeSession.unmount();
+        } catch (e) {}
+      }
+    };
+  }, [showStripeOnramp, session?.address]);
 
   // Sync hash to state changes
   useEffect(() => {
@@ -355,7 +424,7 @@ function App() {
                   </button>
                   {showDropdown && (
                     <div
-                      className="absolute right-0 mt-1.5 w-56 rounded-xl border shadow-lg p-3 z-50 text-[12px] space-y-2.5"
+                      className="absolute right-0 mt-1.5 w-56 rounded-xl border shadow-lg p-3 z-50 text-[12px] space-y-2"
                       style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                     >
                       <div className="px-1 py-0.5 space-y-1">
@@ -369,29 +438,34 @@ function App() {
                         </button>
                       </div>
 
-                      {/* Request Faucet Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleRequestFaucet(session.address)}
-                        disabled={faucetLoading}
-                        className="w-full py-1.5 rounded-lg text-center font-bold text-[10px] uppercase tracking-wider transition-all border flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      {/* Request Faucet Link */}
+                      <a
+                        href={`https://faucet.sui.io/?address=${session.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-1.5 rounded-lg text-center font-bold text-[10px] uppercase tracking-wider transition-all border flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 block"
                         style={{
-                          borderColor: 'var(--color-brand)',
-                          color: 'var(--color-brand)',
-                          background: 'rgba(79, 110, 247, 0.06)'
+                          borderColor: 'var(--color-border)',
+                          color: 'var(--color-text-secondary)',
+                          background: 'var(--color-surface-2)',
+                          textDecoration: 'none'
                         }}
                       >
-                        {faucetLoading ? (
-                          <>
-                            <div className="h-3 w-3 border-2 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-brand)', borderTopColor: 'transparent' }} />
-                            <span>Requesting...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="h-3 w-3" />
-                            <span>{faucetStatus || 'Request Testnet SUI'}</span>
-                          </>
-                        )}
+                        <Globe className="h-3.5 w-3.5" />
+                        <span>Request Testnet SUI</span>
+                      </a>
+
+                      {/* Fund Wallet via Stripe */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowStripeOnramp(true);
+                          setShowDropdown(false);
+                        }}
+                        className="w-full py-1.5 rounded-lg text-center font-bold text-[10px] uppercase tracking-wider transition-all border flex items-center justify-center gap-1.5 cursor-pointer text-white bg-[var(--color-brand)] border-transparent hover:opacity-95"
+                      >
+                        <CreditCard className="h-3.5 w-3.5" />
+                        <span>Fund with Stripe</span>
                       </button>
 
                       <div className="border-t" style={{ borderColor: 'var(--color-border)' }} />
@@ -535,7 +609,11 @@ function App() {
         {activeTab === 'agents' && (
           <div className="space-y-10">
             <section className="pt-6">
-              <AgentDashboard onSelectAgent={handleSelectAgent} activeSession={session} />
+              <AgentDashboard 
+                onSelectAgent={handleSelectAgent} 
+                activeSession={session} 
+                onTriggerStripeOnramp={() => setShowStripeOnramp(true)} 
+              />
             </section>
 
             {selectedAgent && (
@@ -591,6 +669,79 @@ function App() {
           </p>
         </div>
       </footer>
+
+      {/* Stripe Wallet Funding Modal */}
+      {showStripeOnramp && session && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div
+            className="w-full max-w-md rounded-2xl border overflow-hidden shadow-2xl relative"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            {/* Header */}
+            <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}>
+              <div>
+                <h3 className="text-[15px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Fund via Stripe Crypto Onramp</h3>
+                <p className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                  {session.address.substring(0, 12)}…{session.address.slice(-8)}
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowStripeOnramp(false)} 
+                className="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10 border-0 bg-transparent cursor-pointer"
+              >
+                <X className="h-5 w-5" style={{ color: 'var(--color-text-muted)' }} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4 flex flex-col items-center">
+              <div className="w-full flex justify-between items-center pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                <span className="text-[12px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Destination Wallet:</span>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded border" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>
+                  {session.address.substring(0, 10)}…{session.address.slice(-6)}
+                </span>
+              </div>
+              
+              {stripeLoading && (
+                <div className="py-12 flex flex-col items-center justify-center text-center w-full">
+                  <div className="h-8 w-8 mb-4 border-2 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-brand)', borderTopColor: 'transparent' }} />
+                  <p className="text-[13px]" style={{ color: 'var(--color-text-secondary)' }}>Initializing Stripe Crypto Onramp...</p>
+                </div>
+              )}
+
+              {stripeError && (
+                <div className="py-8 flex flex-col items-center justify-center text-center text-[var(--color-danger)] w-full">
+                  <AlertTriangle className="h-8 w-8 mb-2" style={{ color: 'var(--color-danger)' }} />
+                  <h4 className="text-[13px] font-bold" style={{ color: 'var(--color-danger)' }}>Failed to load Onramp</h4>
+                  <p className="text-[11px] mt-1 text-[var(--color-text-secondary)]">{stripeError}</p>
+                  <button 
+                    onClick={() => setShowStripeOnramp(false)}
+                    className="mt-4 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-[var(--color-brand)] border-0 cursor-pointer"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              )}
+
+              {/* Stripe widget iframe target */}
+              <div 
+                id="stripe-wallet-onramp-container" 
+                className={`w-full min-h-[360px] rounded-lg overflow-hidden ${stripeLoading || stripeError ? 'hidden' : ''}`}
+                style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowStripeOnramp(false)}
+                className="w-full py-2 rounded-lg text-[12px] font-bold transition-all border hover:bg-black/5 cursor-pointer mt-2"
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+              >
+                Close Portal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
