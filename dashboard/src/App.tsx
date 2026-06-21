@@ -457,7 +457,7 @@ function App() {
 
                       {/* Cetus Testnet Swap Link */}
                       <a
-                        href={`https://testnet.cetus.zone/swap?from=0x2::sui::SUI&to=${import.meta.env.VITE_DUSDC_TYPE_TAG || '0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC'}`}
+                        href={`https://app.cetus.zone/swap?from=0x2::sui::SUI&to=${import.meta.env.VITE_DUSDC_TYPE_TAG || '0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC'}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full py-1.5 rounded-lg text-center font-bold text-[10px] uppercase tracking-wider transition-all border flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 block"
