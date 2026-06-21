@@ -88,6 +88,7 @@
 
 ## 🛡️ Production Hardening Tasks (Pending for Future Prod-Grade Release)
 
+*   **Stripe Onramp KYC/Compliance Activation:** Submit the formal merchant onboarding application and allowlist live production domains in the Stripe console to transition the completed onramp integration from sandbox/testmode to live payments (post-hackathon due to the 48-hour merchant approval cycle).
 *   **Real DeepBook Predict Mainnet Integration:** Transition from the testnet mock pool to direct mainnet integration with DeepBook Predict contracts.
 *   **Threshold Key Infrastructure (Seal SDK):** Migrate from mock local AES encryption to real distributed threshold keys derived from policies to encrypt and decrypt Walrus telemetry logs.
 *   **Authorized MemWal Integration:** Authenticate the off-chain bot via a valid MemWal token instead of the playground fallback.
