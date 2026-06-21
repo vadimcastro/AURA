@@ -4,7 +4,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import {
   Award, Shield, ShieldAlert, ShieldCheck,
-  Users, RefreshCw, Settings, Terminal, Globe, Trophy,
+  Users, RefreshCw, Settings, Terminal, Layers, Trophy,
   X, Plus, Play, Square, Zap, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { AgentSettingsModal } from './AgentSettingsModal';
@@ -1221,550 +1221,545 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
 
           {/* Live grid section */}
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Live Trade Tracker */}
-            <div
-              className="lg:col-span-2 rounded-2xl p-6 flex flex-col justify-between"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', minHeight: '380px' }}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
+            
+            {/* Left Workstation: Registered Agents Ledger */}
+            <div className="lg:col-span-2 space-y-6">
+              <div
+                className="rounded-xl overflow-hidden border shadow-lg transition-all"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+              >
+                <div
+                  className="px-5 py-3.5 border-b flex items-center justify-between"
+                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
+                >
                   <div className="flex items-center gap-2">
-                    <Terminal className="h-4 w-4" style={{ color: 'var(--color-brand)' }} />
-                    <h3 className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                      Live Activity & Telemetry Feed
+                    <Layers className="h-4 w-4 text-[var(--color-brand)]" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
+                      Registered Agents Ledger
                     </h3>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-[11px] font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                      Live Monitoring Active
-                    </span>
-                  </div>
+                  <span className="font-mono text-[10px] text-[var(--color-text-muted)] bg-[var(--color-bg)] px-2.5 py-0.5 rounded border border-[var(--color-border)] select-none">
+                    {allAgents.length} SYSTEM_NODES
+                  </span>
                 </div>
                 
-                {/* Event Logs Container */}
-                <div 
-                  className="overflow-y-auto space-y-2.5 max-h-[280px] pr-2 scrollbar-thin p-3.5 rounded-xl border font-mono text-[11px]"
-                  style={{ 
-                    background: 'var(--color-bg)', 
-                    borderColor: 'var(--color-border)',
-                  }}
-                >
-                  {liveEvents.length === 0 ? (
-                    <div className="py-12 flex items-center justify-center text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                      Waiting for telemetry stream...
-                    </div>
-                  ) : (
-                    liveEvents.map((ev) => (
-                      <div 
-                        key={ev.id}
-                        className="p-3 rounded-xl border flex items-start justify-between gap-3 text-[11.5px] transition-all"
-                        style={{ 
-                          background: 'var(--color-surface)', 
-                          borderColor: 'var(--color-border)',
-                          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.01)'
-                        }}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                      <tr
+                        style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}
+                        className="text-[10px] font-bold uppercase tracking-wider select-none text-[var(--color-text-muted)]"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded font-bold shrink-0" style={{
-                            background: 
-                              ev.type === 'slash' ? 'var(--color-danger-bg)' : 
-                              ev.type === 'borrow' ? 'var(--color-brand-light)' : 
-                              (ev.type === 'register' || ev.type === 'deregister') ? 'var(--color-info-bg)' : 
-                              'var(--color-success-bg)',
-                            color: 
-                              ev.type === 'slash' ? 'var(--color-danger)' : 
-                              ev.type === 'borrow' ? 'var(--color-brand)' : 
-                              (ev.type === 'register' || ev.type === 'deregister') ? 'var(--color-info)' : 
-                              'var(--color-success)'
-                          }}>
-                            {ev.type}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-[12px]" style={{ color: 'var(--color-text-primary)' }}>
-                              {ev.message}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1 text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-                              <span className="font-mono">{ev.agent.substring(0, 8)}…{ev.agent.slice(-4)}</span>
-                              <span>·</span>
-                              <span>{new Date(ev.timestamp).toLocaleTimeString()}</span>
-                              {ev.digest && (
-                                <>
-                                  <span>·</span>
-                                  <a 
-                                    href={`https://suiscan.xyz/testnet/tx/${ev.digest}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="hover:underline font-mono"
-                                    style={{ color: 'var(--color-brand)' }}
+                        {['Agent Identity', 'Status', 'Reputation', 'PnL (dUSDC)', 'Win Rate', 'Collateral', 'Telemetry ID', 'Actions'].map((h) => (
+                          <th
+                            key={h}
+                            className={`px-4 py-2.5 ${h === 'Actions' ? 'text-right' : ''}`}
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(isExpanded ? allAgents : allAgents.slice(0, 12)).map((agent) => {
+                        const repPct = reputationPct(agent.reputation);
+                        const srPct  = agent.totalTasks > 0
+                          ? ((agent.successfulTasks / agent.totalTasks) * 100).toFixed(1)
+                          : '—';
+
+                        return (
+                          <tr
+                            key={agent.address}
+                            className="transition-colors border-b border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/50"
+                          >
+                            {/* Address & Name */}
+                            <td className="px-4 py-3">
+                              <div className="flex flex-col gap-0.5">
+                                <span 
+                                  onClick={() => copyToClipboard(agent.address)}
+                                  className="cursor-pointer font-bold transition-colors flex items-center gap-1.5"
+                                  title="Click to copy full address"
+                                >
+                                  {agent.name ? (
+                                    <span className="text-[12.5px] font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand)]">{agent.name}</span>
+                                  ) : (
+                                    <span className="font-mono text-[11px] hover:text-[var(--color-brand)]">{agent.address.substring(0, 10)}…{agent.address.slice(-4)}</span>
+                                  )}
+                                  {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
+                                    <span className="px-1.5 py-0.2 rounded text-[7px] font-bold uppercase bg-[var(--color-brand-light)] text-[var(--color-brand)] border border-[var(--color-brand)]/20 shrink-0">
+                                      New
+                                    </span>
+                                  )}
+                                  {daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase() && (
+                                    <span className="px-1.5 py-0.2 rounded text-[7px] font-bold uppercase bg-[var(--color-success-bg)] text-[var(--color-success)] border border-[var(--color-success)]/20 shrink-0 flex items-center gap-1 pulse-dot">
+                                      <span className="w-1.5 h-1.5 bg-[var(--color-success)] rounded-full"></span> Live
+                                    </span>
+                                  )}
+                                  {copiedAddress === agent.address && (
+                                    <span className="px-1 py-0.2 rounded text-[7px] font-bold uppercase bg-[var(--color-info-bg)] text-[var(--color-info)] border border-[var(--color-info)]/20 shrink-0 animate-pulse">
+                                      Copied!
+                                    </span>
+                                  )}
+                                </span>
+                                {agent.name && (
+                                  <span 
+                                    onClick={() => copyToClipboard(agent.address)}
+                                    className="font-mono text-[9.5px] text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-brand)] transition-colors"
+                                    title="Click to copy full address"
                                   >
-                                    {ev.digest.substring(0, 10)}…
-                                  </a>
-                                </>
+                                    {agent.address.substring(0, 8)}…{agent.address.slice(-4)}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Status */}
+                            <td className="px-4 py-3">
+                              {agent.active ? (
+                                agent.blacklistUntil > 0 ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase" style={{ background: 'var(--color-warning-bg)', color: 'var(--color-warning)', borderColor: 'rgba(245,158,11,0.2)' }}>
+                                    <ShieldAlert className="h-3 w-3" /> Suspended
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase" style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', borderColor: 'rgba(16,185,129,0.2)' }}>
+                                    <ShieldCheck className="h-3 w-3" /> Active
+                                  </span>
+                                )
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase" style={{ background: 'var(--color-danger-bg)', color: 'var(--color-danger)', borderColor: 'rgba(239,68,68,0.2)' }}>
+                                  <ShieldAlert className="h-3 w-3" /> Slashed
+                                </span>
                               )}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          {ev.isMocked ? (
-                            <span className="inline-flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded border" style={{ color: 'var(--color-text-muted)', borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}>
-                              SIMULATED
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
-                              <Globe className="h-2.5 w-2.5" /> ON-CHAIN
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))
+                            </td>
+
+                            {/* Reputation */}
+                            <td className="px-4 py-3">
+                              <div className="flex flex-col gap-1 min-w-[70px]">
+                                <span className="font-bold text-[11px]" style={{ color: 'var(--color-text-primary)' }}>
+                                  {repPct.toFixed(1)}%
+                                </span>
+                                <div className="h-1 w-16 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-2)' }}>
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{
+                                      width: `${repPct}%`,
+                                      background: repPct >= 70 ? 'var(--color-success)' : repPct >= 40 ? 'var(--color-warning)' : 'var(--color-danger)',
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* PnL */}
+                            <td className="px-4 py-3">
+                              {(() => {
+                                const pnlVal = getAgentPnL(agent, daemonActiveAddress);
+                                const isPositive = pnlVal >= 0;
+                                const isLiveDaemon = daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase();
+                                const budgetVal = isLiveDaemon && daemonBalances
+                                  ? parseFloat(daemonBalances.dUSDC)
+                                  : (agent.budget !== undefined ? agent.budget : 25.0);
+                                return (
+                                  <div className="flex flex-col select-none">
+                                    <div className="flex items-center gap-0.5">
+                                      {isPositive ? (
+                                        <ArrowUpRight className="h-3.5 w-3.5 text-[var(--color-success)] shrink-0" />
+                                      ) : (
+                                        <ArrowDownRight className="h-3.5 w-3.5 text-[var(--color-danger)] shrink-0" />
+                                      )}
+                                      <span className={`font-bold font-mono text-[11.5px] ${isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+                                        {isPositive ? '+' : ''}{pnlVal.toFixed(2)}
+                                      </span>
+                                    </div>
+                                    <span className="text-[9px] text-[var(--color-text-muted)] font-mono">
+                                      Cap: {budgetVal.toFixed(1)} USDC
+                                    </span>
+                                  </div>
+                                );
+                              })()}
+                            </td>
+
+                            {/* Success Rate */}
+                            <td className="px-4 py-3 font-mono text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>
+                              {srPct !== '—' ? (
+                                <div>
+                                  <span className="font-bold">{srPct}%</span>
+                                  <span className="block text-[9.5px] text-[var(--color-text-muted)] font-normal">
+                                    ({agent.successfulTasks}/{agent.totalTasks})
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[var(--color-text-muted)]">—</span>
+                              )}
+                            </td>
+
+                            {/* Stake */}
+                            <td className="px-4 py-3 font-mono text-[11.5px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+                              {agent.stakeAmount.toFixed(2)} SUI
+                            </td>
+
+                            {/* Telemetry */}
+                            <td className="px-4 py-3">
+                              {agent.latestBlobId ? (
+                                <span
+                                  className="inline-block font-mono text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80px] border border-[var(--color-brand)]/20"
+                                  title={agent.latestBlobId}
+                                  style={{ background: 'var(--color-brand-light)', color: 'var(--color-brand)' }}
+                                >
+                                  {agent.latestBlobId.substring(0, 8)}…
+                                </span>
+                              ) : (
+                                <span className="text-[10px] italic text-[var(--color-text-muted)]">None</span>
+                              )}
+                            </td>
+
+                            {/* Actions */}
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  id={`btn-audit-${agent.address.substring(2, 8)}`}
+                                  onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
+                                  disabled={!agent.latestBlobId}
+                                  className="px-2 py-1 rounded border text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                  style={{
+                                    background: 'var(--color-surface)',
+                                    color: 'var(--color-text-secondary)',
+                                    borderColor: 'var(--color-border)'
+                                  }}
+                                  onMouseEnter={e => {
+                                    if (!(e.currentTarget as HTMLButtonElement).disabled) {
+                                      (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
+                                      (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
+                                    }
+                                  }}
+                                  onMouseLeave={e => {
+                                    if (!(e.currentTarget as HTMLButtonElement).disabled) {
+                                      (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
+                                      (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
+                                    }
+                                  }}
+                                  title="Audit telemetry stream"
+                                >
+                                  <Terminal className="h-3 w-3" /> Audit
+                                </button>
+                                
+                                <button
+                                  onClick={() => setSettingsAgent(agent)}
+                                  className="px-2 py-1 rounded border text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                                  style={{
+                                    background: 'var(--color-surface)',
+                                    color: 'var(--color-text-secondary)',
+                                    borderColor: 'var(--color-border)'
+                                  }}
+                                  onMouseEnter={e => {
+                                    (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
+                                    (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
+                                  }}
+                                  onMouseLeave={e => {
+                                    (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
+                                    (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
+                                  }}
+                                >
+                                  <Settings className="h-3 w-3" /> Config
+                                </button>
+
+                                <div className="relative">
+                                  <button
+                                    onClick={() => {
+                                      if (activeLoops[agent.address]) {
+                                        setActiveLoops(prev => {
+                                          const next = { ...prev };
+                                          delete next[agent.address];
+                                          return next;
+                                        });
+                                      } else {
+                                        setDropdownOpen(dropdownOpen === agent.address ? null : agent.address);
+                                      }
+                                    }}
+                                    className={`px-2 py-1 rounded text-[10px] flex items-center gap-1 transition-all cursor-pointer border ${
+                                      activeLoops[agent.address] 
+                                        ? 'font-bold text-white bg-[var(--color-success)] border-[var(--color-success)]' 
+                                        : 'font-semibold text-[var(--color-brand)] bg-[var(--color-brand-light)] border-[var(--color-brand)]/20 hover:bg-[var(--color-brand)] hover:text-white hover:border-[var(--color-brand)]'
+                                    }`}
+                                  >
+                                    {activeLoops[agent.address] ? (
+                                      <>
+                                        <Square className="h-2 w-2 fill-current text-white animate-pulse" />
+                                        <span>
+                                          {activeLoops[agent.address].timeLeft === Infinity 
+                                            ? 'Active' 
+                                            : `${Math.floor(activeLoops[agent.address].timeLeft / 60)}:${String(activeLoops[agent.address].timeLeft % 60).padStart(2, '0')}`
+                                          }
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Play className="h-2 w-2 fill-current" /> Run
+                                      </>
+                                    )}
+                                  </button>
+                                  {dropdownOpen === agent.address && (
+                                    <>
+                                      <div className="fixed inset-0 z-20" onClick={() => setDropdownOpen(null)} />
+                                      <div 
+                                        className="absolute right-0 top-full mt-1 z-30 w-44 rounded border shadow-xl flex flex-col p-1 gap-0.5"
+                                        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                                      >
+                                        <div className="px-2 py-1 text-[8.5px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b pb-1 mb-1" style={{ borderColor: 'var(--color-border)' }}>
+                                          Schedule Trade Loop
+                                        </div>
+                                        {[
+                                          { label: 'Continuous', mode: 'continuous', desc: '10s loop, infinite', timeLeft: Infinity, intervalSec: 10 },
+                                          { label: '1 Minute', mode: '1min', desc: '10s loop, 6 trades', timeLeft: 60, intervalSec: 10 },
+                                          { label: '3 Minutes', mode: '3min', desc: '10s loop, 18 trades', timeLeft: 180, intervalSec: 10 },
+                                        ].map((opt) => (
+                                          <button
+                                            key={opt.mode}
+                                            onClick={() => {
+                                              setActiveLoops(prev => ({
+                                                ...prev,
+                                                [agent.address]: {
+                                                  mode: opt.mode as any,
+                                                  timeLeft: opt.timeLeft,
+                                                  nextTradeIn: opt.intervalSec,
+                                                  intervalSec: opt.intervalSec,
+                                                }
+                                              }));
+                                              setDropdownOpen(null);
+                                              
+                                              const newEv: LiveEvent = {
+                                                id: 'mock-schedule-start-' + Date.now() + '-' + Math.random(),
+                                                type: 'register',
+                                                agent: agent.address,
+                                                message: `Scheduled simulation loop started (${opt.label} mode)`,
+                                                timestamp: new Date().toISOString(),
+                                                digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (Sched)',
+                                                isMocked: true,
+                                              };
+                                              setLiveEvents(evs => [newEv, ...evs].slice(0, 50));
+                                            }}
+                                            className="w-full text-left px-2 py-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                                          >
+                                            <div className="text-[11px] font-bold" style={{ color: 'var(--color-text-primary)' }}>{opt.label}</div>
+                                            <div className="text-[9px]" style={{ color: 'var(--color-text-muted)' }}>{opt.desc}</div>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+
+                                {!activeLoops[agent.address] && (
+                                  <button
+                                    onClick={() => handleStepTrade(agent.address)}
+                                    className="px-2 py-1 rounded border text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                                    style={{
+                                      background: 'var(--color-surface)',
+                                      color: 'var(--color-text-secondary)',
+                                      borderColor: 'var(--color-border)'
+                                    }}
+                                    onMouseEnter={e => {
+                                      (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
+                                      (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
+                                    }}
+                                    onMouseLeave={e => {
+                                      (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
+                                      (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
+                                    }}
+                                    title="Execute single simulated trade immediately"
+                                  >
+                                    <Zap className="h-3 w-3 text-amber-500 fill-amber-500" /> Step
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {allAgents.length > 12 && (
+                    <div
+                      className="px-5 py-2.5 border-t flex justify-center"
+                      style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
+                    >
+                      <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="text-[11px] font-bold text-[var(--color-brand)] hover:underline"
+                      >
+                        {isExpanded ? 'Collapse Directory View' : `Expand to Show All ${allAgents.length} Agents`}
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Top Performing Agents */}
-            <div
-              className="rounded-2xl p-6 flex flex-col justify-between"
-              style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Trophy className="h-4 w-4" style={{ color: '#f59e0b' }} />
-                  <h3 className="text-[15px] font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                    Top Performing Agents
+            {/* Right Workstation Sidebar: Performance Metrics & Real-time Feeds */}
+            <div className="lg:col-span-1 space-y-6">
+              
+              {/* Leaderboard panel */}
+              <div
+                className="rounded-xl p-5 border shadow-lg"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+              >
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[var(--color-border-soft)]">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
+                    Top Alpha Agents
                   </h3>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {allAgents.slice(0, 3).map((agent, index) => {
                     const repPercent = reputationPct(agent.reputation);
                     const isWinner = index === 0;
                     return (
                       <div 
                         key={agent.address} 
-                        className="flex items-center justify-between p-3 rounded-xl border transition-all hover:scale-[1.01]"
+                        className="flex items-center justify-between p-3 rounded-lg border transition-all"
                         style={{ 
-                          background: isWinner ? 'rgba(245, 158, 11, 0.04)' : 'var(--color-surface)', 
-                          borderColor: isWinner ? 'rgba(245, 158, 11, 0.2)' : 'var(--color-border-soft)'
+                          background: isWinner ? 'rgba(37, 99, 235, 0.03)' : 'var(--color-surface-2)/40', 
+                          borderColor: isWinner ? 'rgba(37, 99, 235, 0.25)' : 'var(--color-border-soft)'
                         }}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold text-[13px] border" style={{
-                            background: index === 0 ? '#fbf2db' : index === 1 ? '#eef0f2' : '#fcf5eb',
-                            color: index === 0 ? '#b45309' : index === 1 ? '#4b5563' : '#b45309',
-                            borderColor: index === 0 ? '#f59e0b' : index === 1 ? '#d1d5db' : '#f59e0b'
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-6 w-6 rounded-full flex items-center justify-center font-bold text-[11px] border" style={{
+                            background: index === 0 ? 'rgba(245,158,11,0.1)' : 'var(--color-bg)',
+                            color: index === 0 ? 'var(--color-warning)' : 'var(--color-text-secondary)',
+                            borderColor: index === 0 ? 'var(--color-warning)' : 'var(--color-border)'
                           }}>
-                            #{index + 1}
+                            {index + 1}
                           </div>
                           <div>
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-mono text-[11px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                                {agent.address.substring(0, 8)}…{agent.address.slice(-4)}
+                            <div className="flex items-center gap-1">
+                              <p className="font-mono text-[11px] font-bold text-[var(--color-text-primary)]">
+                                {agent.name || `${agent.address.substring(0, 6)}…${agent.address.slice(-4)}`}
                               </p>
-                              {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
-                                <span className="px-1.5 py-0.2 rounded text-[7px] font-bold uppercase bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe] shrink-0">
-                                  New
-                                </span>
-                              )}
                             </div>
-                            <p className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                              {agent.successfulTasks} / {agent.totalTasks} successful
+                            <p className="text-[9.5px] text-[var(--color-text-muted)] font-mono">
+                              {agent.successfulTasks}/{agent.totalTasks} trades
                             </p>
                           </div>
                         </div>
                         
-                        <div className="text-right flex flex-col justify-center items-end select-none">
-                          <span className="text-[12px] font-bold" style={{
+                        <div className="text-right flex flex-col justify-center items-end">
+                          <span className="text-[11.5px] font-bold" style={{
                             color: repPercent >= 70 ? 'var(--color-success)' : repPercent >= 40 ? 'var(--color-warning)' : 'var(--color-danger)'
                           }}>
-                            {repPercent.toFixed(1)}% Rep
+                            {repPercent.toFixed(0)}% Rep
                           </span>
                           {(() => {
                              const pnlVal = getAgentPnL(agent, daemonActiveAddress);
                              const isPositive = pnlVal >= 0;
                             return (
-                              <div className={`text-[12px] font-bold font-mono flex items-center gap-0.5 mt-0.5 ${isPositive ? 'text-[#12b76a]' : 'text-[#f04438]'}`}>
-                                {isPositive ? <ArrowUpRight className="h-3.5 w-3.5 shrink-0" /> : <ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
-                                <span>{isPositive ? '+' : ''}{pnlVal.toFixed(2)}</span>
+                              <div className={`text-[11px] font-bold font-mono flex items-center gap-0.5 ${isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+                                {isPositive ? <ArrowUpRight className="h-3 w-3 shrink-0" /> : <ArrowDownRight className="h-3 w-3 shrink-0" />}
+                                <span>{isPositive ? '+' : ''}{pnlVal.toFixed(1)}</span>
                               </div>
                             );
                           })()}
-                          <p className="text-[8px] uppercase tracking-wider font-bold" style={{ color: 'var(--color-text-muted)' }}>PnL (dUSDC)</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              
-              <div className="pt-4 border-t mt-4 border-dashed" style={{ borderColor: 'var(--color-border)' }}>
-                <p className="text-[11px] text-center" style={{ color: 'var(--color-text-muted)' }}>
-                  Stakes are automatically locked and delegated in AURA registry.
-                </p>
+
+              {/* Console log terminal feed */}
+              <div
+                className="rounded-xl p-5 border shadow-lg flex flex-col justify-between"
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', minHeight: '360px' }}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--color-border-soft)]">
+                    <div className="flex items-center gap-2">
+                      <Terminal className="h-4 w-4 text-[var(--color-brand)]" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
+                        Real-time Telemetry
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-1.5 select-none">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span className="text-[9.5px] font-mono uppercase tracking-wider text-[var(--color-text-muted)]">
+                        feed_active
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Event Logs Container */}
+                  <div 
+                    className="overflow-y-auto space-y-2 max-h-[250px] pr-1.5 scrollbar-thin p-3 rounded-lg border font-mono text-[10.5px]"
+                    style={{ 
+                      background: 'var(--color-bg)', 
+                      borderColor: 'var(--color-border)',
+                    }}
+                  >
+                    {liveEvents.length === 0 ? (
+                      <div className="py-12 flex items-center justify-center text-[10px] text-[var(--color-text-muted)]">
+                        $ listening_to_onchain_stream...
+                      </div>
+                    ) : (
+                      liveEvents.map((ev) => (
+                        <div 
+                          key={ev.id}
+                          className="p-2 rounded border flex flex-col gap-1 transition-all"
+                          style={{ 
+                            background: 'var(--color-surface)', 
+                            borderColor: 'var(--color-border-soft)'
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[9px] uppercase px-1 py-0.2 rounded font-bold" style={{
+                              background: 
+                                ev.type === 'slash' ? 'var(--color-danger-bg)' : 
+                                ev.type === 'borrow' ? 'var(--color-brand-light)' : 
+                                (ev.type === 'register' || ev.type === 'deregister') ? 'var(--color-info-bg)' : 
+                                'var(--color-success-bg)',
+                              color: 
+                                ev.type === 'slash' ? 'var(--color-danger)' : 
+                                ev.type === 'borrow' ? 'var(--color-brand)' : 
+                                (ev.type === 'register' || ev.type === 'deregister') ? 'var(--color-info)' : 
+                                'var(--color-success)'
+                            }}>
+                              {ev.type}
+                            </span>
+                            <span className="text-[9px] text-[var(--color-text-muted)]">
+                              {new Date(ev.timestamp).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          
+                          <p className="font-semibold text-[11px] text-[var(--color-text-primary)] leading-snug">
+                            {ev.message}
+                          </p>
+                          
+                          <div className="flex items-center justify-between text-[9px] text-[var(--color-text-muted)] pt-1 border-t border-[var(--color-border-soft)]">
+                            <span className="font-mono">node: {ev.agent.substring(0, 6)}…{ev.agent.slice(-4)}</span>
+                            {ev.digest && (
+                              <a 
+                                href={`https://suiscan.xyz/testnet/tx/${ev.digest}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="hover:underline font-mono text-[var(--color-brand)]"
+                              >
+                                tx:{ev.digest.substring(0, 6)}…
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+                
+                <div className="pt-3 border-t border-[var(--color-border-soft)] mt-3">
+                  <p className="text-[9.5px] font-mono text-[var(--color-text-muted)] leading-tight text-center">
+                    All telemetry logs are committed to Walrus Protocol decentralized storage.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-
-
-          {/* Agents table */}
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-          >
-            <div
-              className="px-6 py-4 border-b flex items-center justify-between"
-              style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
-            >
-              <h3 className="text-[14px] font-semibold" style={{ color: 'var(--color-text-primary)' }} id="agents-table-title">
-                Registered Agents Directory
-              </h3>
-              <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-                {allAgents.length} agent{allAgents.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[13px]">
-                <thead>
-                  <tr
-                    style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}
-                    className="text-[11px] font-semibold uppercase tracking-wider"
-                  >
-                    {['Agent Address', 'Status', 'Reputation', 'PnL (dUSDC)', 'Success Rate', 'Stake (SUI)', 'Telemetry', ''].map((h) => (
-                      <th
-                        key={h}
-                        className={`px-5 py-3 ${h === '' ? 'text-right' : ''}`}
-                        style={{ color: 'var(--color-text-muted)' }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(isExpanded ? allAgents : allAgents.slice(0, 12)).map((agent) => {
-                    const repPct = reputationPct(agent.reputation);
-                    const srPct  = agent.totalTasks > 0
-                      ? ((agent.successfulTasks / agent.totalTasks) * 100).toFixed(1)
-                      : '—';
-
-                    return (
-                      <tr
-                        key={agent.address}
-                        className="transition-colors"
-                        style={{ borderBottom: '1px solid var(--color-border-soft)' }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-surface-2)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = '')}
-                      >
-                        {/* Address */}
-                        <td className="px-5 py-3.5" style={{ color: 'var(--color-text-primary)' }}>
-                          <div className="flex flex-col gap-0.5 select-none">
-                            <span 
-                              onClick={() => copyToClipboard(agent.address)}
-                              className="cursor-pointer font-semibold transition-colors flex items-center gap-1.5"
-                              title="Click to copy full address"
-                            >
-                              {agent.name ? (
-                                <span className="text-[13px] font-semibold text-[var(--color-text-primary)] hover:text-[var(--color-brand)]">{agent.name}</span>
-                              ) : (
-                                <span className="font-mono text-[11px] hover:text-[var(--color-brand)]">{agent.address.substring(0, 14)}…{agent.address.slice(-6)}</span>
-                              )}
-                              {agent.registeredAt && (Date.now() - agent.registeredAt < 3600000) && (
-                                <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[#dbeafe] text-[#1e40af] border border-[#bfdbfe] shrink-0">
-                                  New
-                                </span>
-                              )}
-                              {daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase() && (
-                                <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0 flex items-center gap-1 pulse-dot">
-                                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Live Node
-                                </span>
-                              )}
-                              {copiedAddress === agent.address && (
-                                <span className="px-1 py-0.5 rounded text-[8px] font-bold uppercase bg-[#ecfdf3] text-[#065f46] border border-[#a7f3d0] shrink-0 animate-pulse">
-                                  Copied!
-                                </span>
-                              )}
-                            </span>
-                            {agent.name && (
-                              <span 
-                                onClick={() => copyToClipboard(agent.address)}
-                                className="font-mono text-[10px] text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-brand)] transition-colors"
-                                title="Click to copy full address"
-                              >
-                                {agent.address.substring(0, 12)}…{agent.address.slice(-6)}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Status badge */}
-                        <td className="px-5 py-3.5">
-                          {agent.active ? (
-                            agent.blacklistUntil > 0 ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ background: 'var(--color-warning-bg)', color: '#92400e', border: '1px solid #fde68a' }}>
-                                <ShieldAlert className="h-3 w-3" /> Suspended
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ background: 'var(--color-success-bg)', color: '#065f46', border: '1px solid #6ee7b7' }}>
-                                <ShieldCheck className="h-3 w-3" /> Active
-                              </span>
-                            )
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium" style={{ background: 'var(--color-danger-bg)', color: '#991b1b', border: '1px solid #fca5a5' }}>
-                              <ShieldAlert className="h-3 w-3" /> Slashed
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Reputation with mini bar */}
-                        <td className="px-5 py-3.5">
-                          <div className="flex flex-col gap-1 min-w-[90px]">
-                            <span className="font-semibold text-[12px]" style={{ color: 'var(--color-text-primary)' }}>
-                              {repPct.toFixed(1)}%
-                            </span>
-                            <div className="h-1.5 w-20 rounded-full overflow-hidden" style={{ background: 'var(--color-border)' }}>
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${repPct}%`,
-                                  background: repPct >= 70 ? 'var(--color-success)' : repPct >= 40 ? 'var(--color-warning)' : 'var(--color-danger)',
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="px-5 py-3.5">
-                          {(() => {
-                            const pnlVal = getAgentPnL(agent, daemonActiveAddress);
-                            const isPositive = pnlVal >= 0;
-                            const isLiveDaemon = daemonActiveAddress && agent.address.toLowerCase() === daemonActiveAddress.toLowerCase();
-                            const budgetVal = isLiveDaemon && daemonBalances
-                              ? parseFloat(daemonBalances.dUSDC)
-                              : (agent.budget !== undefined ? agent.budget : 25.0);
-                            return (
-                              <div className="flex items-center gap-1 select-none">
-                                {isPositive ? (
-                                  <ArrowUpRight className="h-4 w-4 text-[#12b76a] shrink-0" />
-                                ) : (
-                                  <ArrowDownRight className="h-4 w-4 text-[#f04438] shrink-0" />
-                                )}
-                                <div className="flex flex-col">
-                                  <span className={`font-bold font-mono text-[12.5px] ${isPositive ? 'text-[#12b76a]' : 'text-[#f04438]'}`}>
-                                    {isPositive ? '+' : ''}{pnlVal.toFixed(2)}
-                                  </span>
-                                  <span className="text-[10px] text-[var(--color-text-muted)] font-medium">
-                                    Budget: {budgetVal.toFixed(2)} dUSDC
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })()}
-                        </td>
-
-                        {/* Success rate */}
-                        <td className="px-5 py-3.5 text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
-                          {srPct !== '—' ? `${srPct}%` : '—'}
-                          <span className="ml-1 text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
-                            ({agent.successfulTasks}/{agent.totalTasks})
-                          </span>
-                        </td>
-
-                        {/* Stake */}
-                        <td className="px-5 py-3.5 font-mono text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
-                          {agent.stakeAmount.toFixed(3)}
-                        </td>
-
-                        {/* Blob ID */}
-                        <td className="px-5 py-3.5">
-                          {agent.latestBlobId ? (
-                            <span
-                              className="inline-block font-mono text-[10px] px-2 py-0.5 rounded truncate max-w-[100px]"
-                              title={agent.latestBlobId}
-                              style={{ background: 'var(--color-brand-light)', color: 'var(--color-brand)' }}
-                            >
-                              {agent.latestBlobId.substring(0, 10)}…
-                            </span>
-                          ) : (
-                            <span className="text-[11px] italic" style={{ color: 'var(--color-text-muted)' }}>No telemetry</span>
-                          )}
-                        </td>
-
-                        {/* Action */}
-                        <td className="px-5 py-3.5 text-right">
-                          <div className="relative flex items-center justify-end gap-2">
-                            <button
-                              id={`btn-audit-${agent.address.substring(2, 8)}`}
-                              onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
-                              disabled={!agent.latestBlobId}
-                              className="px-2.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1 transition-all cursor-pointer border disabled:opacity-30 disabled:cursor-not-allowed"
-                              style={{
-                                background: 'var(--color-surface)',
-                                color: 'var(--color-text-secondary)',
-                                borderColor: 'var(--color-border)'
-                              }}
-                              onMouseEnter={e => {
-                                if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
-                                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
-                                }
-                              }}
-                              onMouseLeave={e => {
-                                if (!(e.currentTarget as HTMLButtonElement).disabled) {
-                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
-                                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
-                                }
-                              }}
-                            >
-                              <Terminal className="h-3.5 w-3.5" /> Audit Log
-                            </button>
-                            <button
-                              onClick={() => setSettingsAgent(agent)}
-                              className="w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer border"
-                              style={{
-                                background: 'var(--color-surface)',
-                                color: 'var(--color-text-secondary)',
-                                borderColor: 'var(--color-border)'
-                              }}
-                              onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
-                                (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
-                              }}
-                              onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
-                                (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
-                              }}
-                            >
-                              <Settings className="h-3.5 w-3.5" /> Configure
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (activeLoops[agent.address]) {
-                                  setActiveLoops(prev => {
-                                    const next = { ...prev };
-                                    delete next[agent.address];
-                                    return next;
-                                  });
-                                } else {
-                                  setDropdownOpen(dropdownOpen === agent.address ? null : agent.address);
-                                }
-                              }}
-                              className={`w-[105px] justify-center px-3 py-1.5 rounded-lg text-[12px] flex items-center gap-1.5 transition-all cursor-pointer border ${
-                                activeLoops[agent.address] 
-                                  ? 'font-bold text-white bg-[#12b76a] border-[#12b76a] shadow-md shadow-emerald-500/20 hover:opacity-95' 
-                                  : 'font-semibold text-[var(--color-brand)] bg-[rgba(79,110,247,0.04)] border-[var(--color-brand)]/20 hover:bg-[var(--color-brand)] hover:text-white hover:border-[var(--color-brand)]'
-                              }`}
-                            >
-                              {activeLoops[agent.address] ? (
-                                <>
-                                  <Square className="h-3 w-3 fill-current text-white animate-pulse" />
-                                  <span>
-                                    {activeLoops[agent.address].timeLeft === Infinity 
-                                      ? 'Active' 
-                                      : `${Math.floor(activeLoops[agent.address].timeLeft / 60)}:${String(activeLoops[agent.address].timeLeft % 60).padStart(2, '0')}`
-                                    }
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <Play className="h-3 w-3 fill-current" /> Run Loop
-                                </>
-                              )}
-                            </button>
-                            {dropdownOpen === agent.address && (
-                              <>
-                                <div className="fixed inset-0 z-20" onClick={() => setDropdownOpen(null)} />
-                                <div 
-                                  className="absolute right-0 top-full mt-1.5 z-30 w-48 rounded-xl border shadow-xl flex flex-col p-1.5 gap-0.5"
-                                  style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-                                >
-                                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b pb-1.5 mb-1" style={{ borderColor: 'var(--color-border)' }}>
-                                    Schedule Trade Loop
-                                  </div>
-                                  {[
-                                    { label: 'Continuous', mode: 'continuous', desc: '10s interval, run forever', timeLeft: Infinity, intervalSec: 10 },
-                                    { label: '1 Minute', mode: '1min', desc: '10s interval, 6 trades', timeLeft: 60, intervalSec: 10 },
-                                    { label: '3 Minutes', mode: '3min', desc: '10s interval, 18 trades', timeLeft: 180, intervalSec: 10 },
-                                  ].map((opt) => (
-                                    <button
-                                      key={opt.mode}
-                                      onClick={() => {
-                                        setActiveLoops(prev => ({
-                                          ...prev,
-                                          [agent.address]: {
-                                            mode: opt.mode as any,
-                                            timeLeft: opt.timeLeft,
-                                            nextTradeIn: opt.intervalSec,
-                                            intervalSec: opt.intervalSec,
-                                          }
-                                        }));
-                                        setDropdownOpen(null);
-                                        
-                                        const newEv: LiveEvent = {
-                                          id: 'mock-schedule-start-' + Date.now() + '-' + Math.random(),
-                                          type: 'register',
-                                          agent: agent.address,
-                                          message: `Scheduled simulation loop started (${opt.label} mode)`,
-                                          timestamp: new Date().toISOString(),
-                                          digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (Sched)',
-                                          isMocked: true,
-                                        };
-                                        setLiveEvents(evs => [newEv, ...evs].slice(0, 50));
-                                      }}
-                                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                                    >
-                                      <div className="text-[12px] font-bold text-left" style={{ color: 'var(--color-text-primary)' }}>{opt.label}</div>
-                                      <div className="text-[10px] text-left" style={{ color: 'var(--color-text-muted)' }}>{opt.desc}</div>
-                                    </button>
-                                  ))}
-                                </div>
-                              </>
-                            )}
-                            {!activeLoops[agent.address] && (
-                              <button
-                                onClick={() => handleStepTrade(agent.address)}
-                                className="px-2.5 py-1.5 rounded-lg text-[12px] font-semibold flex items-center gap-1 transition-all cursor-pointer border"
-                                style={{
-                                  background: 'var(--color-surface)',
-                                  color: 'var(--color-text-secondary)',
-                                  borderColor: 'var(--color-border)'
-                                }}
-                                onMouseEnter={e => {
-                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-surface-2)';
-                                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)';
-                                }}
-                                onMouseLeave={e => {
-                                  (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)';
-                                  (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
-                                }}
-                                title="Execute a single simulated trade cycle immediately"
-                              >
-                                <Zap className="h-3.5 w-3.5 text-amber-500 fill-amber-500" /> Step
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {allAgents.length > 12 && (
-                <div
-                  className="px-6 py-3 border-t flex justify-center"
-                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}
-                >
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-[12px] font-semibold text-[var(--color-brand)] hover:underline"
-                  >
-                    {isExpanded ? 'Show fewer agents' : `Show all ${allAgents.length} agents`}
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </>
       )}

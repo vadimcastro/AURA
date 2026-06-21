@@ -909,8 +909,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         type="number"
                         value={sandboxVolume}
                         onChange={(e) => setSandboxVolume(parseInt(e.target.value) || 0)}
-                        className="w-full p-2 border rounded-lg focus:outline-none bg-white font-mono"
-                        style={{ borderColor: 'var(--color-border)' }}
+                        className="w-full p-2 border rounded-lg focus:outline-none font-mono"
+                        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                       />
                     </div>
 
@@ -921,8 +921,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <select 
                         value={sandboxAddress}
                         onChange={(e) => setSandboxAddress(e.target.value)}
-                        className="w-full p-2 border rounded-lg focus:outline-none bg-white text-[11px] font-mono"
-                        style={{ borderColor: 'var(--color-border)' }}
+                        className="w-full p-2 border rounded-lg focus:outline-none text-[11px] font-mono"
+                        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                       >
                         <option value="0x7d28...3f1c">DeepBook V3 (Allowlisted)</option>
                         <option value="0xbeef...dead">SuiLend Pool (Allowlisted)</option>
@@ -963,10 +963,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   <div 
                     className={`rounded-lg p-2.5 text-[11px] font-semibold border ${
                       sandboxAddress === '0x94fc...12ab'
-                        ? 'bg-red-50 border-red-200 text-red-600'
+                        ? 'bg-[var(--color-danger-bg)] border-[var(--color-danger)]/25 text-[var(--color-danger)]'
                         : sandboxVolume > 100
-                        ? 'bg-yellow-50 border-yellow-200 text-yellow-600'
-                        : 'bg-green-50 border-green-200 text-green-600'
+                        ? 'bg-[var(--color-warning-bg)] border-[var(--color-warning)]/25 text-[var(--color-warning)]'
+                        : 'bg-[var(--color-success-bg)] border-[var(--color-success)]/25 text-[var(--color-success)]'
                     }`}
                   >
                     {sandboxAddress === '0x94fc...12ab'
@@ -986,41 +986,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <span className="font-bold text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">3. Consensus Thinker Panel &amp; Grunt</span>
                     
                     <div className="space-y-2.5 text-[11px] font-mono leading-relaxed max-h-[220px] overflow-y-auto pr-1">
-                      <div className="p-2 bg-white rounded border" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-orange-600">Gemma-4-26B (Grunt Executor):</span>
-                          <span className="text-[9px] bg-orange-100 text-orange-800 px-1 py-0.2 rounded font-semibold uppercase">Active Execution</span>
+                          <span className="font-bold text-orange-400">Gemma-4-26B (Grunt Executor):</span>
+                          <span className="text-[9px] bg-orange-950/40 text-orange-400 border border-orange-800/40 px-1 py-0.2 rounded font-semibold uppercase">Active Execution</span>
                         </div>
-                        <p className="mt-0.5 text-xs">"Evaluating SVI parameters. Ready to generate options trading transaction block..."</p>
+                        <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">"Evaluating SVI parameters. Ready to generate options trading transaction block..."</p>
                       </div>
-                      <div className="p-2 bg-white rounded border" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-pink-600">Nemotron-3-Ultra-550B (Thinker 1):</span>
-                          <span className="text-[9px] bg-pink-100 text-pink-800 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
+                          <span className="font-bold text-pink-400">Nemotron-3-Ultra-550B (Thinker 1):</span>
+                          <span className="text-[9px] bg-pink-950/40 text-pink-400 border border-pink-800/40 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
                         </div>
-                        <p className="mt-0.5 text-xs">
+                        <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">
                           {sandboxVolume > 100 
                             ? '"Option skew bounds variance is too wide for volume. Flagged."'
                             : '"Volatility parameter alignment matches spot index. Verified."'}
                         </p>
                       </div>
-                      <div className="p-2 bg-white rounded border" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-blue-600">Qwen3-Coder-480B (Thinker 2):</span>
-                          <span className="text-[9px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
+                          <span className="font-bold text-blue-400">Qwen3-Coder-480B (Thinker 2):</span>
+                          <span className="text-[9px] bg-blue-950/40 text-blue-400 border border-blue-800/40 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
                         </div>
-                        <p className="mt-0.5 text-xs">
+                        <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">
                           {sandboxVolume > 100 
                             ? '"Calculated spread width does not meet delta hedging thresholds. Halt suggested."'
                             : '"Delta neutrality matches vault parameters. Approved."'}
                         </p>
                       </div>
-                      <div className="p-2 bg-white rounded border" style={{ borderColor: 'var(--color-border)' }}>
+                      <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-600">Llama-3.3-Instruct-70B (Thinker 3):</span>
-                          <span className="text-[9px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
+                          <span className="font-bold text-green-400">Llama-3.3-Instruct-70B (Thinker 3):</span>
+                          <span className="text-[9px] bg-green-950/40 text-green-400 border border-green-800/40 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
                         </div>
-                        <p className="mt-0.5 text-xs">
+                        <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">
                           {sandboxVolume > 100 
                             ? '"Consensus match fails safety margins. Deny transaction execution."'
                             : '"All safety checks passed. Standard strategy execution approved."'}

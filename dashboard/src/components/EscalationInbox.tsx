@@ -185,8 +185,8 @@ export const EscalationInbox: React.FC = () => {
               key={item.id}
               className="rounded-xl p-4 border space-y-3 transition-all duration-200"
               style={{
-                borderColor: item.status === 'PENDING' ? '#fecaca' : 'var(--color-border)',
-                background: item.status === 'PENDING' ? 'rgba(254, 242, 242, 0.4)' : 'var(--color-surface-2)'
+                borderColor: item.status === 'PENDING' ? 'rgba(239, 68, 68, 0.3)' : 'var(--color-border)',
+                background: item.status === 'PENDING' ? 'var(--color-danger-bg)' : 'var(--color-surface-2)'
               }}
             >
               <div className="flex justify-between items-start gap-4">
@@ -196,10 +196,10 @@ export const EscalationInbox: React.FC = () => {
                       {item.agentName}
                     </span>
                     <span
-                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase ${
                         item.status === 'PENDING'
-                          ? 'bg-red-50 text-red-600 border-red-200'
-                          : 'bg-green-50 text-green-600 border-green-200'
+                          ? 'bg-[var(--color-danger-bg)] text-[var(--color-danger)] border-[var(--color-danger)]/25'
+                          : 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success)]/25'
                       }`}
                     >
                       {item.status}

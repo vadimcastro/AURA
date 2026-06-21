@@ -5,34 +5,34 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Light palette */
-  --color-bg:          #f8f9fc;
-  --color-surface:     #ffffff;
-  --color-surface-2:   #f1f3f8;
-  --color-border:      #e2e6ef;
-  --color-border-soft: #edf0f7;
+  /* Midnight Cyber Blue - Dark Financial Terminal Theme */
+  --color-bg:          #070d19;   /* Deep space obsidian blue-black */
+  --color-surface:     #0c152b;   /* Sleek terminal console panels */
+  --color-surface-2:   #121f3d;   /* Highlight panel header/inputs */
+  --color-border:      #1a2b54;   /* Cool slate blue framing border */
+  --color-border-soft: #142142;   /* Soft layout separator */
 
-  /* Brand */
-  --color-brand:        #4f6ef7;   /* calm indigo-blue */
-  --color-brand-light:  #eef1fe;
-  --color-brand-dark:   #3451d1;
+  /* Brand - Cyber Blue / Neon Blue */
+  --color-brand:        #2563eb;   /* Vivid brand blue */
+  --color-brand-light:  rgba(37, 99, 235, 0.15);
+  --color-brand-dark:   #1d4ed8;
 
-  /* Info/Blue */
-  --color-info:         #0284c7;
-  --color-info-bg:      #f0f9ff;
+  /* Info/Blue - Cyber Cyan */
+  --color-info:         #06b6d4;
+  --color-info-bg:      rgba(6, 182, 212, 0.12);
 
-  /* Semantic */
-  --color-success:      #12b76a;
-  --color-success-bg:   #ecfdf3;
-  --color-warning:      #f59e0b;
-  --color-warning-bg:   #fffbeb;
-  --color-danger:       #ef4444;
-  --color-danger-bg:    #fef2f2;
+  /* Semantic - Vibrant Terminal Alerts */
+  --color-success:      #10b981;   /* Cyber Emerald */
+  --color-success-bg:   rgba(16, 185, 129, 0.12);
+  --color-warning:      #f59e0b;   /* Cyber Amber */
+  --color-warning-bg:   rgba(245, 158, 11, 0.12);
+  --color-danger:       #ef4444;   /* Cyber Red */
+  --color-danger-bg:    rgba(239, 68, 68, 0.12);
 
-  /* Text */
-  --color-text-primary:   #0f1729;
-  --color-text-secondary: #5a6482;
-  --color-text-muted:     #9aa3be;
+  /* Text - Crisp Light Terminal Contrast */
+  --color-text-primary:   #f3f4f6;   /* Ice white */
+  --color-text-secondary: #9ca3af;   /* Muted gray */
+  --color-text-muted:     #6b7280;   /* Slate gray */
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────── */
@@ -64,7 +64,7 @@ h1, h2, h3, h4, h5 { font-weight: 700; letter-spacing: -0.02em; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
 /* ─── Selection ─────────────────────────────────────────────── */
-::selection { background: #c7d3fd; color: var(--color-text-primary); }
+::selection { background: #1d4ed8; color: var(--color-text-primary); }
 
 /* ─── Spinner ────────────────────────────────────────────────── */
 @keyframes spin { to { transform: rotate(360deg); } }
