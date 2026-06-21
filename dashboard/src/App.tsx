@@ -354,7 +354,7 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}>
 
       {/* Subtle top gradient accent */}
       <div className="fixed top-0 inset-x-0 h-1 bg-gradient-to-r from-[#4f6ef7] via-[#818cf8] to-[#4f6ef7] z-50" />
@@ -619,7 +619,7 @@ function App() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-24 pt-2">
+      <main className="flex-grow mx-auto max-w-[1600px] w-full px-4 sm:px-6 lg:px-8 pb-24 pt-2">
         {activeTab === 'landing' && (
           <LandingPage onNavigate={(tab) => setActiveTab(tab as TabType)} />
         )}
