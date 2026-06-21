@@ -106,6 +106,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
   const [error, setError]         = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeDisputeEscrow, setActiveDisputeEscrow] = useState<number>(0.0);
 
   // Auto-refresh on-chain agents list every 15 seconds to sync run loop updates dynamically
   useEffect(() => {
@@ -188,7 +189,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
     setTimeout(() => setCopiedAddress(null), 1500);
   };
 
-  const allAgents = [...localAgents, ...agents];
+  const allAgents = [
+    ...localAgents,
+    ...agents.filter(a => !localAgents.some(la => la.address.toLowerCase() === a.address.toLowerCase()))
+  ];
 
   // Handle deploying a live agent on-chain (if wallet is connected) or a mock agent (if zkLogin/guest)
   const handleDeployAgent = async () => {
@@ -695,6 +699,38 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           );
         }
 
+        // 1.8 Fetch active disputes by comparing DisputeSubmitted and DisputeResolved events
+        let activeDisputesCount = 0;
+        try {
+          const disputeSubEvents = await suiClient.queryEvents({
+            query: { MoveEventType: `${PACKAGE_ID}::aura_registry::DisputeSubmitted` },
+            limit: 50,
+            order: 'descending',
+          });
+          const disputeResEvents = await suiClient.queryEvents({
+            query: { MoveEventType: `${PACKAGE_ID}::aura_registry::DisputeResolved` },
+            limit: 50,
+            order: 'descending',
+          });
+
+          const resolvedDisputeIds = new Set<string>();
+          for (const ev of disputeResEvents.data) {
+            const disputeId = (ev.parsedJson as any)?.dispute_id;
+            if (disputeId) {
+              resolvedDisputeIds.add(disputeId);
+            }
+          }
+
+          for (const ev of disputeSubEvents.data) {
+            const disputeId = (ev.parsedJson as any)?.dispute_id;
+            if (disputeId && !resolvedDisputeIds.has(disputeId)) {
+              activeDisputesCount++;
+            }
+          }
+        } catch (e) {
+          console.warn('Could not query active disputes:', e);
+        }
+
         if (active) {
           // Show all registered agents in the directory immediately
           const filteredAgents = agentsData;
@@ -709,6 +745,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             return b.totalTasks - a.totalTasks;
           });
           setAgents(filteredAgents);
+          setActiveDisputeEscrow(activeDisputesCount * 0.01);
         }
       } catch (err) {
         if (active) setError((err as Error).message);
@@ -796,6 +833,19 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             type = 'deregister';
             const refund = (ev.parsedJson as any)?.refund_amount;
             message = `Policy revoked; reclaimed ${refund ? refund / 1e6 : 0} dUSDC`;
+          } else if (typeStr.includes('DisputeSubmitted')) {
+            type = 'slash';
+            const disputer = (ev.parsedJson as any)?.disputer;
+            message = `🚨 Telemetry dispute filed by ${disputer ? disputer.substring(0, 8) : '0x'}…! AES decryption key requested.`;
+          } else if (typeStr.includes('KeyDisclosed')) {
+            type = 'register';
+            message = `🔑 Encryption key disclosed by operator on-chain. Telemetry verified secure!`;
+          } else if (typeStr.includes('DisputeResolved')) {
+            type = 'slash';
+            const slashed = (ev.parsedJson as any)?.slashed;
+            message = slashed
+              ? `❌ Dispute RESOLVED: Operator failed to disclose key. Operator slashed, stake awarded to disputer.`
+              : `✅ Dispute RESOLVED: Operator disclosed valid key. Dispute bond awarded to operator.`;
           }
           
           return {
@@ -1226,7 +1276,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             {/* 2. Dispute Escrow */}
             <div className="border-r border-[var(--color-border-soft)] pr-4 last:border-r-0 sm:block hidden">
               <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Dispute Escrow</span>
-              <span className="font-mono text-base font-bold text-[var(--color-warning)] block mt-1">{(totalStake * 0.10).toFixed(2)} SUI</span>
+              <span className="font-mono text-base font-bold text-[var(--color-warning)] block mt-1">{activeDisputeEscrow.toFixed(2)} SUI</span>
             </div>
 
             {/* 3. Treasury Accrued */}

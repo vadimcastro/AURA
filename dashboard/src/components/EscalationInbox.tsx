@@ -133,6 +133,13 @@ export const EscalationInbox: React.FC = () => {
               Note: This matches the `ADMIN_API_KEY` set in your Railway environment variables.
             </span>
           </div>
+          
+          <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-1">On-Chain Disputes Note:</span>
+            <p className="text-[10.5px] leading-relaxed text-[var(--color-text-muted)] font-sans">
+              Slashing disputes and decryption challenges are resolved on-chain. Active disputes are displayed in the <strong style={{ color: 'var(--color-brand)' }}>On-Chain Activity Feed</strong>. Audit telemetry and trigger disputes using the <strong style={{ color: 'var(--color-brand)' }}>Seal Decrypter</strong> panels.
+            </p>
+          </div>
         </div>
       </div>
 
