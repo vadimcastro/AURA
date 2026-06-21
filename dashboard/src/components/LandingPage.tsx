@@ -323,7 +323,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     setTimeout(() => {
       setNlpParsing(false);
       setNlpExecuted(true);
-      setNlpLogMsg(`✅ Transaction signed & broadcast. Digest: 0x${Math.random().toString(16).substring(2, 10)}... (TradeTicket returned safely to Move sandbox in single atomic block)`);
+      setNlpLogMsg(`Transaction signed & broadcast. Digest: 0x${Math.random().toString(16).substring(2, 10)}... (TradeTicket returned safely to Move sandbox in single atomic block)`);
       
       // Inject transaction into decrypted telemetries
       const newBlob = {
@@ -976,10 +976,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     }`}
                   >
                     {sandboxAddress === '0x94fc...12ab'
-                      ? '❌ Broadcast Prevented: Unregistered recipient address.'
+                      ? 'Broadcast Prevented: Unregistered recipient address.'
                       : sandboxVolume > 100
-                      ? '⚠️ Warning triggered: Request escalated to HITL queue.'
-                      : '✅ Sandbox validation completed cleanly.'}
+                      ? 'Warning triggered: Request escalated to HITL queue.'
+                      : 'Sandbox validation completed cleanly.'}
                   </div>
                 </div>
 

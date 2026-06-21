@@ -251,10 +251,10 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
         transaction: tx,
       });
 
-      console.log("✅ Dispute successfully filed! Digest:", result.digest);
-      alert(`🎉 Slashing dispute successfully filed on Sui Testnet!\nDigest: ${result.digest}\n\nThe operator has 24 hours to disclose their AES decryption key or face automatic slashing!`);
+      console.log("Dispute successfully filed! Digest:", result.digest);
+      alert(`Slashing dispute successfully filed on Sui Testnet!\nDigest: ${result.digest}\n\nThe operator has 24 hours to disclose their AES decryption key or face automatic slashing!`);
     } catch (err) {
-      console.error("❌ Failed to file dispute on-chain:", err);
+      console.error("Failed to file dispute on-chain:", err);
       alert(`Failed to file dispute: ${(err as Error).message}`);
     } finally {
       setDisputing(false);
@@ -434,7 +434,7 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
                       Filing Dispute...
                     </>
                   ) : (
-                    '🚨 File Slashing Dispute on Testnet'
+                    'File Slashing Dispute on Testnet'
                   )}
                 </button>
               ) : (

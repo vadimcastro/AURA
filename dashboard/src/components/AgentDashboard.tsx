@@ -215,7 +215,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           return;
         }
 
-        console.log("📡 Registering agent live on-chain on Sui Testnet...");
+        console.log("Registering agent live on-chain on Sui Testnet...");
         const tx = new Transaction();
         
         // 1. Split 0.10 SUI (100,000,000 Mist) from gas coin for agent collateral stake
@@ -235,7 +235,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           transaction: tx,
         });
 
-        console.log(`✅ On-chain agent registration succeeded. Digest: ${result.digest}`);
+        console.log(`On-chain agent registration succeeded. Digest: ${result.digest}`);
 
         // Add real transaction event log
         const registerEv: LiveEvent = {
@@ -251,7 +251,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         setLiveEvents((prev) => [registerEv, ...prev]);
         setRefreshKey(k => k + 1); // Refresh directory to fetch the newly registered agent immediately
       } catch (err) {
-        console.error("❌ On-chain agent registration failed:", err);
+        console.error("On-chain agent registration failed:", err);
         alert(`On-chain registration failed: ${(err as Error).message}`);
       } finally {
         setIsDeploying(false);
@@ -482,7 +482,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         id: 'mock-tx-error-' + Date.now(),
         type: 'slash',
         agent: addr,
-        message: `❌ Execution blocked: Agent policy wallet has run out of dUSDC budget (0.00 dUSDC left).`,
+        message: `Execution blocked: Agent policy wallet has run out of dUSDC budget (0.00 dUSDC left).`,
         timestamp: new Date().toISOString(),
         digest: '0xERROR-BUDGET',
         isMocked: true,
@@ -836,16 +836,16 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           } else if (typeStr.includes('DisputeSubmitted')) {
             type = 'slash';
             const disputer = (ev.parsedJson as any)?.disputer;
-            message = `🚨 Telemetry dispute filed by ${disputer ? disputer.substring(0, 8) : '0x'}…! AES decryption key requested.`;
+            message = `Telemetry dispute filed by ${disputer ? disputer.substring(0, 8) : '0x'}…! AES decryption key requested.`;
           } else if (typeStr.includes('KeyDisclosed')) {
             type = 'register';
-            message = `🔑 Encryption key disclosed by operator on-chain. Telemetry verified secure!`;
+            message = `Encryption key disclosed by operator on-chain. Telemetry verified secure!`;
           } else if (typeStr.includes('DisputeResolved')) {
             type = 'slash';
             const slashed = (ev.parsedJson as any)?.slashed;
             message = slashed
-              ? `❌ Dispute RESOLVED: Operator failed to disclose key. Operator slashed, stake awarded to disputer.`
-              : `✅ Dispute RESOLVED: Operator disclosed valid key. Dispute bond awarded to operator.`;
+              ? `Dispute RESOLVED: Operator failed to disclose key. Operator slashed, stake awarded to disputer.`
+              : `Dispute RESOLVED: Operator disclosed valid key. Dispute bond awarded to operator.`;
           }
           
           return {
@@ -919,7 +919,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
               id: 'mock-schedule-halt-' + Date.now() + '-' + Math.random(),
               type: 'slash',
               agent: addr,
-              message: `❌ Simulation halted: Agent has exhausted its policy wallet dUSDC budget (0.00 dUSDC left)! Please deposit funds to resume.`,
+              message: `Simulation halted: Agent has exhausted its policy wallet dUSDC budget (0.00 dUSDC left)! Please deposit funds to resume.`,
               timestamp: new Date().toISOString(),
               digest: '0x' + Math.random().toString(16).substring(2, 12).toUpperCase() + ' (OutFunds)',
               isMocked: true,
@@ -1575,12 +1575,12 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                                         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                                       >
                                         <div className="px-2 py-1 text-[8.5px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b pb-1 mb-1" style={{ borderColor: 'var(--color-border)' }}>
-                                          Schedule Trade Loop
+                                          Schedule Local Sim Loop
                                         </div>
                                         {[
-                                          { label: 'Continuous', mode: 'continuous', desc: '10s loop, infinite', timeLeft: Infinity, intervalSec: 10 },
-                                          { label: '1 Minute', mode: '1min', desc: '10s loop, 6 trades', timeLeft: 60, intervalSec: 10 },
-                                          { label: '3 Minutes', mode: '3min', desc: '10s loop, 18 trades', timeLeft: 180, intervalSec: 10 },
+                                          { label: 'Continuous', mode: 'continuous', desc: '10s local sim loop', timeLeft: Infinity, intervalSec: 10 },
+                                          { label: '1 Minute', mode: '1min', desc: '10s local loop, 6 trades', timeLeft: 60, intervalSec: 10 },
+                                          { label: '3 Minutes', mode: '3min', desc: '10s local loop, 18 trades', timeLeft: 180, intervalSec: 10 },
                                         ].map((opt) => (
                                           <button
                                             key={opt.mode}

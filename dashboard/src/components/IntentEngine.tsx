@@ -235,8 +235,8 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
           transaction: tx,
         });
 
-        console.log(`✅ On-chain intent execution succeeded. Digest: ${result.digest}`);
-        setStatusMsg(`🎉 On-chain PTB Executed Successfully! Digest: ${result.digest.substring(0, 14)}... (Options Range Minted on DeepBook Predict)`);
+        console.log(`On-chain intent execution succeeded. Digest: ${result.digest}`);
+        setStatusMsg(`On-chain PTB Executed Successfully! Digest: ${result.digest.substring(0, 14)}... (Options Range Minted on DeepBook Predict)`);
 
         if (onAddLiveEvent) {
           onAddLiveEvent({
@@ -253,7 +253,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
         setPrompt('');
         setParsedIntent(null);
       } catch (err) {
-        console.error("❌ On-chain intent execution failed:", err);
+        console.error("On-chain intent execution failed:", err);
         alert(`On-chain execution failed: ${(err as Error).message}`);
       } finally {
         setExecuting(false);
@@ -263,7 +263,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
       const txDigest = '0x' + Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
       setTimeout(() => {
         setExecuting(false);
-        setStatusMsg(`🎉 PTB Executed Successfully! Digest: ${txDigest.substring(0, 14)}... (Guest/zkLogin simulated execution)`);
+        setStatusMsg(`PTB Executed Successfully! Digest: ${txDigest.substring(0, 14)}... (Guest/zkLogin simulated execution)`);
         
         if (onAddLiveEvent) {
           onAddLiveEvent({
