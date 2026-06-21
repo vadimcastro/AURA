@@ -9,7 +9,8 @@
     "start": "tsc && node dist/bot_runner.js",
     "test": "tsc && node dist/tests/run_tests.js",
     "recover": "tsc && node dist/recover_funds.js",
-    "runner": "tsc && node dist/bot_runner.js"
+    "runner": "tsc && node dist/bot_runner.js",
+    "multi-agent": "tsc && node dist/run_multi_agent.js"
   },
   "dependencies": {
     "@mysten/sui": "^1.1.0",

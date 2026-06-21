@@ -30,9 +30,13 @@ graph TD
 *   **Trigger:** A Liquidity Provider (LP) or the user deploys a dedicated sandbox wallet.
 *   **On-Chain Action:** Instantiates `agent_wallet_policy::create_policy`, depositing trading capital (dUSDC) and delegating execution authority to the registered agent's address. Allowlisted packages (e.g. DeepBook Predict) and drawdown ceilings are set at this stage.
 
-### Step 3: Off-Chain Daemon Cycle Initialization
-*   **Trigger:** The daemon server is started (listening on port 3000).
-*   **Action:** Hitting the "Start Agent/Server" button on the Cloud Operator panel transitions the server to an `ENABLED/RUNNING` state (which registers/bootstraps agent registry entities) but does **not** execute any periodic background cycles automatically. The trading loops or manual step execution are triggered strictly on-demand from the UI: via the per-agent "Run Loop" or "Step" buttons inside the Agent Directory tab, or via one-off atomic transactions triggered in the Intent Engine tab. Once triggered, manual or scheduled cycles poll the blockchain, pulling SVI base prices and volatility parameters from the DeepBook oracle object.
+### Step 3: Execution Loop Modes & Initialization
+*   **Trigger:** The operator starts the execution environment. This can be done in one of two modes:
+    1. **Local Browser Simulation:** Scheduled via the "Schedule Local Sim Loop" or "Step" button on an agent card in the Vite Dashboard. 
+    2. **Real On-Chain Continuous Daemon Loop:** Started by running `npm run multi-agent` inside the `/sdk/` directory, or by enabling the Operator Server daemon on port 3000 and starting the background interval loops.
+*   **Action & Architectural Difference (Bypassing the Approve Wall):**
+    *   **Browser-Based Simulation:** Enforces strategy presets (Conservative, Balanced, Aggressive) and safety thresholds client-side, writing simulated telemetry outputs. This is required because browser wallets (Sui Wallet, OKX, etc.) mandate manual user consent popup windows for every transaction signature. Continuous high-frequency trading would trigger a signature popup every 10 seconds, which is unusable.
+    *   **On-Chain CLI Daemon:** Loads the agent keypair directly in-memory. This allows the backend process to programmatically sign options-trading PTBs and write real telemetry blobs to Walrus on-chain without human prompt walls. Capital security is maintained on-chain via the user's configured `WalletPolicy` (restricting access to specific smart contracts like DeepBook Predict and enforcing drawdown limits). Once active, manual or scheduled cycles poll the blockchain, pulling SVI base prices and volatility parameters from the DeepBook oracle object.
 
 ### Step 4: Asynchronous "Thinker Panel" Consensus (Every 5 Cycles)
 *   **LLM Role:** **Thinkers** (`nemotron-3-ultra`, `qwen3-coder`, `llama-3.3-instruct`) act as judges.
