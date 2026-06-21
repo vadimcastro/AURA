@@ -746,6 +746,80 @@ app.post("/api/recover", requireAuth, async (req, res) => {
   }
 });
 
+app.post("/api/intent/parse", async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ error: "Missing prompt in request body" });
+  }
+
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+  if (!openRouterApiKey) {
+    return res.status(500).json({ error: "OpenRouter is not configured on this server (missing OPENROUTER_API_KEY)" });
+  }
+
+  try {
+    const systemPrompt = `You are the AURA Intent Engine. Parse this natural language options trading intent into a structured JSON parameter block on Sui.
+Respond ONLY with a valid JSON matching this schema:
+{
+  "action": "MINT_RANGE",
+  "amount": number, // amount in dUSDC (not raw decimals, just simple count, e.g. 50)
+  "lowerStrike": number, // SUI price strike, default 65000 (meaning $6.5)
+  "higherStrike": number, // SUI price strike, default 75000 (meaning $7.5)
+  "expiryDays": number, // number of days, default 1
+  "isConservative": boolean
+}
+Intent: "${prompt}"`;
+
+    let model = "google/gemma-4-26b-a4b-it:free";
+    let textResult = "";
+    try {
+      console.log(`🤖 Intent Engine: Parsing prompt with ${model} on OpenRouter...`);
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openRouterApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: "user", content: systemPrompt }]
+        })
+      });
+      if (response.ok) {
+        const data = await response.json() as any;
+        textResult = data.choices?.[0]?.message?.content?.trim() || "";
+      } else {
+        throw new Error(`OpenRouter returned status ${response.status}`);
+      }
+    } catch (err) {
+      console.warn("⚠️ Gemma-4 parsing failed, falling back to Nemotron:", (err as Error).message);
+      model = "nvidia/nemotron-3-ultra-550b-a55b:free";
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openRouterApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: "user", content: systemPrompt }]
+        })
+      });
+      if (!response.ok) throw new Error(`Fallback OpenRouter returned ${response.status}`);
+      const data = await response.json() as any;
+      textResult = data.choices?.[0]?.message?.content?.trim() || "";
+    }
+
+    const cleanJSON = textResult.replace(/```json/g, "").replace(/```/g, "").trim();
+    const parsed = JSON.parse(cleanJSON);
+    console.log(`✅ Intent Engine: Successfully parsed intent into:`, parsed);
+    res.json({ success: true, parsed, modelUsed: model });
+  } catch (err) {
+    console.error("❌ Intent Engine parse failed:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 app.post("/api/stripe/create-session", async (req, res) => {
   const { walletAddress } = req.body;
   if (!walletAddress) {

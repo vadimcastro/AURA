@@ -518,11 +518,23 @@ export async function executeTradeCycle(
   const promptSummary = `Previous Cycle Status: "${previousSummary}". Active Consensus Strategy: "${activeConsensusSummary}".`;
 
   if (openRouterApiKey && !openRouterApiKey.includes("placeholder") && !options.copyParams) {
-    console.log("🤖 Querying live Gemma-4 Grunt model on OpenRouter for options pricing strategy decision...");
-    try {
-      rawLLMOutputJSON = await queryOpenRouterLLM(svi, promptSummary, openRouterApiKey, "google/gemma-4-26b-a4b-it:free");
-    } catch (e) {
-      console.warn("⚠️ OpenRouter Gemma-4 Grunt query failed, falling back to local simulation schema:", (e as Error).message);
+    const gruntModels = [
+      "google/gemma-4-26b-a4b-it:free",
+      "qwen/qwen3-next-80b-a3b-instruct:free",
+      "nvidia/nemotron-3-ultra-550b-a55b:free"
+    ];
+
+    for (const model of gruntModels) {
+      console.log(`🤖 Querying live Grunt model ${model} on OpenRouter for options pricing strategy decision...`);
+      try {
+        rawLLMOutputJSON = await queryOpenRouterLLM(svi, promptSummary, openRouterApiKey, model);
+        if (rawLLMOutputJSON) {
+          console.log(`✅ Successfully queried Grunt model ${model}`);
+          break;
+        }
+      } catch (e) {
+        console.warn(`⚠️ OpenRouter Grunt query to ${model} failed:`, (e as Error).message);
+      }
     }
   }
 
