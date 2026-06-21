@@ -48,7 +48,10 @@ const FeatureCard: React.FC<FeatureProps> = ({ icon, title, description, badge }
     style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
   >
     {badge && (
-      <span className="absolute top-3 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-light)] text-[var(--color-brand)] border border-[#c7d3fd]">
+      <span 
+        className="absolute top-3 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full border"
+        style={{ background: 'var(--color-brand-light)', color: 'var(--color-brand)', borderColor: 'rgba(2, 82, 214, 0.2)' }}
+      >
         {badge}
       </span>
     )}
@@ -708,7 +711,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
 
                 {nlpLogMsg && (
-                  <div className="rounded-xl p-3 text-[12px] bg-[var(--color-success-bg)] text-[var(--color-success)] border border-[#d1f7e2] font-mono leading-relaxed">
+                  <div 
+                    className="rounded-xl p-3 text-[12px] font-mono leading-relaxed border"
+                    style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', borderColor: 'rgba(5, 150, 105, 0.2)' }}
+                  >
                     {nlpLogMsg}
                   </div>
                 )}
@@ -730,11 +736,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
                         <span className="font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Guardian Decision</span>
                         <span 
-                          className={`font-bold px-2 py-0.5 rounded-full text-[10px] border ${
-                            nlpResult.guardianCheck.passed 
-                              ? 'bg-green-50 border-green-200 text-[var(--color-success)]' 
-                              : 'bg-red-50 border-red-200 text-[var(--color-danger)]'
-                          }`}
+                          className="font-bold px-2 py-0.5 rounded-full text-[10px] border"
+                          style={nlpResult.guardianCheck.passed 
+                            ? { background: 'var(--color-success-bg)', borderColor: 'rgba(5, 150, 105, 0.2)', color: 'var(--color-success)' }
+                            : { background: 'var(--color-danger-bg)', borderColor: 'rgba(220, 38, 38, 0.2)', color: 'var(--color-danger)' }
+                          }
                         >
                           {nlpResult.guardianCheck.passed ? 'PASSED' : 'ALERT'}
                         </span>
@@ -988,15 +994,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <div className="space-y-2.5 text-[11px] font-mono leading-relaxed max-h-[220px] overflow-y-auto pr-1">
                       <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-orange-400">Gemma-4-26B (Grunt Executor):</span>
-                          <span className="text-[9px] bg-orange-950/40 text-orange-400 border border-orange-800/40 px-1 py-0.2 rounded font-semibold uppercase">Active Execution</span>
+                          <span className="font-bold" style={{ color: 'var(--color-warning)' }}>Gemma-4-26B (Grunt Executor):</span>
+                          <span className="text-[9px] border px-1.5 py-0.5 rounded font-semibold uppercase" style={{ background: 'var(--color-warning-bg)', color: 'var(--color-warning)', borderColor: 'rgba(217, 119, 6, 0.2)' }}>Active Execution</span>
                         </div>
                         <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">"Evaluating SVI parameters. Ready to generate options trading transaction block..."</p>
                       </div>
                       <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-pink-400">Nemotron-3-Ultra-550B (Thinker 1):</span>
-                          <span className="text-[9px] bg-pink-950/40 text-pink-400 border border-pink-800/40 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
+                          <span className="font-bold" style={{ color: 'var(--color-brand)' }}>Nemotron-3-Ultra-550B (Thinker 1):</span>
+                          <span className="text-[9px] border px-1.5 py-0.5 rounded font-semibold uppercase" style={{ background: 'var(--color-brand-light)', color: 'var(--color-brand)', borderColor: 'rgba(2, 82, 214, 0.2)' }}>Consensus</span>
                         </div>
                         <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">
                           {sandboxVolume > 100 
@@ -1006,8 +1012,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       </div>
                       <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-blue-400">Qwen3-Coder-480B (Thinker 2):</span>
-                          <span className="text-[9px] bg-blue-950/40 text-blue-400 border border-blue-800/40 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
+                          <span className="font-bold" style={{ color: 'var(--color-info)' }}>Qwen3-Coder-480B (Thinker 2):</span>
+                          <span className="text-[9px] border px-1.5 py-0.5 rounded font-semibold uppercase" style={{ background: 'var(--color-info-bg)', color: 'var(--color-info)', borderColor: 'rgba(8, 145, 178, 0.2)' }}>Consensus</span>
                         </div>
                         <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">
                           {sandboxVolume > 100 
@@ -1017,8 +1023,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       </div>
                       <div className="p-2 rounded border" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-400">Llama-3.3-Instruct-70B (Thinker 3):</span>
-                          <span className="text-[9px] bg-green-950/40 text-green-400 border border-green-800/40 px-1.5 py-0.5 rounded font-semibold uppercase">Consensus</span>
+                          <span className="font-bold" style={{ color: 'var(--color-success)' }}>Llama-3.3-Instruct-70B (Thinker 3):</span>
+                          <span className="text-[9px] border px-1.5 py-0.5 rounded font-semibold uppercase" style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', borderColor: 'rgba(5, 150, 105, 0.2)' }}>Consensus</span>
                         </div>
                         <p className="mt-0.5 text-xs text-[var(--color-text-primary)]">
                           {sandboxVolume > 100 
@@ -1092,7 +1098,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                           )}
                         </button>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded bg-green-50 border border-green-200 text-green-600 uppercase">
+                        <span 
+                          className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded border uppercase"
+                          style={{ background: 'var(--color-success-bg)', borderColor: 'rgba(5, 150, 105, 0.2)', color: 'var(--color-success)' }}
+                        >
                           Decrypted Trace
                         </span>
                       )}
@@ -1184,11 +1193,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                               {item.agent}
                             </span>
                             <span 
-                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
-                                item.status === 'PENDING'
-                                  ? 'bg-red-50 text-red-600 border-red-200'
-                                  : 'bg-green-50 text-green-600 border-green-200'
-                              }`}
+                              className="text-[9px] font-bold px-2 py-0.5 rounded-full border"
+                              style={item.status === 'PENDING'
+                                ? { background: 'var(--color-danger-bg)', color: 'var(--color-danger)', borderColor: 'rgba(220, 38, 38, 0.2)' }
+                                : { background: 'var(--color-success-bg)', color: 'var(--color-success)', borderColor: 'rgba(5, 150, 105, 0.2)' }
+                              }
                             >
                               {item.status}
                             </span>

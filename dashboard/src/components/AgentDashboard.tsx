@@ -199,8 +199,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         console.log("📡 Registering agent live on-chain on Sui Testnet...");
         const tx = new Transaction();
         
-        // 1. Split 0.01 SUI (10,000,000 Mist) from gas coin for agent collateral stake
-        const [stakeCoin] = tx.splitCoins(tx.gas, [10_000_000]);
+        // 1. Split 0.10 SUI (100,000,000 Mist) from gas coin for agent collateral stake
+        const [stakeCoin] = tx.splitCoins(tx.gas, [100_000_000]);
         
         // 2. Register agent in our on-chain registry
         tx.moveCall({
@@ -223,7 +223,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           id: `register-tx-${Date.now()}-1`,
           type: 'register',
           agent: activeSession.address,
-          message: `Agent registered live on-chain with 0.01 SUI collateral`,
+          message: `Agent registered live on-chain with 0.10 SUI collateral`,
           timestamp: new Date().toISOString(),
           digest: result.digest,
           isMocked: false,
@@ -254,7 +254,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           reputation: 1000000,
           totalTasks: 0,
           successfulTasks: 0,
-          stakeAmount: 0.01,
+          stakeAmount: 0.10,
           active: true,
           blacklistUntil: 0,
           latestBlobId: 'mock-walrus-telemetry-fresh',
@@ -272,7 +272,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
           id: `register-tx-${Date.now()}-1`,
           type: 'register',
           agent: mockAddr,
-          message: `Agent registered on-chain with 0.01 SUI collateral`,
+          message: `Agent registered on-chain with 0.10 SUI collateral`,
           timestamp: new Date().toISOString(),
           digest: '0x' + Math.random().toString(16).substring(2, 10) + '... (Mock)',
           isMocked: true,
@@ -615,7 +615,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
               reputation: 920_000,   // 92.0 %
               totalTasks: 48,
               successfulTasks: 44,
-              stakeAmount: 0.01,
+              stakeAmount: 0.10,
               active: true,
               blacklistUntil: 0,
               latestBlobId: 'xyfwRUYqWnmbw2C_9WUOMxrz1SMlJEzBumkoLg-AhFc',
@@ -1160,7 +1160,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             {/* 2. Dispute Escrow */}
             <div className="border-r border-[var(--color-border-soft)] pr-4 last:border-r-0 sm:block hidden">
               <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Dispute Escrow</span>
-              <span className="font-mono text-base font-bold text-[var(--color-warning)] block mt-1">{(totalStake * 10).toFixed(2)} SUI</span>
+              <span className="font-mono text-base font-bold text-[var(--color-warning)] block mt-1">{(totalStake * 0.10).toFixed(2)} SUI</span>
             </div>
 
             {/* 3. Treasury Accrued */}

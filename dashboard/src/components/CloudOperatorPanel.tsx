@@ -180,11 +180,11 @@ export const CloudOperatorPanel: React.FC = () => {
               style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
             >
               <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Agent Status:</span>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                daemonStatus === 'RUNNING' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' :
-                daemonStatus === 'STOPPED' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400' :
-                daemonStatus === 'ERROR' ? 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400' :
-                'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+              <span className={`text-xs font-bold px-2 py-0.5 rounded border uppercase ${
+                daemonStatus === 'RUNNING' ? 'bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success)]/25' :
+                daemonStatus === 'STOPPED' ? 'bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning)]/25' :
+                daemonStatus === 'ERROR' ? 'bg-[var(--color-danger-bg)] text-[var(--color-danger)] border-[var(--color-danger)]/25' :
+                'bg-[var(--color-surface-2)] text-[var(--color-text-muted)] border-[var(--color-border)]'
               }`}>
                 {daemonStatus}
               </span>
