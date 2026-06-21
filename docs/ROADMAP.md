@@ -364,8 +364,10 @@ Implement the hybrid validator-consensus execution pattern, dynamic reputation-b
 *   ✅ **Natural Language Intent Engine & Guardian**: Implement `dashboard/src/components/IntentEngine.tsx` parsing English user prompts into atomic PTBs with pre-flight Guardian budget checks.
 *   ✅ **"Decrypted Mind" Memory Visualizer**: Implement `dashboard/src/components/TimelineVisualizer.tsx` converting decrypted JSON audit logs into natural language reasoning narratives.
 *   ✅ **Live SVI Volatility Surface Studio**: Implement `dashboard/src/components/VolatilityStudio.tsx` rendering live oracle SVI updates in 3D, overlaying agent strike bounds.
+*   ✅ **Stripe Crypto Onramp Funding Portal**: Integrated the Stripe Crypto Onramp widget into [AgentSettingsModal.tsx](file:///Users/vadim/Desktop/AURA/dashboard/src/components/AgentSettingsModal.tsx) via window-based SDK scripts, backed by a secure backend creation endpoint in [bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts) using private/public test keys to enable direct fiat-to-dUSDC funding on Sui.
 
 ---
+
 
 ## 🚀 Phase 10: Live Walkthrough Demo & Submission — PLANNED
 

@@ -1013,7 +1013,7 @@ To support the monetization of high-performing autonomous strategies, AURA enabl
 *   **zkLogin Socials:** Implements Google, GitHub, and Apple zkLogin connections in parallel to simplify friction-free social onboarding for Web2 operators.
 *   **Sui v2 SDK Compatibility:** Deployed client-side queries utilizing the new `SuiJsonRpcClient` and `JsonRpcHTTPTransport` connection patterns.
 
-### F. Scale & Operations: Tiered Execution Curve *(Planned for Phase 9)*
+### F. Scale & Operations: Tiered Execution Curve *(Implemented in Phase 9)*
 To balance latency, compute cost, and decision-making quality, AURA introduces a **Tiered Execution Curve** for off-chain agent logic, transitioning smoothly from fast local compute to heavy consensus panels:
 
 1. **Layer 1: Local Grunt Executor (Fast Path — On-Loop)**
@@ -1032,6 +1032,8 @@ To balance latency, compute cost, and decision-making quality, AURA introduces a
 3. **Layer 3: DecisionBench Emergent Delegation (Exception Path)**
    * **Trigger:** Initiated if the TS Sanity Sandbox intercepts a logical hallucination or if the Grunt emits a low-confidence flag.
    * **Role:** The runner suspends the Grunt and delegates range selection to the 550B Nemotron model for heavy reasoning on that specific step. If this fallback also violates sandbox bounds, the trade halts entirely and escalates to the user's dashboard via the **Human-in-the-Loop Escalation Inbox**.
+
+*For a detailed step-by-step control flow analysis of the agent lifecycle (from registration to trade completion), parameter mathematical equations, and the LLM-as-a-Judge consensus trio mechanics, see the [AURA Agent Lifecycle & Consensus Architecture](file:///Users/vadim/Desktop/AURA/docs/LIFECYCLE_AND_CONSENSUS.md) document.*
 
 ### G. Web2 zkLogin Onboarding & Gasless Capital Funding (First Principles)
 When onboarding Web2 users through social authentication (zkLogin via Google or GitHub), they receive a newly generated, empty Sui address. To enable transaction execution and trading capital deployment without requiring them to install browser extensions or purchase SUI on centralized exchanges, AURA implements a native **Sui Sponsored Transaction & Paymaster** infrastructure:

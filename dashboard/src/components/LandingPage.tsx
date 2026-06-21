@@ -416,8 +416,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </h1>
 
         <p className="mx-auto mt-5 max-w-xl text-[15px] leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-          AURA provides a trustless delegation framework for AI options traders on Sui. Move-enforced atomic sandboxes, multi-model consensus validation, and Walrus audit timelines eliminate counterparty risks.
+          AURA provides a trustless delegation framework for autonomous options trading agents on Sui. Move-enforced atomic sandboxes, multi-model consensus validation, and Walrus audit timelines eliminate counterparty risks for delegated capital.
         </p>
+
 
         {/* CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

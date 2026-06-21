@@ -746,6 +746,54 @@ app.post("/api/recover", requireAuth, async (req, res) => {
   }
 });
 
+app.post("/api/stripe/create-session", async (req, res) => {
+  const { walletAddress } = req.body;
+  if (!walletAddress) {
+    return res.status(400).json({ error: "Missing walletAddress in request body" });
+  }
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    return res.status(500).json({ error: "Stripe is not configured on this server (missing STRIPE_SECRET_KEY)" });
+  }
+
+  try {
+    console.log(`💳 Creating Stripe Crypto Onramp Session for wallet ${walletAddress}...`);
+    
+    // Construct form-data body for Stripe API
+    const params = new URLSearchParams();
+    params.append("destination_currency", "usdc");
+    params.append("destination_network", "sui");
+    params.append("wallet_addresses[sui]", walletAddress);
+    
+    const response = await fetch("https://api.stripe.com/v1/crypto/onramp_sessions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${stripeSecretKey}`,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: params.toString()
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Stripe API returned status ${response.status}: ${errorText}`);
+      return res.status(response.status).json({ error: `Stripe API error: ${errorText}` });
+    }
+
+    const sessionData = await response.json() as any;
+    console.log(`✅ Stripe Crypto Onramp Session created. Client Secret: ${sessionData.client_secret ? "Present" : "Missing"}`);
+    
+    res.json({
+      success: true,
+      clientSecret: sessionData.client_secret
+    });
+  } catch (err) {
+    console.error("❌ Failed to create Stripe Crypto Onramp Session:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`\n🚀 AURA Daemon Server listening on port ${PORT}`);
   console.log(`   Admin API Endpoints are protected by header 'x-api-key'\n`);

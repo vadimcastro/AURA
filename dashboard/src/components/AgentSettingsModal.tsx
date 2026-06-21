@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Zap, Lock, DollarSign, Activity, AlertTriangle, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Zap, Lock, DollarSign, Activity, AlertTriangle, Users, CreditCard } from 'lucide-react';
 
 export interface AgentSettingsModalProps {
   agentAddress: string;
@@ -36,6 +36,108 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
   const [copyTargetAddress, setCopyTargetAddress] = useState<string>(initialCopyTarget);
   const [isSimulating, setIsSimulating] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [showStripe, setShowStripe] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showStripe) return;
+    
+    let activeSession: any = null;
+    let isMounted = true;
+    
+    const loadScript = (src: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+          resolve();
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+        document.head.appendChild(script);
+      });
+    };
+
+    const initStripeOnramp = async () => {
+      setStripeLoading(true);
+      setStripeError(null);
+      
+      try {
+        await loadScript('https://js.stripe.com/v3/');
+        await loadScript('https://crypto-js.stripe.com/crypto-onramp-outer.js');
+
+        if (!isMounted) return;
+
+        const stripeOnrampGlobal = (window as any).StripeOnramp;
+        if (!stripeOnrampGlobal) {
+          throw new Error('StripeOnramp script failed to initialize on window object.');
+        }
+
+        const daemonUrl = localStorage.getItem('aura_daemon_url') || import.meta.env.VITE_DAEMON_URL || 'http://localhost:3000';
+        
+        const res = await fetch(`${daemonUrl}/api/stripe/create-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ walletAddress: agentAddress }),
+        });
+        
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Failed to create Stripe onramp session: ${errText || res.statusText}`);
+        }
+        
+        const data = await res.json();
+        if (!data.clientSecret) {
+          throw new Error('No clientSecret returned from backend daemon.');
+        }
+
+        if (!isMounted) return;
+
+        const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51TkY23C53TDTRt9MrX2SlU50ls3sXtWLnqEO0VpBSMQFf9QfH8uMsyJ6Uv4K6qLmPFkK3aqYFyHYpP8j6rU5rSTZ00bbAmCcuo';
+        const onrampInstance = stripeOnrampGlobal(publishableKey);
+        
+        const session = onrampInstance.createSession({
+          clientSecret: data.clientSecret,
+          appearance: {
+            theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+          }
+        });
+        
+        activeSession = session;
+        
+        if (isMounted) {
+          setTimeout(() => {
+            if (isMounted) {
+              session.mount('#stripe-onramp-container');
+              setStripeLoading(false);
+            }
+          }, 100);
+        }
+      } catch (err) {
+        console.error('Stripe onramp initialization failed:', err);
+        if (isMounted) {
+          setStripeError((err as Error).message);
+          setStripeLoading(false);
+        }
+      }
+    };
+    
+    initStripeOnramp();
+    
+    return () => {
+      isMounted = false;
+      if (activeSession && typeof activeSession.unmount === 'function') {
+        try {
+          activeSession.unmount();
+        } catch (e) {}
+      }
+    };
+  }, [showStripe, agentAddress]);
 
   const getRiskLabel = (val: number) => {
     if (val <= 33) return 'Conservative';
@@ -85,12 +187,14 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between border-b" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}>
           <div>
-            <h3 className="text-[15px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Agent Configuration</h3>
+            <h3 className="text-[15px] font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              {showStripe ? 'Fund via Stripe' : 'Agent Configuration'}
+            </h3>
             <p className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
               {agentAddress.substring(0, 12)}…{agentAddress.slice(-8)}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10">
+          <button onClick={showStripe ? () => setShowStripe(false) : onClose} className="p-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/10">
             <X className="h-5 w-5" style={{ color: 'var(--color-text-muted)' }} />
           </button>
         </div>
@@ -104,6 +208,52 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
               </div>
               <h4 className="text-[15px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Transaction Confirmed</h4>
               <p className="text-[13px] mt-1" style={{ color: 'var(--color-text-secondary)' }}>{successMsg}</p>
+            </div>
+          ) : showStripe ? (
+            <div className="space-y-4 flex flex-col items-center">
+              <div className="w-full flex justify-between items-center pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                <span className="text-[12px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Destination Wallet:</span>
+                <span className="text-[11px] font-mono px-2 py-0.5 rounded border" style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>
+                  {agentAddress.substring(0, 10)}…{agentAddress.slice(-6)}
+                </span>
+              </div>
+              
+              {stripeLoading && (
+                <div className="py-12 flex flex-col items-center justify-center text-center w-full">
+                  <div className="h-8 w-8 mb-4 border-2 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-brand)', borderTopColor: 'transparent' }} />
+                  <p className="text-[13px]" style={{ color: 'var(--color-text-secondary)' }}>Initializing Stripe Crypto Onramp...</p>
+                </div>
+              )}
+
+              {stripeError && (
+                <div className="py-8 flex flex-col items-center justify-center text-center text-[var(--color-danger)] w-full">
+                  <AlertTriangle className="h-8 w-8 mb-2" style={{ color: 'var(--color-danger)' }} />
+                  <h4 className="text-[13px] font-bold" style={{ color: 'var(--color-danger)' }}>Failed to load Onramp</h4>
+                  <p className="text-[11px] mt-1 text-[var(--color-text-secondary)]">{stripeError}</p>
+                  <button 
+                    onClick={() => setShowStripe(false)}
+                    className="mt-4 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-[var(--color-brand)]"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              )}
+
+              {/* Stripe widget iframe target */}
+              <div 
+                id="stripe-onramp-container" 
+                className={`w-full min-h-[360px] rounded-lg overflow-hidden ${stripeLoading || stripeError ? 'hidden' : ''}`}
+                style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowStripe(false)}
+                className="w-full py-2 rounded-lg text-[12px] font-bold transition-all border hover:bg-black/5 cursor-pointer mt-2"
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+              >
+                Back to Settings
+              </button>
             </div>
           ) : (
             <>
@@ -132,6 +282,15 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
                     Withdraw {currentStake > 0 ? `${currentStake.toFixed(2)} SUI` : 'All'}
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowStripe(true)}
+                  className="w-full py-2 rounded-lg text-[12px] font-bold transition-all flex items-center justify-center gap-2 border hover:bg-black/5 cursor-pointer"
+                  style={{ borderColor: '#635bff', color: '#635bff', background: 'rgba(99, 91, 255, 0.07)' }}
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  <span>Fund with Stripe Crypto Onramp</span>
+                </button>
               </div>
 
               {/* Strategy Mode Switcher */}
@@ -249,7 +408,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
         </div>
 
         {/* Footer */}
-        {!successMsg && (
+        {!successMsg && !showStripe && (
           <div className="px-6 py-4 flex justify-end gap-3 border-t" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-2)' }}>
             <button 
               onClick={onClose}

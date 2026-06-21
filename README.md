@@ -73,7 +73,9 @@ AURA/
 ├── docs/
 │   ├── SPECIFICATION.md               # Full technical specification
 │   ├── ROADMAP.md                     # Phased execution plan + dependencies
-│   └── EDGE_CASES.md                  # Failure modes & resolution strategies
+│   ├── EDGE_CASES.md                  # Failure modes & resolution strategies
+│   └── LIFECYCLE_AND_CONSENSUS.md     # Agent lifecycle, LLM consensus judges, & math
+
 ├── contracts_sui/
 │   ├── Move.toml
 │   └── sources/
