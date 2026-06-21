@@ -514,14 +514,36 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         // 1.5 Fetch AgentRegistered events to find registration timestamps
         const regEvents = await suiClient.queryEvents({
           query: { MoveEventType: `${PACKAGE_ID}::aura_registry::AgentRegistered` },
-          limit: 50,
+          limit: 100,
           order: 'descending',
         });
         const registrationTimes = new Map<string, number>();
         for (const ev of regEvents.data) {
           const agent = (ev.parsedJson as any)?.agent;
           if (agent) {
-            registrationTimes.set(agent.toLowerCase(), Number(ev.timestampMs));
+            const agentLower = agent.toLowerCase();
+            if (!registrationTimes.has(agentLower)) {
+              registrationTimes.set(agentLower, Number(ev.timestampMs));
+            }
+          }
+        }
+
+        // 1.7 Fetch PolicyCreated events to map agent to policy_id
+        const policyEvents = await suiClient.queryEvents({
+          query: { MoveEventType: `${PACKAGE_ID}::agent_wallet_policy::PolicyCreated` },
+          limit: 100,
+          order: 'descending',
+        });
+        const agentPolicies = new Map<string, string>();
+        for (const ev of policyEvents.data) {
+          const evJson = ev.parsedJson as any;
+          const agent = evJson?.agent;
+          const policyId = evJson?.policy_id;
+          if (agent && policyId) {
+            const agentLower = agent.toLowerCase();
+            if (!agentPolicies.has(agentLower)) {
+              agentPolicies.set(agentLower, policyId);
+            }
           }
         }
 
@@ -598,6 +620,28 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
               name = nameRes.data[0];
             }
 
+            // Fetch dynamic policy wallet balance on-chain
+            const agentLower = address.toLowerCase();
+            const policyId = agentPolicies.get(agentLower);
+            let budget = 25.0; // default fallback
+            if (policyId) {
+              try {
+                const policyObj = await suiClient.getObject({ id: policyId, options: { showContent: true } });
+                const fields = (policyObj.data?.content as any)?.fields;
+                let balanceValue = fields?.balance;
+                if (balanceValue && typeof balanceValue === 'object') {
+                  if (balanceValue.fields && balanceValue.fields.value !== undefined) {
+                    balanceValue = balanceValue.fields.value;
+                  }
+                }
+                if (balanceValue !== undefined) {
+                  budget = parseInt(String(balanceValue), 10) / 1_000_000;
+                }
+              } catch (e) {
+                console.warn(`Could not query balance for policy ${policyId}:`, e);
+              }
+            }
+
             const agentInfo: AgentInfo = {
               address,
               name,
@@ -609,7 +653,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
               blacklistUntil,
               latestBlobId,
               registeredAt: registrationTimes.get(address.toLowerCase()),
-              budget: 25.0,
+              budget,
             };
             return agentInfo;
           } catch (err) {
@@ -1235,10 +1279,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                         style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}
                         className="text-[10px] font-bold uppercase tracking-wider select-none text-[var(--color-text-muted)]"
                       >
-                        {['Agent Identity', 'Status', 'Reputation', 'PnL (dUSDC)', 'Win Rate', 'Collateral', 'Telemetry ID', 'Actions'].map((h) => (
+                        {['Agent Identity', 'Status', 'Reputation (Win Rate)', 'PnL (dUSDC)', 'Collateral', 'Telemetry ID', 'Actions'].map((h) => (
                           <th
                             key={h}
-                            className={`px-4 py-2.5 ${h === 'Actions' ? 'text-right' : ''}`}
+                            className={`px-2 py-2.5 ${h === 'Actions' ? 'text-right' : ''}`}
                           >
                             {h}
                           </th>
@@ -1248,9 +1292,6 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                     <tbody>
                       {(isExpanded ? allAgents : allAgents.slice(0, 12)).map((agent) => {
                         const repPct = reputationPct(agent.reputation);
-                        const srPct  = agent.totalTasks > 0
-                          ? ((agent.successfulTasks / agent.totalTasks) * 100).toFixed(1)
-                          : '—';
 
                         return (
                           <tr
@@ -1258,7 +1299,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                             className="transition-colors border-b border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/50"
                           >
                             {/* Address & Name */}
-                            <td className="px-4 py-3">
+                            <td className="px-2 py-2.5">
                               <div className="flex flex-col gap-0.5">
                                 <span 
                                   onClick={() => copyToClipboard(agent.address)}
@@ -1299,7 +1340,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                             </td>
 
                             {/* Status */}
-                            <td className="px-4 py-3">
+                            <td className="px-2 py-2.5">
                               {agent.active ? (
                                 agent.blacklistUntil > 0 ? (
                                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border uppercase" style={{ background: 'var(--color-warning-bg)', color: 'var(--color-warning)', borderColor: 'rgba(245,158,11,0.2)' }}>
@@ -1317,13 +1358,20 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                               )}
                             </td>
 
-                            {/* Reputation */}
-                            <td className="px-4 py-3">
-                              <div className="flex flex-col gap-1 min-w-[70px]">
-                                <span className="font-bold text-[11px]" style={{ color: 'var(--color-text-primary)' }}>
-                                  {repPct.toFixed(1)}%
-                                </span>
-                                <div className="h-1 w-16 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-2)' }}>
+                            {/* Reputation & Win Rate */}
+                            <td className="px-2 py-2.5">
+                              <div className="flex flex-col gap-1 min-w-[85px]">
+                                <div className="flex items-baseline gap-1.5 select-none">
+                                  <span className="font-bold text-[11px]" style={{ color: 'var(--color-text-primary)' }}>
+                                    {repPct.toFixed(1)}%
+                                  </span>
+                                  {agent.totalTasks > 0 && (
+                                    <span className="text-[9.5px] text-[var(--color-text-muted)] font-mono">
+                                      ({agent.successfulTasks}/{agent.totalTasks})
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="h-1 w-20 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-2)' }}>
                                   <div
                                     className="h-full rounded-full transition-all duration-500"
                                     style={{
@@ -1336,7 +1384,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                             </td>
 
                             {/* PnL */}
-                            <td className="px-4 py-3">
+                            <td className="px-2 py-2.5">
                               {(() => {
                                 const pnlVal = getAgentPnL(agent, daemonActiveAddress);
                                 const isPositive = pnlVal >= 0;
@@ -1364,30 +1412,16 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                               })()}
                             </td>
 
-                            {/* Success Rate */}
-                            <td className="px-4 py-3 font-mono text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>
-                              {srPct !== '—' ? (
-                                <div>
-                                  <span className="font-bold">{srPct}%</span>
-                                  <span className="block text-[9.5px] text-[var(--color-text-muted)] font-normal">
-                                    ({agent.successfulTasks}/{agent.totalTasks})
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-[var(--color-text-muted)]">—</span>
-                              )}
-                            </td>
-
                             {/* Stake */}
-                            <td className="px-4 py-3 font-mono text-[11.5px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+                            <td className="px-2 py-2.5 font-mono text-[11.5px] font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
                               {agent.stakeAmount.toFixed(2)} SUI
                             </td>
 
                             {/* Telemetry */}
-                            <td className="px-4 py-3">
+                            <td className="px-2 py-2.5">
                               {agent.latestBlobId ? (
                                 <span
-                                  className="inline-block font-mono text-[9px] px-1.5 py-0.5 rounded truncate max-w-[80px] border border-[var(--color-brand)]/20"
+                                  className="inline-block font-mono text-[9px] px-1.5 py-0.5 rounded truncate max-w-[65px] border border-[var(--color-brand)]/20"
                                   title={agent.latestBlobId}
                                   style={{ background: 'var(--color-brand-light)', color: 'var(--color-brand)' }}
                                 >
@@ -1399,7 +1433,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                             </td>
 
                             {/* Actions */}
-                            <td className="px-4 py-3 text-right">
+                            <td className="px-2 py-2.5 text-right">
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   id={`btn-audit-${agent.address.substring(2, 8)}`}
