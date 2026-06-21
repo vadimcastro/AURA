@@ -131,3 +131,43 @@ For future iterations of the AURA protocol, the following upgrades are planned:
     Modify `agent_nft.move` to enforce on-chain royalty transfers directly in Move. When a high-performing agent NFT is sold or leased in a Sui Kiosk, the Move contract will programmatically route a percentage of all subsequent trading profits back to the original strategy creator's wallet.
 3.  **Cross-Chain Paymaster Liquidity Pools:**
     Allow paymaster gas sponsorships to be funded using bridged assets (such as Ethereum USDC) via dynamic swaps, expanding the zkLogin onboarding reach to non-Sui native Web2 users.
+
+---
+
+## 5. Optimistic Slashing, Dispute Game, and Sybil Prevention
+
+AURA implements an optimistic slashing game-theoretic model to enforce decentralized, honest agent behavior without relying on a centralized administrator or multi-sig keys.
+
+### 5.1 How Challengers Detect Infractions
+Challengers (and automated telemetry auditing bots) monitor the agent's behavior through three primary vectors:
+1. **On-Chain Deviation:** Every trade executed by an agent is visible publicly on the Sui blockchain. Since the LP's `WalletPolicy` specifies strict rules (allowlisted packages, trading parameters, spot size limits), anyone can compare the transaction parameters against the allowlist rules. A transaction trading unapproved coins or exceeding the drawdown/size limits is an immediate indicator of a policy breach.
+2. **Telemetry Gaps (Missing Blobs):** Agents must archive their step-by-step telemetry reasoning on Walrus and record the `blob_id` on-chain every cycle. If an agent stops publishing telemetry or posts unreachable/malformed `blob_id`s, it indicates a cover-up.
+3. **Statistical Sampling (Spot Audits):** Auditors run regular spot-checks, choosing to audit random transaction blobs. 
+
+### 5.2 The Dispute Game Steps
+1. **File Challenge:** A challenger disputes a specific telemetry `blob_id` by calling `aura_registry::submit_dispute` and locking a **dispute bond** (0.01 SUI on Testnet / 50 SUI on Mainnet).
+2. **Disclosure Window:** A 24-hour countdown begins on-chain. The operator of the challenged agent must call `aura_registry::disclose_telemetry_key` to publish the decryption key for that specific telemetry blob.
+3. **Resolution Outcomes:**
+   * **Outcome A: Operator fails to disclose key (Timeout Slash)**
+     - If the 24-hour window expires, the operator is deemed malicious or dead.
+     - Anyone can call `aura_registry::resolve_dispute`.
+     - The registry contract slashes the agent operator's **entire performance stake** (0.1 SUI on Testnet / 500 SUI on Mainnet) and awards it to the challenger, along with a full refund of the challenger's dispute bond.
+     - The agent is marked `inactive`, and its reputation score is reset to 0.
+   * **Outcome B: Operator discloses decryption key (Cooperative Verification)**
+     - The operator publishes the key, resolving the dispute.
+     - The key is recorded on-chain, allowing anyone to decrypt the suspect telemetry blob off-chain using the browser dashboard (Audit Studio).
+     - **Sybil Prevention & Privacy Compensation:** To prevent challengers from spamming disputes to force an operator to leak all their proprietary strategy logs for free, the challenger's dispute bond is **slashed and transferred to the agent operator**.
+     - If the decrypted logs show the agent was **compliant** (false alarm), the challenger has paid a minor fee (0.01 SUI / 50 SUI) for the audit, and the operator is compensated for the privacy disclosure.
+     - If the decrypted logs show the agent **breached rules** (infraction), the challenger submits the decrypted proof to the DAO/governance. The DAO slashes the operator's registry stake (0.1 SUI / 500 SUI) and transfers it to the challenger. This nets the challenger a **10x reward** (0.1 SUI bounty vs 0.01 SUI bond lost), ensuring strong incentives for honest auditors.
+
+### 5.3 Game-Theoretic Payoff Matrix
+The economics ensure that:
+* Spammers/griefers lose their bonds to honest operators.
+* Honest operators make net profits if spammed.
+* Malicious operators are heavily penalized for non-disclosure or cheating.
+
+| Case | Scenario | Operator Payoff | Challenger Payoff | System State |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | Challenger disputes compliant agent | +0.01 SUI (Compensated) | -0.01 SUI (Bond Slashed) | Compliant Agent remains Active |
+| **2** | Challenger disputes cheating agent who hides key | -0.1 SUI (Stake Slashed) | +0.1 SUI (Bounty) | Agent deactivated |
+| **3** | Challenger disputes cheating agent who discloses key | -0.1 SUI (DAO Slashed) | +0.09 SUI (Bounty minus bond) | Agent deactivated |

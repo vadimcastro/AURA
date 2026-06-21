@@ -484,10 +484,10 @@ module aura::aura_registry {
         dispute.decryption_key = option::some(decryption_key);
         dispute.resolved = true;
 
-        // Refund the disputer's locked bond coin back to them
+        // Transfer the dispute bond to the agent operator as compensation for privacy disclosure (Sybil prevention)
         let bond_balance = balance::withdraw_all(&mut dispute.dispute_bond);
         let bond_coin = coin::from_balance(bond_balance, ctx);
-        transfer::public_transfer(bond_coin, dispute.disputer);
+        transfer::public_transfer(bond_coin, dispute.agent);
 
         event::emit(KeyDisclosed {
             dispute_id,
@@ -986,8 +986,8 @@ module aura::aura_registry {
             ts::return_shared(registry);
         };
 
-        // Assert disputer gets their dispute bond refunded
-        ts::next_tx(&mut scenario, disputer);
+        // Assert agent gets the dispute bond as compensation (Sybil prevention)
+        ts::next_tx(&mut scenario, AGENT1);
         {
             let refunded = ts::take_from_sender<Coin<SUI>>(&scenario);
             std::unit_test::assert_eq!(refunded.value(), DISPUTE_BOND_AMOUNT);
