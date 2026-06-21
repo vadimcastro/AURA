@@ -159,7 +159,11 @@ async function bootstrapAgent(
     const tx1Res = await SUI_CLIENT.signAndExecuteTransaction({
       signer: ownerKeypair,
       transaction: tx1,
+      options: { showEffects: true }
     });
+    if (tx1Res.effects?.status.status !== "success") {
+      throw new Error(`Policy creation failed: ${tx1Res.effects?.status.error}`);
+    }
     await SUI_CLIENT.waitForTransaction({ digest: tx1Res.digest });
     console.log(green(`   Policy created. Finding object ID...`));
 
@@ -234,7 +238,11 @@ async function bootstrapAgent(
     const tx2Res = await SUI_CLIENT.signAndExecuteTransaction({
       signer: ownerKeypair,
       transaction: tx2,
+      options: { showEffects: true }
     });
+    if (tx2Res.effects?.status.status !== "success") {
+      throw new Error(`dUSDC deposit failed: ${tx2Res.effects?.status.error}`);
+    }
     await SUI_CLIENT.waitForTransaction({ digest: tx2Res.digest });
     console.log(green(`   dUSDC Deposited successfully. Digest: ${tx2Res.digest}`));
   } else {
@@ -262,7 +270,11 @@ async function bootstrapAgent(
     const tx3Res = await SUI_CLIENT.signAndExecuteTransaction({
       signer: agentKeypair,
       transaction: tx3,
+      options: { showEffects: true }
     });
+    if (tx3Res.effects?.status.status !== "success") {
+      throw new Error(`Agent registration failed: ${tx3Res.effects?.status.error}`);
+    }
     await SUI_CLIENT.waitForTransaction({ digest: tx3Res.digest });
     console.log(green(`   Agent registered successfully. Digest: ${tx3Res.digest}`));
   } else {
@@ -699,9 +711,9 @@ app.post("/api/start", requireAuth, async (req, res) => {
   const key3 = deriveAgentKeypair(ownerKeypair, "deltaneutral");
 
   try {
-    const agent1 = await bootstrapAgent(ownerKeypair, key1, "Conservative Yield Hunter", 25_000_000, 100_000_000);
-    const agent2 = await bootstrapAgent(ownerKeypair, key2, "Aggressive Vol Trader", 25_000_000, 100_000_000);
-    const agent3 = await bootstrapAgent(ownerKeypair, key3, "Delta-Neutral Bot", 25_000_000, 100_000_000);
+    const agent1 = await bootstrapAgent(ownerKeypair, key1, "Conservative Yield Hunter", 25_000_000, 300_000_000);
+    const agent2 = await bootstrapAgent(ownerKeypair, key2, "Aggressive Vol Trader", 25_000_000, 300_000_000);
+    const agent3 = await bootstrapAgent(ownerKeypair, key3, "Delta-Neutral Bot", 25_000_000, 300_000_000);
 
     const runCycle = async (name: string, keypair: Ed25519Keypair, policyId: string) => {
       if (!loopRunning || circuitBreakerTripped) return;

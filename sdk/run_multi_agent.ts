@@ -46,7 +46,11 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
   const tx1Res = await SUI_CLIENT.signAndExecuteTransaction({
     signer: ownerKeypair,
     transaction: tx1,
+    options: { showEffects: true }
   });
+  if (tx1Res.effects?.status.status !== "success") {
+    throw new Error(`Policy creation transaction failed: ${tx1Res.effects?.status.error}`);
+  }
   console.log(yellow(`   Policy creation & Gas funding sent. Digest: ${tx1Res.digest}`));
   await SUI_CLIENT.waitForTransaction({ digest: tx1Res.digest });
 
@@ -123,7 +127,11 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
   const tx2Res = await SUI_CLIENT.signAndExecuteTransaction({
     signer: ownerKeypair,
     transaction: tx2,
+    options: { showEffects: true }
   });
+  if (tx2Res.effects?.status.status !== "success") {
+    throw new Error(`dUSDC deposit transaction failed: ${tx2Res.effects?.status.error}`);
+  }
   console.log(yellow(`   dUSDC Deposit sent. Digest: ${tx2Res.digest}`));
   await SUI_CLIENT.waitForTransaction({ digest: tx2Res.digest });
 
@@ -140,7 +148,11 @@ async function setupAgent(ownerKeypair: Ed25519Keypair, agentName: string, dusdc
   const tx3Res = await SUI_CLIENT.signAndExecuteTransaction({
     signer: agentKeypair,
     transaction: tx3,
+    options: { showEffects: true }
   });
+  if (tx3Res.effects?.status.status !== "success") {
+    throw new Error(`Agent registration transaction failed: ${tx3Res.effects?.status.error}`);
+  }
   console.log(yellow(`   Agent Registered on-chain. Digest: ${tx3Res.digest}`));
   await SUI_CLIENT.waitForTransaction({ digest: tx3Res.digest });
 
@@ -157,10 +169,10 @@ async function main() {
   console.log(`Owner Address: ${ownerAddress}`);
 
   console.log(green("\n[Phase 1] Bootstrapping 3 distinct Agents..."));
-  // Split 25 dUSDC per agent, 0.2 SUI for gas
-  const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", 25_000_000, 100_000_000);
-  const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", 25_000_000, 100_000_000);
-  const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", 25_000_000, 100_000_000);
+  // Split 25 dUSDC per agent, 0.3 SUI for gas (provides enough SUI for the 0.1 SUI stake bond + transaction fees)
+  const agent1 = await setupAgent(ownerKeypair, "Conservative Yield Hunter", 25_000_000, 300_000_000);
+  const agent2 = await setupAgent(ownerKeypair, "Aggressive Vol Trader", 25_000_000, 300_000_000);
+  const agent3 = await setupAgent(ownerKeypair, "Delta-Neutral Bot", 25_000_000, 300_000_000);
 
   // Run crash recovery workflow for each agent
   await recoverAgentState(agent1.agentKeypair.toSuiAddress());
