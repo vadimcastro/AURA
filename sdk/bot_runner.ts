@@ -13,7 +13,8 @@ import {
   REGISTRY_OBJECT_ID,
   DEEPBOOK_PREDICT_PACKAGE_ID,
   DUSDC_TYPE_TAG,
-  getAgentKeypair 
+  getAgentKeypair,
+  AUTO_DISCLOSE
 } from "./config.js";
 import { executeTradeCycle } from "./predict_agent.js";
 import { downloadFromWalrus, decryptWithSeal } from "./walrus_archiver.js";
@@ -867,7 +868,94 @@ app.post("/api/stripe/create-session", async (req, res) => {
   }
 });
 
+const disclosedDisputes = new Set<string>();
+
+async function checkAndAutoDisclose() {
+  if (!AUTO_DISCLOSE) return;
+
+  try {
+    const ownerKeypair = getAgentKeypair();
+    const key1 = deriveAgentKeypair(ownerKeypair, "conservative");
+    const key2 = deriveAgentKeypair(ownerKeypair, "aggressive");
+    const key3 = deriveAgentKeypair(ownerKeypair, "deltaneutral");
+
+    const myAgentKeys = new Map<string, Ed25519Keypair>([
+      [key1.toSuiAddress(), key1],
+      [key2.toSuiAddress(), key2],
+      [key3.toSuiAddress(), key3],
+    ]);
+
+    const eventType = `${AURA_PACKAGE_ID}::aura_registry::DisputeSubmitted`;
+    const events = await SUI_CLIENT.queryEvents({
+      query: { MoveEventType: eventType },
+      limit: 20,
+      order: "descending"
+    });
+
+    for (const event of events.data) {
+      const evJson = event.parsedJson as any;
+      if (!evJson) continue;
+
+      const disputeId = evJson.dispute_id;
+      const agentAddress = evJson.agent;
+
+      if (disclosedDisputes.has(disputeId)) continue;
+
+      const matchingKeypair = myAgentKeys.get(agentAddress);
+      if (matchingKeypair) {
+        console.log(yellow(`🚨 [AUTO-DISCLOSE] Detected active dispute ${disputeId} against our agent ${agentAddress}!`));
+        
+        // Ephemeral mock key passphrase
+        const decryptionKey = "mock-seal-passphrase";
+        const keyBytes = Array.from(new TextEncoder().encode(decryptionKey));
+
+        console.log(cyan(`📡 [AUTO-DISCLOSE] Submitting key disclosure transaction on-chain for dispute ${disputeId}...`));
+        
+        const tx = new Transaction();
+        tx.moveCall({
+          target: `${AURA_PACKAGE_ID}::aura_registry::disclose_telemetry_key`,
+          arguments: [
+            tx.object(REGISTRY_OBJECT_ID),
+            tx.pure.address(disputeId),
+            tx.pure.vector("u8", keyBytes)
+          ]
+        });
+
+        try {
+          const res = await SUI_CLIENT.signAndExecuteTransaction({
+            signer: matchingKeypair,
+            transaction: tx,
+          });
+          await SUI_CLIENT.waitForTransaction({ digest: res.digest });
+          console.log(green(`✅ [AUTO-DISCLOSE] Successfully disclosed key for dispute ${disputeId}. Digest: ${res.digest}`));
+          disclosedDisputes.add(disputeId);
+        } catch (txErr) {
+          const errMsg = (txErr as Error).message;
+          if (errMsg.includes("EDisputeAlreadyResolved") || errMsg.includes("already resolved") || errMsg.includes("3") || errMsg.includes("7")) {
+            // Already resolved
+            disclosedDisputes.add(disputeId);
+          } else {
+            console.error(red(`❌ [AUTO-DISCLOSE] Failed to submit key disclosure transaction:`), errMsg);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error(red("⚠️ [AUTO-DISCLOSE] Error checking for disputes:"), (err as Error).message);
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`\n🚀 AURA Daemon Server listening on port ${PORT}`);
   console.log(`   Admin API Endpoints are protected by header 'x-api-key'\n`);
+  
+  if (AUTO_DISCLOSE) {
+    console.log(cyan("🕵️‍♂️ [AUTO-DISCLOSE] Starting background Dispute Listener (polling every 15s)..."));
+    checkAndAutoDisclose().catch(err => console.error("Error running initial auto-disclose check:", err));
+    setInterval(() => {
+      checkAndAutoDisclose().catch(err => console.error("Error in auto-disclose interval check:", err));
+    }, 15000);
+  } else {
+    console.log(yellow("🕵️‍♂️ [AUTO-DISCLOSE] Auto-Disclose is disabled by environment configuration."));
+  }
 });

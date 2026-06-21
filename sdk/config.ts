@@ -53,3 +53,7 @@ export function getAgentKeypair(): Ed25519Keypair {
     return new Ed25519Keypair();
   }
 }
+
+// Controls whether daemon automatically responds on-chain to any submit_dispute challenges
+export const AUTO_DISCLOSE = process.env.AUTO_DISCLOSE !== "false";
+
