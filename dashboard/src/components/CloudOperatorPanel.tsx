@@ -179,7 +179,7 @@ export const CloudOperatorPanel: React.FC = () => {
               className="p-3 rounded-xl border flex items-center justify-between" 
               style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
             >
-              <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Daemon Status:</span>
+              <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Agent Status:</span>
               <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                 daemonStatus === 'RUNNING' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' :
                 daemonStatus === 'STOPPED' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400' :
@@ -221,14 +221,14 @@ export const CloudOperatorPanel: React.FC = () => {
                 disabled={isActionLoading || daemonStatus === 'RUNNING'}
                 className="py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer transition-opacity"
               >
-                <Play className="h-3 w-3 fill-current" /> Start Server Loop
+                <Play className="h-3 w-3 fill-current" /> Start Agent
               </button>
               <button
                 onClick={() => triggerDaemonAction('stop')}
                 disabled={isActionLoading || daemonStatus === 'STOPPED'}
                 className="py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer transition-opacity"
               >
-                <Square className="h-3 w-3 fill-current" /> Stop Server Loop
+                <Square className="h-3 w-3 fill-current" /> Stop Agent
               </button>
             </div>
 

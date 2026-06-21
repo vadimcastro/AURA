@@ -606,6 +606,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   AURA translates plain English strategies into atomic PTB structures, and runs pre-sign verification checklists before deployment.
                 </p>
 
+                {/* Supported Actions & Protocols */}
+                <div 
+                  className="p-3 rounded-xl border text-[11px] space-y-2"
+                  style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)', width: '100%' }}
+                >
+                  <span className="font-bold text-[var(--color-text-primary)] block uppercase tracking-wider text-[10px]">
+                    Supported Actions & Integrated Protocols:
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex items-start gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1 shrink-0"></span>
+                      <div>
+                        <strong className="text-[var(--color-text-primary)] text-[11px]">MINT_RANGE</strong>
+                        <span className="block text-[var(--color-text-muted)] text-[10px]">DeepBook Options Range Minting</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
+                      <div>
+                        <strong className="text-[var(--color-text-primary)] text-[11px]">SWAP</strong>
+                        <span className="block text-[var(--color-text-muted)] text-[10px]">Spot Cetus DEX Swaps</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1 shrink-0"></span>
+                      <div>
+                        <strong className="text-[var(--color-text-primary)] text-[11px]">LIQUIDITY</strong>
+                        <span className="block text-[var(--color-text-muted)] text-[10px]">Cetus LP Pool Deposits</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 shrink-0"></span>
+                      <div>
+                        <strong className="text-[var(--color-text-primary)] text-[11px]">LEND</strong>
+                        <span className="block text-[var(--color-text-muted)] text-[10px]">SuiLend Collateral Supply</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-3 pt-2">
                   <div>
                     <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--color-text-muted)' }}>

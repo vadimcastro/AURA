@@ -59,11 +59,18 @@
 *   ✅ **Deflationary Value Capture**: Added a 0.5% protocol profit fee inside Move routed directly to the treasury buy-and-burn modules.
 *   ✅ **Durable State Resilience:** Coded idempotency checks, process circuit breakers, and reflective memory buffers to gracefully handle network issues and gas depletion.
 
-### ✅ Phase 9: V4 Production Architecture & Advanced Orchestration — COMPLETE (2026-06-20)
+### ✅ Phase 9: V4 Production Architecture & Advanced Orchestration — COMPLETE (2026-06-21)
 *   ✅ **Gemma 4 Grunt Executor:** Integrated `google/gemma-4-26b-a4b-it:free` for fast-path option evaluation under a strict pre-sign sanity sandbox.
 *   ✅ **Consensus Thinker Judge Panel:** Implemented a background 3-model judge consensus panel (`Nemotron`, `Qwen3`, `Llama-3.3`) off the live trading loop.
 *   ✅ **DecisionBench Emergent Delegation:** Handled automatic fallback paths to Nemotron-3-Ultra on Grunt failures, with human-in-the-loop escalations.
 *   ✅ **Stripe Crypto Onramp Funding Portal**: Integrated the Stripe Crypto Onramp widget into the dashboard configuration modal, supported by a secure backend creation endpoint using private keys.
+*   ✅ **V4 Hardening & UX Polish**:
+    *   *Stripe Version Pinning:* Fixed post session failures on older dev accounts by pinning the `Stripe-Version: 2022-11-15` header.
+    *   *Parallelized Consensus:* Leveraged `Promise.all` for off-loop thinker queries to minimize audit latency.
+    *   *Model Fallback Chain:* Added resilient upstream model transitions (`Gemma-4` -> `Qwen-3 Coder` -> `Nemotron-3-Ultra`) under high-load API rate limits.
+    *   *Live signed PTB execution:* Integrated on-chain PTB construction and browser-wallet signature requests into the Intent Engine interface.
+    *   *UX testing links:* Placed Sui Testnet Faucet and Cetus DEX swap buttons directly under the wallet address to simplify token setup.
+    *   *Anti-Flicker:* Gated the UI loading spinner states to eliminate layout shifts during periodic dashboard polls.
 
 ---
 

@@ -31,8 +31,8 @@ graph TD
 *   **On-Chain Action:** Instantiates `agent_wallet_policy::create_policy`, depositing trading capital (dUSDC) and delegating execution authority to the registered agent's address. Allowlisted packages (e.g. DeepBook Predict) and drawdown ceilings are set at this stage.
 
 ### Step 3: Off-Chain Daemon Cycle Initialization
-*   **Trigger:** The daemon ([bot_runner.ts](file:///Users/vadim/Desktop/AURA/sdk/bot_runner.ts)) polls the blockchain every 15-30 seconds.
-*   **Action:** The daemon pulls current on-chain oracle parameters (SVI base prices and volatility) from the DeepBook SVI oracle object and matches them against active policies.
+*   **Trigger:** The daemon server is started (listening on port 3000). **Note: Starting the server does not trigger any trading loops automatically.**
+*   **Action:** The loops must be explicitly started via the "Start Agent" dashboard operator button, or triggered via the onboarding registration/configuration flow or natural language Intent Engine. Once enabled, the daemon loops will poll the blockchain periodically (every 15–30 seconds), pulling SVI base prices and volatility parameters from the DeepBook oracle object.
 
 ### Step 4: Asynchronous "Thinker Panel" Consensus (Every 5 Cycles)
 *   **LLM Role:** **Thinkers** (`nemotron-3-ultra`, `qwen3-coder`, `llama-3.3-instruct`) act as judges.
