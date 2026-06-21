@@ -221,14 +221,14 @@ export const CloudOperatorPanel: React.FC = () => {
                 disabled={isActionLoading || daemonStatus === 'RUNNING'}
                 className="py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer transition-opacity"
               >
-                <Play className="h-3 w-3 fill-current" /> Start Loop
+                <Play className="h-3 w-3 fill-current" /> Start Server Loop
               </button>
               <button
                 onClick={() => triggerDaemonAction('stop')}
                 disabled={isActionLoading || daemonStatus === 'STOPPED'}
                 className="py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer transition-opacity"
               >
-                <Square className="h-3 w-3 fill-current" /> Stop Loop
+                <Square className="h-3 w-3 fill-current" /> Stop Server Loop
               </button>
             </div>
 
