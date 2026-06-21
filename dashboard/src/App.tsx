@@ -156,6 +156,46 @@ function App() {
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [connectingType, setConnectingType] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [copiedWallet, setCopiedWallet] = useState(false);
+  const [faucetLoading, setFaucetLoading] = useState(false);
+  const [faucetStatus, setFaucetStatus] = useState<string | null>(null);
+
+  const handleCopyWalletAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setCopiedWallet(true);
+    setTimeout(() => setCopiedWallet(false), 2000);
+  };
+
+  const handleRequestFaucet = async (address: string) => {
+    setFaucetLoading(true);
+    setFaucetStatus(null);
+    try {
+      const response = await fetch('https://faucet.testnet.sui.io/v1/gas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          FixedAmountRequest: {
+            recipient: address,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Faucet error: ${response.statusText}`);
+      }
+
+      setFaucetStatus('SUI Requested!');
+    } catch (err) {
+      console.warn('Faucet request failed, opening web portal:', err);
+      setFaucetStatus('Redirecting to Faucet...');
+      window.open('https://faucet.blockvision.org/', '_blank');
+    } finally {
+      setFaucetLoading(false);
+      setTimeout(() => setFaucetStatus(null), 3000);
+    }
+  };
 
   // Sync hash to state changes
   useEffect(() => {
@@ -315,19 +355,50 @@ function App() {
                   </button>
                   {showDropdown && (
                     <div
-                      className="absolute right-0 mt-1.5 w-56 rounded-xl border shadow-lg p-2.5 z-50 text-[12px] space-y-2"
+                      className="absolute right-0 mt-1.5 w-56 rounded-xl border shadow-lg p-3 z-50 text-[12px] space-y-2.5"
                       style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                     >
-                      <div className="px-2 py-1">
+                      <div className="px-1 py-0.5 space-y-1">
                         <p className="font-bold text-[var(--color-text-primary)]">{session.providerLabel}</p>
-                        <p className="font-mono text-[9px] text-[var(--color-text-muted)] truncate select-all" title="Click to select all">
-                          {session.address}
-                        </p>
+                        <button
+                          onClick={() => handleCopyWalletAddress(session.address)}
+                          className="w-full text-left font-mono text-[9px] text-[var(--color-text-muted)] truncate hover:text-[var(--color-brand)] transition-colors cursor-pointer focus:outline-none border-0 bg-transparent p-0"
+                          title="Click to copy address"
+                        >
+                          {copiedWallet ? '✓ Address Copied!' : session.address}
+                        </button>
                       </div>
+
+                      {/* Request Faucet Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleRequestFaucet(session.address)}
+                        disabled={faucetLoading}
+                        className="w-full py-1.5 rounded-lg text-center font-bold text-[10px] uppercase tracking-wider transition-all border flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        style={{
+                          borderColor: 'var(--color-brand)',
+                          color: 'var(--color-brand)',
+                          background: 'rgba(79, 110, 247, 0.06)'
+                        }}
+                      >
+                        {faucetLoading ? (
+                          <>
+                            <div className="h-3 w-3 border-2 border-[var(--color-brand)] border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-brand)', borderTopColor: 'transparent' }} />
+                            <span>Requesting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="h-3 w-3" />
+                            <span>{faucetStatus || 'Request Testnet SUI'}</span>
+                          </>
+                        )}
+                      </button>
+
                       <div className="border-t" style={{ borderColor: 'var(--color-border)' }} />
+                      
                       <button
                         onClick={handleDisconnect}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
+                        className="w-full flex items-center gap-2 px-1 py-1 rounded-lg text-left font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer border-0 bg-transparent"
                       >
                         <LogOut className="h-3.5 w-3.5" />
                         Disconnect Wallet
