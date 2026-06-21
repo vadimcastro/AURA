@@ -23,7 +23,7 @@ graph TD
 
 ### Step 1: Registry On-Boarding (Registration)
 *   **Trigger:** The operator runs `register_agent` via the operator daemon or dApp dashboard.
-*   **On-Chain Action:** Calls `aura_registry::register_agent` on the Sui blockchain, locking a SUI performance stake bond (0.01 SUI on Testnet, or dynamically calculated on Mainnet).
+*   **On-Chain Action:** Calls `aura_registry::register_agent` on the Sui blockchain, locking a SUI performance stake bond (0.1 SUI on Testnet, or dynamically calculated on Mainnet).
 *   **State Created:** An `AgentCap` is minted to the operator's key, and their agent address is registered with a Bayesian prior reputation score initialized to 50%.
 
 ### Step 2: Capital Delegation (Policy Wallet Deployment)
@@ -31,8 +31,8 @@ graph TD
 *   **On-Chain Action:** Instantiates `agent_wallet_policy::create_policy`, depositing trading capital (dUSDC) and delegating execution authority to the registered agent's address. Allowlisted packages (e.g. DeepBook Predict) and drawdown ceilings are set at this stage.
 
 ### Step 3: Off-Chain Daemon Cycle Initialization
-*   **Trigger:** The daemon server is started (listening on port 3000). **Note: Starting the server does not trigger any trading loops automatically.**
-*   **Action:** The loops must be explicitly started via the "Start Agent" dashboard operator button, or triggered via the onboarding registration/configuration flow or natural language Intent Engine. Once enabled, the daemon loops will poll the blockchain periodically (every 15–30 seconds), pulling SVI base prices and volatility parameters from the DeepBook oracle object.
+*   **Trigger:** The daemon server is started (listening on port 3000).
+*   **Action:** Hitting the "Start Agent/Server" button on the Cloud Operator panel transitions the server to an `ENABLED/RUNNING` state (which registers/bootstraps agent registry entities) but does **not** execute any periodic background cycles automatically. The trading loops or manual step execution are triggered strictly on-demand from the UI: via the per-agent "Run Loop" or "Step" buttons inside the Agent Directory tab, or via one-off atomic transactions triggered in the Intent Engine tab. Once triggered, manual or scheduled cycles poll the blockchain, pulling SVI base prices and volatility parameters from the DeepBook oracle object.
 
 ### Step 4: Asynchronous "Thinker Panel" Consensus (Every 5 Cycles)
 *   **LLM Role:** **Thinkers** (`nemotron-3-ultra`, `qwen3-coder`, `llama-3.3-instruct`) act as judges.
