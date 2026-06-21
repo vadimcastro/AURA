@@ -457,18 +457,131 @@ app.post("/api/escalations/approve", requireAuth, (req, res) => {
   res.json({ success: true, message: "Escalation approved, loops resumed." });
 });
 
+async function decryptWithCustomKey(encryptedPayload: Uint8Array, keyBytes: Uint8Array): Promise<Uint8Array> {
+  const jsonStr = new TextDecoder().decode(encryptedPayload);
+  const envelope: any = JSON.parse(jsonStr);
+
+  const iv = Buffer.from(envelope.iv, "hex");
+  const tag = Buffer.from(envelope.tag, "hex");
+  const ciphertext = Buffer.from(envelope.ciphertext, "hex");
+  
+  let derivedKey = keyBytes;
+  if (keyBytes.length !== 32) {
+    const keyStr = new TextDecoder().decode(keyBytes);
+    derivedKey = crypto.scryptSync(keyStr, "aura-salt", 32);
+  }
+  
+  const decipher = crypto.createDecipheriv("aes-256-gcm", derivedKey, iv);
+  decipher.setAuthTag(tag);
+  
+  return new Uint8Array(Buffer.concat([decipher.update(ciphertext), decipher.final()]));
+}
+
+async function findDisclosedKeyForBlob(blobId: string): Promise<Uint8Array | null> {
+  try {
+    let disputeId: string | null = null;
+    let cursor: any = null;
+    let hasNextPage = true;
+
+    while (hasNextPage && !disputeId) {
+      const events = await SUI_CLIENT.queryEvents({
+        query: { MoveEventType: `${AURA_PACKAGE_ID}::aura_registry::DisputeSubmitted` },
+        cursor,
+        limit: 50
+      });
+
+      for (const ev of events.data) {
+        const evJson = ev.parsedJson as any;
+        if (!evJson) continue;
+
+        let evBlobId = "";
+        if (typeof evJson.blob_id === "string") {
+          evBlobId = evJson.blob_id;
+        } else if (Array.isArray(evJson.blob_id)) {
+          const buf = Buffer.from(evJson.blob_id);
+          evBlobId = buf.toString("hex");
+          const evBlobIdStr = buf.toString("utf-8");
+          if (evBlobIdStr === blobId) {
+            disputeId = evJson.dispute_id;
+            break;
+          }
+        }
+
+        if (evBlobId === blobId || evJson.dispute_id === blobId) {
+          disputeId = evJson.dispute_id;
+          break;
+        }
+      }
+      hasNextPage = events.hasNextPage;
+      cursor = events.nextCursor ?? null;
+    }
+
+    if (!disputeId) return null;
+
+    cursor = null;
+    hasNextPage = true;
+    while (hasNextPage) {
+      const events = await SUI_CLIENT.queryEvents({
+        query: { MoveEventType: `${AURA_PACKAGE_ID}::aura_registry::KeyDisclosed` },
+        cursor,
+        limit: 50
+      });
+
+      for (const ev of events.data) {
+        const evJson = ev.parsedJson as any;
+        if (evJson && evJson.dispute_id === disputeId && evJson.decryption_key) {
+          if (Array.isArray(evJson.decryption_key)) {
+            return new Uint8Array(evJson.decryption_key);
+          }
+        }
+      }
+      hasNextPage = events.hasNextPage;
+      cursor = events.nextCursor ?? null;
+    }
+  } catch (err) {
+    console.warn("⚠️ [DECRYPT] Failed to resolve key on-chain:", (err as Error).message);
+  }
+  return null;
+}
+
 app.get("/api/telemetry/decrypt", async (req, res) => {
   const blobId = req.query.blobId as string;
+  const customKey = req.query.key as string;
+
   if (!blobId) {
     return res.status(400).json({ error: "Missing blobId query parameter" });
   }
 
   try {
     console.log(`🌐 API Telemetry: Decrypting Walrus blob ${blobId}...`);
-    // Determine mock status based on env vars
     const mockMode = process.env.WALRUS_MOCK === "true";
     const encryptedTrace = await downloadFromWalrus(blobId, mockMode);
-    const decryptedBytes = await decryptWithSeal(encryptedTrace);
+
+    let decryptedBytes: Uint8Array;
+
+    if (customKey) {
+      console.log(`🔑 [DECRYPT] Using custom key query parameter override...`);
+      let keyBuffer: Uint8Array;
+      if (customKey.startsWith("0x")) {
+        keyBuffer = Uint8Array.from(Buffer.from(customKey.substring(2), "hex"));
+      } else if (/^[0-9a-fA-F]{64}$/.test(customKey)) {
+        keyBuffer = Uint8Array.from(Buffer.from(customKey, "hex"));
+      } else {
+        keyBuffer = new TextEncoder().encode(customKey);
+      }
+      decryptedBytes = await decryptWithCustomKey(encryptedTrace, keyBuffer);
+    } else {
+      console.log(`🔍 [DECRYPT] Checking if decryption key was disclosed on-chain for blob ${blobId}...`);
+      const disclosedKeyBytes = await findDisclosedKeyForBlob(blobId);
+      if (disclosedKeyBytes) {
+        console.log(green(`✅ [DECRYPT] Found disclosed key on-chain! Decrypting...`));
+        decryptedBytes = await decryptWithCustomKey(encryptedTrace, disclosedKeyBytes);
+      } else {
+        console.log(yellow(`⚠️ [DECRYPT] No disclosed key found on-chain. Using default mock key...`));
+        decryptedBytes = await decryptWithSeal(encryptedTrace);
+      }
+    }
+
     const decryptedStr = new TextDecoder().decode(decryptedBytes);
     
     try {

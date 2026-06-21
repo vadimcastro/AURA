@@ -99,13 +99,19 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
 
   const handleDaemonDecrypt = async () => {
     if (!envelope) return;
+
     setError(null);
     setDecryptedData(null);
     setDecrypting(true);
 
     const daemonUrl = localStorage.getItem('aura_daemon_url') || import.meta.env.VITE_DAEMON_URL || 'http://localhost:3000';
     try {
-      const res = await fetch(`${daemonUrl}/api/telemetry/decrypt?blobId=${envelope.blobId}`);
+      let cleanKey = viewerKey.trim();
+      const url = cleanKey
+        ? `${daemonUrl}/api/telemetry/decrypt?blobId=${envelope.blobId}&key=${encodeURIComponent(cleanKey)}`
+        : `${daemonUrl}/api/telemetry/decrypt?blobId=${envelope.blobId}`;
+
+      const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`Daemon returned HTTP ${res.status}: ${res.statusText}`);
       }

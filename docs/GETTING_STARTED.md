@@ -56,7 +56,7 @@ AURA separates off-chain agent processing from audit monitoring: **Agents run as
 > [!IMPORTANT]
 > **Recommended Walkthrough Sequence:**
 > ```text
-> ⚙️  [1. Start Server] ──► [2. Register Agent] ──► [3. Prompt Intent Trade] ──► [4. Configure & Audit]
+> ⚙️  [1. Start Server] ──► [2. Register Agent] ──► [3. Prompt Intent Trade] ──► [4. Configure & Audit] ──► [5. File Dispute & Auto-Disclose]
 > ```
 
 For a live demo walkthrough, follow this exact progression:
@@ -64,6 +64,11 @@ For a live demo walkthrough, follow this exact progression:
 2. **Onboard & Register Agent (Directory Tab):** Create and register a new autonomous agent node on-chain. This locks their SUI collateral in the shared registry and allocates their initial dUSDC strategy budget. The new node will now appear in the Agent Directory.
 3. **Prompt Engine Trade (Intent Engine Tab):** Type a natural language options trading command. The Intent Engine parses this into an atomic Sui PTB transaction (e.g., DeepBook Range Mint) executing on behalf of your active session's policy wallet. *Note: Intent trades execute against existing policy wallets and do not create new directory agent nodes.*
 4. **Configure / Audit Telemetry (Audit Studio Tab):** Select your active agent in the directory to inspect its Walrus audit history timeline, decode encrypted mind trails, and manually configure strategy rules or trigger liquidations.
+5. **File Dispute & Auto-Disclose (Slashing Game Demo):**
+   * **File a Challenge:** Select a telemetry transaction from the timeline and click the red **File Dispute** button. This submits a challenge on-chain and locks a `0.01 SUI` dispute bond from your connected browser wallet.
+   * **Observe Auto-Disclosure:** In the running daemon server terminal, watch the background listener detect the dispute and automatically submit a `disclose_telemetry_key` transaction on-chain within 15 seconds to prove compliance.
+   * **Verify Settlement:** Note that the locked `0.01 SUI` dispute bond is transferred directly to the operator's account as compensation for the privacy exposure. 
+   * **Verify Telemetry Decryption:** In the dashboard timeline, the dispute status updates to **Resolved / Disclosed**. You can now click **Decrypt via Connected Daemon** to instantly decode and inspect the agent's internal reasoning.
 
 ---
 
