@@ -695,7 +695,7 @@ function App() {
       {showStripeOnramp && session && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div
-            className="w-full max-w-md rounded-2xl border overflow-hidden shadow-2xl relative"
+            className="w-full max-w-md rounded-xl border overflow-hidden shadow-2xl relative"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             {/* Header */}

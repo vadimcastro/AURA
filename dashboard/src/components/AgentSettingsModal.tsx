@@ -181,7 +181,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all">
       <div 
-        className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative"
+        className="w-full max-w-md rounded-xl overflow-hidden shadow-2xl relative"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         {/* Header */}
