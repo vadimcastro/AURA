@@ -5,12 +5,14 @@ interface IntentEngineProps {
   activeSession: any;
   suiBalance: string | null;
   dusdcBalance: string | null;
+  onAddLiveEvent?: (event: any) => void;
 }
 
 export const IntentEngine: React.FC<IntentEngineProps> = ({ 
   activeSession, 
   suiBalance, 
-  dusdcBalance 
+  dusdcBalance,
+  onAddLiveEvent
 }) => {
   const [prompt, setPrompt] = useState('');
   const [parsing, setParsing] = useState(false);
@@ -26,7 +28,21 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
 
     // Simulate parsing the natural language statement via Qwen3 Coder / LLM
     setTimeout(() => {
-      let isConservative = prompt.toLowerCase().includes('conservative');
+      const promptLower = prompt.toLowerCase();
+      let targetAgent = 'Aggressive Vol Trader';
+      let lowerStrike = 62000;
+      let higherStrike = 78000;
+      
+      if (promptLower.includes('conservative') || promptLower.includes('low risk')) {
+        targetAgent = 'Conservative Yield Hunter';
+        lowerStrike = 67000;
+        higherStrike = 73000;
+      } else if (promptLower.includes('balanced') || promptLower.includes('moderate') || promptLower.includes('medium risk')) {
+        targetAgent = 'Balanced Risk Manager';
+        lowerStrike = 65000;
+        higherStrike = 75000;
+      }
+
       let amount = 50; // default dUSDC
       const amountMatch = prompt.match(/\b(\d+)\s*(?:dusdc|usdc|dollars|dusd)\b/i);
       if (amountMatch) {
@@ -58,10 +74,10 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
       setParsedIntent({
         rawText: prompt,
         action: 'MINT_RANGE',
-        targetAgent: isConservative ? 'Conservative Yield Hunter' : 'Aggressive Vol Trader',
+        targetAgent,
         amount: amount * 1000000, // to raw dUSDC decimals
-        lowerStrike: isConservative ? 67000 : 62000,
-        higherStrike: isConservative ? 73000 : 78000,
+        lowerStrike,
+        higherStrike,
         expiry: Math.floor(Date.now() / 1000) + 86400, // 24h
         gasBudget: 2000000, // 0.002 SUI
         guardianCheck: {
@@ -78,10 +94,25 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
     setExecuting(true);
     setStatusMsg(null);
 
+    const txDigest = '0x' + Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
+
     // Simulate executing the atomic PTB
     setTimeout(() => {
       setExecuting(false);
-      setStatusMsg(`🎉 PTB Executed Successfully! Digest: 0x${Math.random().toString(16).substring(2, 10)}... (Hot potato TradeTicket consumed dynamically)`);
+      setStatusMsg(`🎉 PTB Executed Successfully! Digest: ${txDigest.substring(0, 14)}... (Hot potato TradeTicket consumed dynamically)`);
+      
+      if (onAddLiveEvent) {
+        onAddLiveEvent({
+          id: `intent-tx-${Date.now()}`,
+          type: 'trade',
+          agent: activeSession?.address || '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676',
+          message: `Intent executed: Mint range ${(parsedIntent.lowerStrike / 10000).toFixed(2)} - ${(parsedIntent.higherStrike / 10000).toFixed(2)} SUI with ${(parsedIntent.amount / 1000000).toFixed(0)} dUSDC`,
+          timestamp: new Date().toISOString(),
+          digest: txDigest,
+          isMocked: true,
+        });
+      }
+
       setPrompt('');
       setParsedIntent(null);
     }, 2000);
@@ -217,7 +248,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
               className="rounded-xl p-4 flex gap-2.5"
               style={{
                 background: parsedIntent.guardianCheck.passed ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-                border: `1px solid ${parsedIntent.guardianCheck.passed ? '#d1f7e2' : '#fcd5d5'}`,
+                border: `1px solid ${parsedIntent.guardianCheck.passed ? 'rgba(5, 150, 105, 0.2)' : 'rgba(220, 38, 38, 0.2)'}`,
                 color: parsedIntent.guardianCheck.passed ? 'var(--color-success)' : 'var(--color-danger)'
               }}
             >
@@ -253,7 +284,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: 'var(--color-text-secondary)' }}>Options Strikes</span>
-                  <span className="font-mono font-semibold" style={{ color: 'var(--color-text-primary)' }}>{parsedIntent.lowerStrike} - {parsedIntent.higherStrike} SUI</span>
+                  <span className="font-mono font-semibold" style={{ color: 'var(--color-text-primary)' }}>{(parsedIntent.lowerStrike / 10000).toFixed(2)} - {(parsedIntent.higherStrike / 10000).toFixed(2)} SUI</span>
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: 'var(--color-text-secondary)' }}>Expiry Window</span>

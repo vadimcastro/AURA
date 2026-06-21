@@ -87,6 +87,8 @@ interface AgentDashboardProps {
     providerLabel: string;
   } | null;
   onTriggerStripeOnramp?: () => void;
+  liveEvents: LiveEvent[];
+  setLiveEvents: React.Dispatch<React.SetStateAction<LiveEvent[]>>;
 }
 
 
@@ -94,7 +96,9 @@ interface AgentDashboardProps {
 export const AgentDashboard: React.FC<AgentDashboardProps> = ({ 
   onSelectAgent, 
   activeSession, 
-  onTriggerStripeOnramp 
+  onTriggerStripeOnramp,
+  liveEvents,
+  setLiveEvents
 }) => {
   const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const [agents, setAgents]       = useState<AgentInfo[]>([]);
@@ -111,7 +115,6 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
     return () => clearInterval(interval);
   }, []);
   const [settingsAgent, setSettingsAgent] = useState<AgentInfo | null>(null);
-  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
 
   // Daemon integration states for pure telemetry pnl overlay
   const [daemonActiveAddress, setDaemonActiveAddress] = useState<string | null>(null);

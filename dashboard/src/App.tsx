@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage';
-import { AgentDashboard } from './components/AgentDashboard';
+import { AgentDashboard, type LiveEvent } from './components/AgentDashboard';
 import { TimelineVisualizer, type SealEnvelope } from './components/TimelineVisualizer';
 import { SealDecrypter } from './components/SealDecrypter';
 import { IntentEngine } from './components/IntentEngine';
@@ -29,6 +29,7 @@ function App() {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [selectedBlobId, setSelectedBlobId] = useState<string | null>(null);
   const [selectedEnvelope, setSelectedEnvelope] = useState<SealEnvelope | null>(null);
+  const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
 
   // dApp-kit wallet hooks
   const wallets = useWallets();
@@ -630,6 +631,8 @@ function App() {
                 onSelectAgent={handleSelectAgent} 
                 activeSession={session} 
                 onTriggerStripeOnramp={() => setShowStripeOnramp(true)} 
+                liveEvents={liveEvents}
+                setLiveEvents={setLiveEvents}
               />
             </section>
 
@@ -658,6 +661,7 @@ function App() {
               activeSession={session} 
               suiBalance={suiBalance} 
               dusdcBalance={dusdcBalance} 
+              onAddLiveEvent={(ev) => setLiveEvents((prev) => [ev, ...prev].slice(0, 50))}
             />
           </section>
         )}
