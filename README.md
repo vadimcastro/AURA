@@ -1,7 +1,7 @@
 # AURA — Autonomous Utility & Reputation Architecture
 
 <p align="center">
-  <img src="aura_logo.png" alt="AURA Logo" width="280" height="280" />
+  <img src="aura_logo.png" alt="AURA Logo" width="96" height="96" />
 </p>
 
 > A Sui-native reputation routing, policy-enforced wallet, and verifiable memory auditing protocol for autonomous trading agents executing on DeepBook Predict.
