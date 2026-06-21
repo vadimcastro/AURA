@@ -240,7 +240,7 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
   if (!envelope) {
     return (
       <div
-        className="rounded-2xl p-8 text-center"
+        className="rounded-xl shadow-sm p-6 text-center"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <Lock className="mx-auto h-10 w-10 mb-3" style={{ color: 'var(--color-text-muted)' }} />
@@ -256,7 +256,7 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
+      className="rounded-xl shadow-sm overflow-hidden"
       style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
     >
       {/* Header */}

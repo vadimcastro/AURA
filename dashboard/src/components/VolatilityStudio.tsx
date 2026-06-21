@@ -225,7 +225,7 @@ export const VolatilityStudio: React.FC = () => {
     <div className="grid gap-8 lg:grid-cols-3">
       {/* Parameters Panel */}
       <div
-        className="rounded-2xl p-6 space-y-6 lg:col-span-1"
+        className="rounded-xl shadow-sm p-5 space-y-5 lg:col-span-1"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
@@ -374,7 +374,7 @@ export const VolatilityStudio: React.FC = () => {
 
       {/* Surface Plot Rendering Canvas */}
       <div
-        className="rounded-2xl p-6 lg:col-span-2 flex flex-col items-center justify-between"
+        className="rounded-xl shadow-sm p-5 lg:col-span-2 flex flex-col items-center justify-between"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="w-full flex justify-between items-center pb-2 border-b mb-4" style={{ borderColor: 'var(--color-border)' }}>

@@ -91,7 +91,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
     <div className="grid gap-8 lg:grid-cols-2">
       {/* Left panel: NLP input */}
       <div
-        className="rounded-2xl p-6 space-y-4"
+        className="rounded-xl shadow-sm p-5 space-y-4"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="flex items-center gap-2 mb-2">
@@ -193,7 +193,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
 
       {/* Right panel: Guardian Pre-Flight Check */}
       <div
-        className="rounded-2xl p-6"
+        className="rounded-xl shadow-sm p-5"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="flex items-center gap-2 mb-4">

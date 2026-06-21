@@ -73,7 +73,7 @@ export const EscalationInbox: React.FC = () => {
     <div className="grid gap-8 lg:grid-cols-3">
       {/* Settings / Connection Config */}
       <div
-        className="rounded-2xl p-6 space-y-5 lg:col-span-1"
+        className="rounded-xl shadow-sm p-5 space-y-5 lg:col-span-1"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
@@ -138,7 +138,7 @@ export const EscalationInbox: React.FC = () => {
 
       {/* Escalation Queue */}
       <div
-        className="rounded-2xl p-6 lg:col-span-2 space-y-4"
+        className="rounded-xl shadow-sm p-5 lg:col-span-2 space-y-4"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>

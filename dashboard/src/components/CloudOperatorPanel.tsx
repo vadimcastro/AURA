@@ -64,7 +64,7 @@ export const CloudOperatorPanel: React.FC = () => {
     <div className="space-y-8">
       {/* Production Integration Banner */}
       <div 
-        className="rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border"
+        className="rounded-xl shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border"
         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
       >
         <div className="space-y-1">
@@ -90,7 +90,7 @@ export const CloudOperatorPanel: React.FC = () => {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Connection Setup */}
         <div
-          className="rounded-2xl p-6 space-y-5"
+          className="rounded-xl shadow-sm p-5 space-y-5"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
           <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
@@ -163,7 +163,7 @@ export const CloudOperatorPanel: React.FC = () => {
 
         {/* Control Actions & Status */}
         <div
-          className="rounded-2xl p-6 space-y-5"
+          className="rounded-xl shadow-sm p-5 space-y-5"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
           <div className="flex items-center gap-2 pb-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
@@ -244,7 +244,7 @@ export const CloudOperatorPanel: React.FC = () => {
 
         {/* Live Logs Console */}
         <div
-          className="rounded-2xl p-6 lg:col-span-1 flex flex-col justify-between"
+          className="rounded-xl shadow-sm p-5 lg:col-span-1 flex flex-col justify-between"
           style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
         >
           <div className="flex items-center gap-2 pb-2 border-b mb-3" style={{ borderColor: 'var(--color-border)' }}>
