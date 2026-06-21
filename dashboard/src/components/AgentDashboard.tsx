@@ -199,6 +199,18 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
 
     if (isWalletConnected) {
       try {
+        // Prevent duplicate registration abort (MoveAbort EAlreadyRegistered)
+        const isAlreadyRegistered = allAgents.some(
+          a => a.address.toLowerCase() === activeSession.address?.toLowerCase()
+        );
+        if (isAlreadyRegistered) {
+          alert(`Your connected wallet address (${activeSession.address}) is already registered as an active agent operator in the registry. You do not need to register again!`);
+          setIsDeploying(false);
+          setShowOnboarding(false);
+          setNewAgentName('');
+          return;
+        }
+
         console.log("📡 Registering agent live on-chain on Sui Testnet...");
         const tx = new Transaction();
         
@@ -640,8 +652,8 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         }
 
         if (active) {
-          // Filter out agents without telemetry to preserve UX
-          const filteredAgents = agentsData.filter(a => a.latestBlobId !== null);
+          // Show all registered agents in the directory immediately
+          const filteredAgents = agentsData;
           
           // Sort: new agents (registered in last 1 hour) first, then active first, then by descending reputation, then by descending totalTasks
           filteredAgents.sort((a, b) => {
@@ -760,7 +772,14 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
 
     const loadInitialEvents = async () => {
       const ocvs = await fetchOnChainEvents();
-      setLiveEvents(ocvs);
+      setLiveEvents((prev) => {
+        const existingDigests = new Set(prev.map(e => e.digest).filter(Boolean));
+        const newEvents = ocvs.filter(e => e.digest && !existingDigests.has(e.digest));
+        if (newEvents.length > 0) {
+          return [...newEvents, ...prev].slice(0, 50);
+        }
+        return prev;
+      });
     };
 
     loadInitialEvents();
