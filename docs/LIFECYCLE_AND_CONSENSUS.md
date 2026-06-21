@@ -70,9 +70,16 @@ graph TD
 The AURA Consensus Thinker Panel is a production-grade implementation of the **LLM-as-a-Judge** framework, customized for autonomous financial risk management.
 
 ### The Mechanics
-Rather than using a single model for both execution and evaluation, AURA isolates these tasks:
-1.  **The Grunt (Executor):** Gemma-4 is low-latency, specialized in structured tool-calls, and highly efficient for fast-path execution. However, it lacks the context window and strategic reasoning to assess its own performance.
-2.  **The Judges (Thinkers):** Three large, high-capacity models (Nemotron, Qwen, Llama) operate off the critical path. They review the historical log timelines stored on Walrus.
+Rather than using a single model for both execution and evaluation, AURA isolates these tasks across a three-tier hierarchy to balance latency, cognitive reasoning, and safety:
+
+1.  **The Grunt Executor (Gemma-4-26B):** 
+    *   **Role:** Performs the active, in-loop translation from unstructured market inputs (SVI parameters, price, historical trends) into options range strategic intents (`WIDEN_SPREAD`, `MAINTAIN_SPREAD`, or `REDUCE_SIZE`).
+    *   **Why it's not bloat:** The TypeScript Sandbox is a static mathematical wrapper; it cannot read high-level strategic summaries, analyze news sentiment, or dynamically adapt to qualitative parameters on its own. Gemma acts as the active "cognitive translator." It is lightweight, fast, and optimized for JSON structured outputs. Running Gemma at every block cycle keeps transaction latency low (<2s) while maintaining real-time adaptability.
+2.  **The Judges / Thinker Panel (Nemotron, Qwen, Llama):**
+    *   **Role:** Large-parameter judge models operating asynchronously (off-loop, every 5 cycles). They ingest historical timeline traces from Walrus and evaluate PnL, drawdowns, and systemic risk.
+    *   **Cognitive Load Division:** Thinker models are too heavy, slow, and expensive to call on every block. Instead of deciding specific trades, they synthesize high-level strategic directives (e.g., *"Reduce exposure by 30% due to rising volatility"*), which are dynamically injected into Gemma's system prompts.
+3.  **The TypeScript (TS) Sandbox:**
+    *   **Role:** Deterministic mathematical guardrail. The sandbox does not *create* strategies; it only *constrains* them. It intercepts Gemma's structured output and maps it mathematically to actual strike calculations ($k \pm \sigma$). If Gemma attempts to execute an action that breaches maximum drawdown, balance floors, or safety boundaries, the Sandbox triggers a hard halt, logs a `LOGICAL_HALLUCINATION_CAUGHT` audit event, and escalates to the HITL (Human-in-the-Loop) inbox.
 
 ```text
   [ Raw Walrus History ] ──► Nemotron 3 Ultra  ──┐

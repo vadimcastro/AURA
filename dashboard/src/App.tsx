@@ -7,7 +7,7 @@ import { IntentEngine } from './components/IntentEngine';
 import { VolatilityStudio } from './components/VolatilityStudio';
 import { EscalationInbox } from './components/EscalationInbox';
 import { CloudOperatorPanel } from './components/CloudOperatorPanel';
-import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle, Settings, X, CreditCard } from 'lucide-react';
+import { Shield, LayoutDashboard, FlaskConical, Wallet, LogOut, ChevronDown, Mail, Globe, Sparkles, TrendingUp, AlertTriangle, Settings, X, CreditCard, RefreshCw } from 'lucide-react';
 import type React from 'react';
 import { useCurrentAccount, useDisconnectWallet, useConnectWallet, useWallets, useSuiClient } from '@mysten/dapp-kit';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
@@ -455,6 +455,23 @@ function App() {
                         <span>Request Testnet SUI</span>
                       </a>
 
+                      {/* Cetus Testnet Swap Link */}
+                      <a
+                        href={`https://testnet.cetus.zone/swap?from=0x2::sui::SUI&to=${import.meta.env.VITE_DUSDC_TYPE_TAG || '0xe95040085976bfd54a1a07225cd46c8a2b4e8e2b6732f140a0fc49850ba73e1a::dusdc::DUSDC'}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-1.5 rounded-lg text-center font-bold text-[10px] uppercase tracking-wider transition-all border flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 block"
+                        style={{
+                          borderColor: 'var(--color-border)',
+                          color: 'var(--color-text-secondary)',
+                          background: 'var(--color-surface-2)',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5 text-sky-500" />
+                        <span>Swap SUI on Cetus DEX</span>
+                      </a>
+
                       {/* Fund Wallet via Stripe */}
                       <button
                         type="button"
@@ -637,7 +654,11 @@ function App() {
         )}
         {activeTab === 'intent' && (
           <section className="pt-6">
-            <IntentEngine activeSession={session} />
+            <IntentEngine 
+              activeSession={session} 
+              suiBalance={suiBalance} 
+              dusdcBalance={dusdcBalance} 
+            />
           </section>
         )}
         {activeTab === 'volatility' && (

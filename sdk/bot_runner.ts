@@ -770,7 +770,8 @@ app.post("/api/stripe/create-session", async (req, res) => {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${stripeSecretKey}`,
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Stripe-Version": "2022-11-15"
       },
       body: params.toString()
     });

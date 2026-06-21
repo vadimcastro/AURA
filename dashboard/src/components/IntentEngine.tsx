@@ -3,9 +3,15 @@ import { Shield, Sparkles, Send, CheckCircle, AlertCircle, Cpu, Loader2 } from '
 
 interface IntentEngineProps {
   activeSession: any;
+  suiBalance: string | null;
+  dusdcBalance: string | null;
 }
 
-export const IntentEngine: React.FC<IntentEngineProps> = ({ activeSession }) => {
+export const IntentEngine: React.FC<IntentEngineProps> = ({ 
+  activeSession, 
+  suiBalance, 
+  dusdcBalance 
+}) => {
   const [prompt, setPrompt] = useState('');
   const [parsing, setParsing] = useState(false);
   const [executing, setExecuting] = useState(false);
@@ -27,6 +33,28 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({ activeSession }) => 
         amount = parseInt(amountMatch[1], 10);
       }
 
+      // Check real balances if session is connected
+      const userDusdc = dusdcBalance ? parseFloat(dusdcBalance) : 0;
+      const userSui = suiBalance ? parseFloat(suiBalance) : 0;
+      const hasEnoughDusdc = activeSession ? userDusdc >= amount : true;
+      const hasEnoughSui = activeSession ? userSui >= 0.002 : true; // gas budget 0.002 SUI
+
+      let passed = amount <= 100 && hasEnoughDusdc && hasEnoughSui;
+      let reason = '';
+      
+      if (!activeSession) {
+        passed = false;
+        reason = 'Guardian Alert: Wallet not connected. Please connect your account or sign in with zkLogin to perform pre-flight balance and constraint checks.';
+      } else if (!hasEnoughDusdc) {
+        reason = `Guardian Alert: Insufficient Funds. You have ${userDusdc.toFixed(2)} dUSDC, but this trade requires ${amount.toFixed(2)} dUSDC. Swap SUI for dUSDC or top up via Stripe.`;
+      } else if (!hasEnoughSui) {
+        reason = `Guardian Alert: Insufficient Gas. You have ${userSui.toFixed(4)} SUI, but this transaction requires at least 0.0020 SUI for gas. Use the Sui Faucet to top up.`;
+      } else if (amount > 100) {
+        reason = `Warning: Requested trade size exceeds standard retail policy limits ($100 dUSDC). Verify allocations.`;
+      } else {
+        reason = `Trade size is within safe policy budget limits. Execution path is atomic and restricted to DeepBook Predict.`;
+      }
+
       setParsedIntent({
         rawText: prompt,
         action: 'MINT_RANGE',
@@ -37,10 +65,8 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({ activeSession }) => 
         expiry: Math.floor(Date.now() / 1000) + 86400, // 24h
         gasBudget: 2000000, // 0.002 SUI
         guardianCheck: {
-          passed: amount <= 100, // Safety limit: flag trades > 100 dUSDC for extra verification
-          reason: amount <= 100 
-            ? 'Trade size is within safe policy budget limits. Execution path is atomic and restricted to DeepBook Predict.'
-            : 'Warning: Requested trade size exceeds standard retail policy limits ($100 dUSDC). Verify allocations.'
+          passed,
+          reason
         }
       });
       setParsing(false);
@@ -203,7 +229,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({ activeSession }) => 
             {/* Execute trigger */}
             <button
               onClick={handleExecute}
-              disabled={executing || !parsedIntent.guardianCheck.passed && !activeSession}
+              disabled={executing || !parsedIntent.guardianCheck.passed || !activeSession}
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 text-[13px] font-semibold text-white transition-all cursor-pointer hover:opacity-95 disabled:opacity-50"
               style={{ background: 'var(--color-brand)' }}
             >
