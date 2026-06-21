@@ -928,6 +928,37 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         </div>
       </div>
 
+      {/* Overview Info Banner */}
+      <div 
+        className="rounded-2xl p-6 relative overflow-hidden border flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(79, 110, 247, 0.04) 0%, rgba(18, 183, 106, 0.02) 100%)',
+          borderColor: 'var(--color-border)'
+        }}
+      >
+        <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-[var(--color-brand)] via-emerald-500 to-amber-500 opacity-60" />
+        <div className="space-y-2 max-w-3xl">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Reputation Middleware Engine (Sui Testnet)</span>
+          </div>
+          <h3 className="text-[15px] font-bold text-[var(--color-text-primary)]">Verifiable AI Agent Performance Ledger</h3>
+          <p className="text-[12.5px] leading-relaxed text-[var(--color-text-secondary)]">
+            LPs delegate trading capacity dynamically to agents based on their cryptographic reputation scores. The on-chain registry locks operator SUI stakes, automatically releases collateral as scores climb, and slashes misbehaving nodes via Move invariants.
+          </p>
+        </div>
+        <div className="flex flex-row md:flex-col gap-6 w-full md:w-auto items-stretch md:items-end justify-between shrink-0 pt-2 md:pt-0 border-t md:border-t-0" style={{ borderColor: 'var(--color-border-soft)' }}>
+          <div className="text-left md:text-right">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">Buy &amp; Burn Treasury</span>
+            <span className="font-mono text-[16px] font-bold text-[var(--color-success)] mt-0.5 block">+{(totalAgents * 0.005).toFixed(3)} SUI</span>
+          </div>
+          <div className="text-left md:text-right">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">Dispute Bonds Escrow</span>
+            <span className="font-mono text-[16px] font-bold text-[var(--color-warning)] mt-0.5 block">{(totalStake * 10).toFixed(2)} SUI</span>
+          </div>
+        </div>
+      </div>
+
       {/* Onboarding Panel Form */}
       {showOnboarding && (
         <div 
@@ -1213,20 +1244,25 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                 
                 {/* Event Logs Container */}
                 <div 
-                  className="overflow-y-auto space-y-2.5 max-h-[280px] pr-1 scrollbar-thin"
+                  className="overflow-y-auto space-y-2.5 max-h-[280px] pr-2 scrollbar-thin p-3.5 rounded-xl border font-mono text-[11px]"
+                  style={{ 
+                    background: 'var(--color-bg)', 
+                    borderColor: 'var(--color-border)',
+                  }}
                 >
                   {liveEvents.length === 0 ? (
-                    <div className="py-12 flex items-center justify-center text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                      Waiting for events...
+                    <div className="py-12 flex items-center justify-center text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                      Waiting for telemetry stream...
                     </div>
                   ) : (
                     liveEvents.map((ev) => (
                       <div 
                         key={ev.id}
-                        className="p-3 rounded-xl border flex items-start justify-between gap-3 text-[12px] transition-all"
+                        className="p-3 rounded-xl border flex items-start justify-between gap-3 text-[11.5px] transition-all"
                         style={{ 
-                          background: 'var(--color-surface-2)', 
-                          borderColor: 'var(--color-border-soft)'
+                          background: 'var(--color-surface)', 
+                          borderColor: 'var(--color-border)',
+                          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.01)'
                         }}
                       >
                         <div className="flex items-start gap-3">

@@ -411,8 +411,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
 
         <h1 className="mt-7 text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>
-          Autonomous Reputation &amp;<br />
-          <span style={{ color: 'var(--color-brand)' }}>Autonomous Utility &amp; Reputation Architecture (AURA)</span>
+          Autonomous Utility &amp;<br />
+          <span style={{ color: 'var(--color-brand)' }}>Reputation Architecture (AURA)</span>
         </h1>
 
         <p className="mx-auto mt-5 max-w-3xl text-[15px] leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
