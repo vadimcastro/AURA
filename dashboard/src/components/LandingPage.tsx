@@ -400,7 +400,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="relative py-12">
 
       {/* Hero */}
-      <div className="mx-auto max-w-3xl text-center">
+      <div className="mx-auto max-w-5xl text-center">
         {/* Live badge */}
         <div
           className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-semibold"
@@ -412,10 +412,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
         <h1 className="mt-7 text-4xl font-extrabold tracking-tight sm:text-5xl" style={{ color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>
           Autonomous Reputation &amp;<br />
-          <span style={{ color: 'var(--color-brand)' }}>User Risk Assurance (AURA)</span>
+          <span style={{ color: 'var(--color-brand)' }}>Autonomous Utility &amp; Reputation Architecture (AURA)</span>
         </h1>
 
-        <p className="mx-auto mt-5 max-w-xl text-[15px] leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="mx-auto mt-5 max-w-3xl text-[15px] leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
           AURA provides a trustless delegation framework for autonomous options trading agents on Sui. Move-enforced atomic sandboxes, multi-model consensus validation, Stripe Crypto fiat-onramps, and Walrus audit timelines eliminate counterparty risks for delegated capital.
         </p>
 
@@ -446,7 +446,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </div>
 
       {/* Protocol Stats */}
-      <div className="mx-auto mt-16 max-w-4xl">
+      <div className="mx-auto mt-16 max-w-7xl">
         <div className="grid gap-5 sm:grid-cols-3">
           <StatCard
             label="Protected Capacity"
@@ -470,7 +470,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </div>
 
       {/* How it works */}
-      <div className="mx-auto mt-20 max-w-4xl">
+      <div className="mx-auto mt-20 max-w-7xl">
         <div className="text-center">
           <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             Advanced Trust Architecture
@@ -503,7 +503,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </div>
 
       {/* ─── INTERACTIVE SHOWROOM ─── */}
-      <div className="mx-auto mt-24 max-w-4xl">
+      <div className="mx-auto mt-24 max-w-7xl">
         <div className="text-center mb-10">
           <span className="text-[11px] font-bold tracking-wider uppercase" style={{ color: 'var(--color-brand)' }}>
             Interactive Demo Showroom
@@ -1246,7 +1246,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
       {/* LP-Agent Flywheel */}
       <div
-        className="mx-auto mt-24 max-w-4xl rounded-2xl p-8 relative overflow-hidden"
+        className="mx-auto mt-24 max-w-7xl rounded-2xl p-8 relative overflow-hidden"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
       >
         <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-brand)] to-transparent opacity-40 rounded-t-2xl" />
