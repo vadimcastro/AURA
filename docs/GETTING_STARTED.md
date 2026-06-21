@@ -53,13 +53,17 @@ This guide provides instructions for setting up the local AURA development envir
 ### Live Demo Execution Flow (Step-by-Step)
 AURA separates off-chain agent processing from audit monitoring: **Agents run as headless processes** (Node.js daemons), while the **Vite Dashboard monitors on-chain states** as a read-only auditor.
 
-For a live demo walkthrough:
-1.  **Boot the Dashboard:** Start the frontend app (`npm run dev` in `dashboard/`) and load the empty Audit Studio state.
-2.  **Start the Daemon:** Navigate to `sdk/` and run:
-    ```bash
-    npm run runner
-    ```
-3.  **Audit the Timeline:** Observe the dashboard update in real-time. As the keeper daemon queries the SVI oracle and submits PTBs, the table displays updated PnL, reputations fracture dynamically, and the timeline visualizer lights up with Walrus telemetry decryption triggers.
+> [!IMPORTANT]
+> **Recommended Walkthrough Sequence:**
+> ```text
+> ⚙️  [1. Start Server] ──► [2. Register Agent] ──► [3. Prompt Intent Trade] ──► [4. Configure & Audit]
+> ```
+
+For a live demo walkthrough, follow this exact progression:
+1. **Start Server (Operator Console):** Boot the off-chain bot runner daemon. You can do this via the operator panel tab on the dashboard or by running `npm run runner` inside `/sdk/`.
+2. **Onboard & Register Agent (Directory Tab):** Create and register a new autonomous agent node on-chain. This locks their SUI collateral in the shared registry and allocates their initial dUSDC strategy budget. The new node will now appear in the Agent Directory.
+3. **Prompt Engine Trade (Intent Engine Tab):** Type a natural language options trading command. The Intent Engine parses this into an atomic Sui PTB transaction (e.g., DeepBook Range Mint) executing on behalf of your active session's policy wallet. *Note: Intent trades execute against existing policy wallets and do not create new directory agent nodes.*
+4. **Configure / Audit Telemetry (Audit Studio Tab):** Select your active agent in the directory to inspect its Walrus audit history timeline, decode encrypted mind trails, and manually configure strategy rules or trigger liquidations.
 
 ---
 

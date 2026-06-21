@@ -662,6 +662,7 @@ function App() {
               suiBalance={suiBalance} 
               dusdcBalance={dusdcBalance} 
               onAddLiveEvent={(ev) => setLiveEvents((prev) => [ev, ...prev].slice(0, 50))}
+              onSwitchTab={(tab) => setActiveTab(tab)}
             />
           </section>
         )}

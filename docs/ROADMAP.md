@@ -71,6 +71,10 @@
     *   *Live signed PTB execution:* Integrated on-chain PTB construction and browser-wallet signature requests into the Intent Engine interface.
     *   *UX testing links:* Placed Sui Testnet Faucet and Cetus DEX swap buttons directly under the wallet address to simplify token setup.
     *   *Anti-Flicker:* Gated the UI loading spinner states to eliminate layout shifts during periodic dashboard polls.
+    *   *Client-Side Backup Parser:* Implemented regex-based local fallback in the Intent Engine when the backend AI API is offline or rate-limited.
+    *   *Visual System Lifecycle Guide:* Added a top-bar banner to clarify the sequence (`Start Server -> Register Agent -> Prompt Trade -> Configure/Audit`).
+    *   *Strike Price Normalization:* Built scaling normalizers on both frontend and backend to auto-convert decimal strikes (e.g. `6.5` -> `65000`) for DeepBook options.
+    *   *Tight Loop Execution Control:* Modified `/api/start` to bootstrap agent policies and enable daemon status without launching background loops, giving the operator manual control via "Run Loop" or "Step" directory triggers.
 
 ---
 

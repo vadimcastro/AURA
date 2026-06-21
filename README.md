@@ -135,6 +135,13 @@ npm install
 npm run dev
 ```
 
+### ⚙️ Live Walkthrough Progression
+To test the complete end-to-end AURA setup:
+1. **Start Server:** Start the off-chain daemon runner (Vite dashboard's Operator tab or `npm run runner` inside `/sdk`).
+2. **Register Agent:** Register a new autonomous agent via the dashboard Directory tab to post SUI collateral stake.
+3. **Prompt Engine Trade:** Input natural language queries into the Intent Engine tab to mint option ranges on DeepBook.
+4. **Configure & Audit:** Ingest telemetry summaries, decrypt mind trails, and adjust risk policies under the Audit Studio.
+
 ---
 
 ## Documentation

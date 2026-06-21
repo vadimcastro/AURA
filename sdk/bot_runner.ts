@@ -704,22 +704,11 @@ app.post("/api/start", requireAuth, async (req, res) => {
       }
     };
 
-    const t1 = setInterval(() => runCycle("Conservative Yield", agent1.agentKeypair, agent1.policyId), delayMs);
-    await sleep(2000);
-    const t2 = setInterval(() => runCycle("Aggressive Vol", agent2.agentKeypair, agent2.policyId), delayMs);
-    await sleep(2000);
-    const t3 = setInterval(() => runCycle("Delta-Neutral", agent3.agentKeypair, agent3.policyId), delayMs);
-
-    activeIntervals = [t1, t2, t3];
-    
-    runCycle("Conservative Yield", agent1.agentKeypair, agent1.policyId);
-    sleep(2000).then(() => runCycle("Aggressive Vol", agent2.agentKeypair, agent2.policyId));
-    sleep(4000).then(() => runCycle("Delta-Neutral", agent3.agentKeypair, agent3.policyId));
-
-    res.json({ success: true, message: "Backend execution loop started successfully." });
+    console.log("📡 Daemon Enabled: Ready to process manual agent actions from the UI directory.");
+    res.json({ success: true, message: "Trading daemon enabled. Ready to process manual agent actions from the UI." });
   } catch (err) {
     loopRunning = false;
-    res.status(500).json({ error: `Failed to start bots: ${(err as Error).message}` });
+    res.status(500).json({ error: `Failed to enable trading daemon: ${(err as Error).message}` });
   }
 });
 
@@ -812,6 +801,15 @@ Intent: "${prompt}"`;
 
     const cleanJSON = textResult.replace(/```json/g, "").replace(/```/g, "").trim();
     const parsed = JSON.parse(cleanJSON);
+
+    // Normalize option strikes to integer scale (price * 10000) if the model returns float/decimal strikes
+    if (parsed.lowerStrike && parsed.lowerStrike < 1000) {
+      parsed.lowerStrike = Math.round(parsed.lowerStrike * 10000);
+    }
+    if (parsed.higherStrike && parsed.higherStrike < 1000) {
+      parsed.higherStrike = Math.round(parsed.higherStrike * 10000);
+    }
+
     console.log(`✅ Intent Engine: Successfully parsed intent into:`, parsed);
     res.json({ success: true, parsed, modelUsed: model });
   } catch (err) {
