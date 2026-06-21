@@ -3,8 +3,8 @@ import { SuiJsonRpcClient as SuiClient } from '@mysten/sui/jsonRpc';
 import { Transaction } from '@mysten/sui/transactions';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import {
-  Award, Shield, ShieldAlert, ShieldCheck,
-  Users, RefreshCw, Settings, Terminal, Layers, Trophy,
+  ShieldAlert, ShieldCheck,
+  RefreshCw, Settings, Terminal, Layers,
   X, Plus, Play, Square, Zap, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { AgentSettingsModal } from './AgentSettingsModal';
@@ -75,29 +75,7 @@ const getAgentPnL = (agent: AgentInfo, daemonActiveAddress?: string | null): num
 
 
 
-// ─── Agent stat card ─────────────────────────────────────────────────────────
-const StatTile: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  accent: string;
-}> = ({ icon, label, value, accent }) => (
-  <div
-    className="rounded-2xl p-5 flex items-center gap-4"
-    style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
-  >
-    <div
-      className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
-      style={{ background: `${accent}18`, color: accent }}
-    >
-      {icon}
-    </div>
-    <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
-      <p className="text-xl font-bold mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{value}</p>
-    </div>
-  </div>
-);
+
 
 // ─── Main component ───────────────────────────────────────────────────────────
 interface AgentDashboardProps {
@@ -928,36 +906,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         </div>
       </div>
 
-      {/* Overview Info Banner */}
-      <div 
-        className="rounded-2xl p-6 relative overflow-hidden border flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm"
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(79, 110, 247, 0.04) 0%, rgba(18, 183, 106, 0.02) 100%)',
-          borderColor: 'var(--color-border)'
-        }}
-      >
-        <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-[var(--color-brand)] via-emerald-500 to-amber-500 opacity-60" />
-        <div className="space-y-2 max-w-3xl">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Reputation Middleware Engine (Sui Testnet)</span>
-          </div>
-          <h3 className="text-[15px] font-bold text-[var(--color-text-primary)]">Verifiable AI Agent Performance Ledger</h3>
-          <p className="text-[12.5px] leading-relaxed text-[var(--color-text-secondary)]">
-            LPs delegate trading capacity dynamically to agents based on their cryptographic reputation scores. The on-chain registry locks operator SUI stakes, automatically releases collateral as scores climb, and slashes misbehaving nodes via Move invariants.
-          </p>
-        </div>
-        <div className="flex flex-row md:flex-col gap-6 w-full md:w-auto items-stretch md:items-end justify-between shrink-0 pt-2 md:pt-0 border-t md:border-t-0" style={{ borderColor: 'var(--color-border-soft)' }}>
-          <div className="text-left md:text-right">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">Buy &amp; Burn Treasury</span>
-            <span className="font-mono text-[16px] font-bold text-[var(--color-success)] mt-0.5 block">+{(totalAgents * 0.005).toFixed(3)} SUI</span>
-          </div>
-          <div className="text-left md:text-right">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">Dispute Bonds Escrow</span>
-            <span className="font-mono text-[16px] font-bold text-[var(--color-warning)] mt-0.5 block">{(totalStake * 10).toFixed(2)} SUI</span>
-          </div>
-        </div>
-      </div>
+
 
       {/* Onboarding Panel Form */}
       {showOnboarding && (
@@ -1197,26 +1146,40 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
         </div>
       ) : (
         <>
-          {/* Stat tiles */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatTile
-              icon={<Users className="h-5 w-5" />}
-              label="Registered Agents"
-              value={`${totalAgents} total · ${activeAgents} active`}
-              accent="var(--color-brand)"
-            />
-            <StatTile
-              icon={<Award className="h-5 w-5" />}
-              label="Avg Reputation Score"
-              value={`${avgRepPct.toFixed(1)}%`}
-              accent="var(--color-success)"
-            />
-            <StatTile
-              icon={<Shield className="h-5 w-5" />}
-              label="Collateral Locked"
-              value={`${totalStake.toFixed(3)} SUI`}
-              accent="#f59e0b"
-            />
+          {/* Streamlined Horizontal Metric strip */}
+          <div 
+            className="rounded-xl border p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 items-center justify-between shadow-sm select-none"
+            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          >
+            {/* 1. Collateral Locked */}
+            <div className="border-r border-[var(--color-border-soft)] pr-4 last:border-r-0">
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Collateral Locked</span>
+              <span className="font-mono text-base font-bold text-[var(--color-text-primary)] block mt-1">{totalStake.toFixed(3)} SUI</span>
+            </div>
+
+            {/* 2. Dispute Escrow */}
+            <div className="border-r border-[var(--color-border-soft)] pr-4 last:border-r-0 sm:block hidden">
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Dispute Escrow</span>
+              <span className="font-mono text-base font-bold text-[var(--color-warning)] block mt-1">{(totalStake * 10).toFixed(2)} SUI</span>
+            </div>
+
+            {/* 3. Treasury Accrued */}
+            <div className="border-r border-[var(--color-border-soft)] pr-4 last:border-r-0">
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Treasury Accrued</span>
+              <span className="font-mono text-base font-bold text-[var(--color-success)] block mt-1">+{(totalAgents * 0.005).toFixed(3)} SUI</span>
+            </div>
+
+            {/* 4. Active Nodes */}
+            <div className="border-r border-[var(--color-border-soft)] pr-4 last:border-r-0 md:block hidden">
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Active Nodes</span>
+              <span className="font-mono text-base font-bold text-[var(--color-brand)] block mt-1">{activeAgents} / {totalAgents}</span>
+            </div>
+
+            {/* 5. Avg Reputation */}
+            <div className="last:border-r-0">
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Avg Reputation</span>
+              <span className="font-mono text-base font-bold text-[var(--color-info)] block mt-1">{avgRepPct.toFixed(1)}%</span>
+            </div>
           </div>
 
           {/* Live grid section */}
@@ -1598,78 +1561,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
             {/* Right Workstation Sidebar: Performance Metrics & Real-time Feeds */}
             <div className="lg:col-span-1 space-y-6">
               
-              {/* Leaderboard panel */}
-              <div
-                className="rounded-xl p-5 border shadow-lg"
-                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-              >
-                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[var(--color-border-soft)]">
-                  <Trophy className="h-4 w-4 text-amber-500" />
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
-                    Top Alpha Agents
-                  </h3>
-                </div>
-                
-                <div className="space-y-3">
-                  {allAgents.slice(0, 3).map((agent, index) => {
-                    const repPercent = reputationPct(agent.reputation);
-                    const isWinner = index === 0;
-                    return (
-                      <div 
-                        key={agent.address} 
-                        className="flex items-center justify-between p-3 rounded-lg border transition-all"
-                        style={{ 
-                          background: isWinner ? 'rgba(37, 99, 235, 0.03)' : 'var(--color-surface-2)/40', 
-                          borderColor: isWinner ? 'rgba(37, 99, 235, 0.25)' : 'var(--color-border-soft)'
-                        }}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="h-6 w-6 rounded-full flex items-center justify-center font-bold text-[11px] border" style={{
-                            background: index === 0 ? 'rgba(245,158,11,0.1)' : 'var(--color-bg)',
-                            color: index === 0 ? 'var(--color-warning)' : 'var(--color-text-secondary)',
-                            borderColor: index === 0 ? 'var(--color-warning)' : 'var(--color-border)'
-                          }}>
-                            {index + 1}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1">
-                              <p className="font-mono text-[11px] font-bold text-[var(--color-text-primary)]">
-                                {agent.name || `${agent.address.substring(0, 6)}…${agent.address.slice(-4)}`}
-                              </p>
-                            </div>
-                            <p className="text-[9.5px] text-[var(--color-text-muted)] font-mono">
-                              {agent.successfulTasks}/{agent.totalTasks} trades
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="text-right flex flex-col justify-center items-end">
-                          <span className="text-[11.5px] font-bold" style={{
-                            color: repPercent >= 70 ? 'var(--color-success)' : repPercent >= 40 ? 'var(--color-warning)' : 'var(--color-danger)'
-                          }}>
-                            {repPercent.toFixed(0)}% Rep
-                          </span>
-                          {(() => {
-                             const pnlVal = getAgentPnL(agent, daemonActiveAddress);
-                             const isPositive = pnlVal >= 0;
-                            return (
-                              <div className={`text-[11px] font-bold font-mono flex items-center gap-0.5 ${isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
-                                {isPositive ? <ArrowUpRight className="h-3 w-3 shrink-0" /> : <ArrowDownRight className="h-3 w-3 shrink-0" />}
-                                <span>{isPositive ? '+' : ''}{pnlVal.toFixed(1)}</span>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Console log terminal feed */}
               <div
                 className="rounded-xl p-5 border shadow-lg flex flex-col justify-between"
-                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', minHeight: '360px' }}
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', minHeight: '520px' }}
               >
                 <div>
                   <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--color-border-soft)]">
@@ -1689,7 +1584,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                   
                   {/* Event Logs Container */}
                   <div 
-                    className="overflow-y-auto space-y-2 max-h-[250px] pr-1.5 scrollbar-thin p-3 rounded-lg border font-mono text-[10.5px]"
+                    className="overflow-y-auto space-y-2 max-h-[460px] pr-1.5 scrollbar-thin p-3 rounded-lg border font-mono text-[10.5px]"
                     style={{ 
                       background: 'var(--color-bg)', 
                       borderColor: 'var(--color-border)',

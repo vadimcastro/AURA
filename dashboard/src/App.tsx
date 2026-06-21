@@ -362,7 +362,7 @@ function App() {
       {/* Navigation Header */}
       <header
         className="sticky top-1 z-40 border-b"
-        style={{ background: 'rgba(7, 13, 25, 0.85)', backdropFilter: 'blur(12px)', borderColor: 'var(--color-border)' }}
+        style={{ background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(12px)', borderColor: 'var(--color-border)' }}
       >
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">

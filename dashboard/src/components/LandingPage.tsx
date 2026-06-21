@@ -518,72 +518,72 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
         {/* Showroom tabs */}
         <div 
-          className="flex flex-wrap gap-1.5 p-1.5 rounded-xl mb-6 justify-center"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 p-1.5 rounded-xl mb-6 w-full text-center"
           style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
         >
           <button
             onClick={() => setActiveTab('intent')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-bold rounded-lg transition-all cursor-pointer w-full text-center ${
               activeTab === 'intent' 
-                ? 'bg-white shadow-sm' 
-                : 'hover:bg-white/50'
+                ? 'bg-[var(--color-surface)] shadow-sm' 
+                : 'hover:bg-[var(--color-surface-2)]/60'
             }`}
             style={{ color: activeTab === 'intent' ? 'var(--color-brand)' : 'var(--color-text-secondary)' }}
           >
-            <Sparkles className="h-4.5 w-4.5" />
-            Qwen Intent Engine
+            <Sparkles className="h-4.5 w-4.5 shrink-0" />
+            <span>Qwen Intent Engine</span>
           </button>
 
           <button
             onClick={() => setActiveTab('volatility')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-bold rounded-lg transition-all cursor-pointer w-full text-center ${
               activeTab === 'volatility' 
-                ? 'bg-white shadow-sm' 
-                : 'hover:bg-white/50'
+                ? 'bg-[var(--color-surface)] shadow-sm' 
+                : 'hover:bg-[var(--color-surface-2)]/60'
             }`}
             style={{ color: activeTab === 'volatility' ? 'var(--color-brand)' : 'var(--color-text-secondary)' }}
           >
-            <Layers className="h-4.5 w-4.5" />
-            3D Volatility Surface
+            <Layers className="h-4.5 w-4.5 shrink-0" />
+            <span>3D Volatility Surface</span>
           </button>
 
           <button
             onClick={() => setActiveTab('consensus')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-bold rounded-lg transition-all cursor-pointer w-full text-center ${
               activeTab === 'consensus' 
-                ? 'bg-white shadow-sm' 
-                : 'hover:bg-white/50'
+                ? 'bg-[var(--color-surface)] shadow-sm' 
+                : 'hover:bg-[var(--color-surface-2)]/60'
             }`}
             style={{ color: activeTab === 'consensus' ? 'var(--color-brand)' : 'var(--color-text-secondary)' }}
           >
-            <Shield className="h-4.5 w-4.5" />
-            Consensus &amp; Sandbox
+            <Shield className="h-4.5 w-4.5 shrink-0" />
+            <span>Consensus &amp; Sandbox</span>
           </button>
 
           <button
             onClick={() => setActiveTab('telemetry')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-bold rounded-lg transition-all cursor-pointer w-full text-center ${
               activeTab === 'telemetry' 
-                ? 'bg-white shadow-sm' 
-                : 'hover:bg-white/50'
+                ? 'bg-[var(--color-surface)] shadow-sm' 
+                : 'hover:bg-[var(--color-surface-2)]/60'
             }`}
             style={{ color: activeTab === 'telemetry' ? 'var(--color-brand)' : 'var(--color-text-secondary)' }}
           >
-            <Database className="h-4.5 w-4.5" />
-            Walrus Telemetry
+            <Database className="h-4.5 w-4.5 shrink-0" />
+            <span>Walrus Telemetry</span>
           </button>
 
           <button
             onClick={() => setActiveTab('hitl')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-bold rounded-lg transition-all cursor-pointer w-full text-center col-span-2 sm:col-span-1 ${
               activeTab === 'hitl' 
-                ? 'bg-white shadow-sm' 
-                : 'hover:bg-white/50'
+                ? 'bg-[var(--color-surface)] shadow-sm' 
+                : 'hover:bg-[var(--color-surface-2)]/60'
             }`}
             style={{ color: activeTab === 'hitl' ? 'var(--color-brand)' : 'var(--color-text-secondary)' }}
           >
-            <ShieldAlert className="h-4.5 w-4.5" />
-            HITL LP Overrides
+            <ShieldAlert className="h-4.5 w-4.5 shrink-0" />
+            <span>HITL LP Overrides</span>
           </button>
         </div>
 
