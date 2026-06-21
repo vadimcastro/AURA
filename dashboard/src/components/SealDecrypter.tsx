@@ -1,25 +1,16 @@
 import React, { useState } from 'react';
-import { Lock, Unlock, Key, Eye, EyeOff, ShieldCheck, Terminal, RotateCcw, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Key, Eye, EyeOff, ShieldCheck, Terminal, RotateCcw, Loader2, AlertTriangle } from 'lucide-react';
+import { useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit';
+import { Transaction } from '@mysten/sui/transactions';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-/**
- * SVI (Stochastic Volatility Inspired) surface parameters.
- * Matches the SVIParameters interface in sdk/predict_agent.ts exactly.
- * These are raw SVI model coefficients, NOT human-readable vol metrics.
- */
 interface SviSurface {
-  /** Vertical shift of the variance smile — overall level of implied variance */
   a:         number;
-  /** Slope parameter — controls the wings of the variance smile */
   b:         number;
-  /** Correlation — skew/asymmetry of the distribution (-1 < ρ < 1) */
   rho:       number;
-  /** Minimum variance strike offset (ATM-relative log-moneyness) */
   m:         number;
-  /** Smoothing / curvature parameter (σ > 0) */
   sigma:     number;
-  /** Unix ms timestamp of the oracle reading */
   timestamp?: number;
 }
 
@@ -27,16 +18,13 @@ interface AuditTrace {
   epoch:                  number;
   policy_wallet:          string;
   agent_address:          string;
-  /** Raw SVI parameters from sdk/predict_agent.ts fetchSVIParameters() */
   svi_surface:            SviSurface;
   trade_decision:         string;
-  /** Raw units: 6 decimal places (1_000_000 raw = 1.00 dUSDC) */
   trade_amount_dusdc:     number;
   refund_amount_dusdc:    number;
   pnl_dusdc:              number;
   arbitrage_check_passed: boolean;
   model_reasoning_hash:   string;
-  /** Gas balance in MIST (divide by 1e9 for display in SUI) */
   gas_balance_sui:        number;
   timestamp:              string;
 }
@@ -57,17 +45,12 @@ interface SealDecrypterProps {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-/** Demo AES-256-GCM key hex for the offline simulation envelope */
 const DEMO_KEY_HEX = 'e853b29e4574a1bf906960ec61517e4aebd4ee5550c1871fbad255575932b8df';
-
-/**
- * dUSDC uses 6 decimal places — matches the on-chain coin precision.
- * sdk/predict_agent.ts tradeAmount = 100_000_000 → 100.00 dUSDC.
- */
 const DUSDC_DECIMALS = 1_000_000;
-
-/** SUI balance field is stored in MIST (1 SUI = 1_000_000_000 MIST). */
 const SUI_MIST = 1_000_000_000;
+
+const AURA_PACKAGE_ID = import.meta.env.VITE_AURA_PACKAGE_ID || '0xb03d26d64408c965e293940b1d2c83b28758bf152600d662cdb29294ad87952e';
+const REGISTRY_OBJECT_ID = import.meta.env.VITE_REGISTRY_OBJECT_ID || '0x848bfe3b550bae763d6b408f9613f416bfbf4ded0c20f531a63906250c666e8c';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const hexToUint8Array = (hex: string): Uint8Array => {
@@ -80,7 +63,6 @@ const hexToUint8Array = (hex: string): Uint8Array => {
 
 const fmt = (raw: number) => (raw / DUSDC_DECIMALS).toFixed(2);
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
 const DataRow: React.FC<{
   label: string;
   value: React.ReactNode;
@@ -104,6 +86,10 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
   const [decryptedData, setDecryptedData] = useState<AuditTrace | null>(null);
   const [error,        setError]        = useState<string | null>(null);
   const [decrypting,   setDecrypting]   = useState(false);
+  const [disputing,    setDisputing]    = useState(false);
+
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
   const reset = () => {
     setDecryptedData(null);
@@ -201,8 +187,6 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
           refund_amount_dusdc:    refundAmount,
           pnl_dusdc:              pnl,
           arbitrage_check_passed: true,
-          // Exact value from predict_agent.ts:
-          // crypto.createHash("sha256").update("mock-llm-reasoning").digest("hex")
           model_reasoning_hash:   '18f576496773fc3c30252ad557e75fe078fd9640b94e613c76deae09c889a6ae',
           gas_balance_sui:        5_200_000_000, // 5.20 SUI in MIST
           timestamp:              envelope.timestamp,
@@ -216,7 +200,6 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
       const tagBytes        = hexToUint8Array(envelope.tag);
       const ciphertextBytes = hexToUint8Array(envelope.ciphertext);
 
-      // Web Crypto expects ciphertext || tag as a single buffer
       const combined = new Uint8Array(ciphertextBytes.length + tagBytes.length);
       combined.set(ciphertextBytes);
       combined.set(tagBytes, ciphertextBytes.length);
@@ -236,7 +219,42 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
     }
   };
 
-  // ── Empty state ────────────────────────────────────────────────────────────
+  const handleSubmitDispute = async () => {
+    if (!envelope) return;
+    setDisputing(true);
+    try {
+      console.log("📡 Filing slashing dispute on-chain on Sui Testnet...");
+      const tx = new Transaction();
+
+      // Lock a 0.01 SUI dispute bond (10,000,000 Mist) split from gas coin
+      const [bondCoin] = tx.splitCoins(tx.gas, [10_000_000]);
+
+      // Call submit_dispute Move contract method
+      tx.moveCall({
+        target: `${AURA_PACKAGE_ID}::aura_registry::submit_dispute`,
+        arguments: [
+          tx.object(REGISTRY_OBJECT_ID),
+          tx.object('0x6'), // Sui Clock object ID
+          tx.pure.address(envelope.agentAddress || '0xded1f38aa191a972cb56c33062629a74045c1d80341e9148aa96f2ba1443f676'),
+          tx.pure.vector('u8', Array.from(new TextEncoder().encode(envelope.blobId))),
+          bondCoin
+        ]
+      });
+
+      const result = await signAndExecuteTransaction({
+        transaction: tx,
+      });
+
+      console.log("✅ Dispute successfully filed! Digest:", result.digest);
+      alert(`🎉 Slashing dispute successfully filed on Sui Testnet!\nDigest: ${result.digest}\n\nThe operator has 24 hours to disclose their AES decryption key or face automatic slashing!`);
+    } catch (err) {
+      console.error("❌ Failed to file dispute on-chain:", err);
+      alert(`Failed to file dispute: ${(err as Error).message}`);
+    } finally {
+      setDisputing(false);
+    }
+  };
+
   if (!envelope) {
     return (
       <div
@@ -381,6 +399,44 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
                 {decrypting ? 'Decrypting…' : 'Execute Decryption'}
               </button>
             </form>
+
+            <div className="flex items-center gap-3 my-4">
+              <div className="h-px bg-gray-200 flex-grow" />
+              <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">or challenge agent</span>
+              <div className="h-px bg-gray-200 flex-grow" />
+            </div>
+
+            {/* Slashing Dispute Game Trigger */}
+            <div className="p-3.5 rounded-xl border border-red-900/20 bg-red-950/10 space-y-2.5">
+              <div className="flex items-center gap-1.5 text-red-500 font-semibold">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span className="text-[12px] uppercase tracking-wider">Slashing Dispute Game</span>
+              </div>
+              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                If you suspect policy violations or if the agent refuses to disclose its key, lock a 0.01 SUI dispute bond to file a challenge. If correct, you claim the agent's performance stake!
+              </p>
+              {currentAccount ? (
+                <button
+                  type="button"
+                  onClick={handleSubmitDispute}
+                  disabled={disputing}
+                  className="w-full py-2.5 rounded-xl text-[11px] font-bold text-white bg-red-600 hover:bg-red-700 cursor-pointer transition-colors flex items-center justify-center gap-1"
+                >
+                  {disputing ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Filing Dispute...
+                    </>
+                  ) : (
+                    '🚨 File Slashing Dispute on Testnet'
+                  )}
+                </button>
+              ) : (
+                <div className="text-[10px] text-center italic text-amber-500 font-semibold">
+                  Connect wallet to file a slashing dispute.
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           // ── Decrypted trace view ──────────────────────────────────────────
@@ -430,7 +486,7 @@ export const SealDecrypter: React.FC<SealDecrypterProps> = ({ envelope }) => {
               />
             </div>
 
-            {/* SVI model params — field names match SVIParameters in sdk/predict_agent.ts */}
+            {/* SVI model params */}
             <div
               className="rounded-xl p-4 space-y-2"
               style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}

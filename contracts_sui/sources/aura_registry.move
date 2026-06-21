@@ -408,7 +408,7 @@ module aura::aura_registry {
     }
 
     /// Submit a dispute challenging an agent's telemetry audit blob.
-    /// Locks a 1.0 SUI dispute bond to prevent griefing.
+    /// Locks a 0.01 SUI dispute bond to prevent griefing.
     public fun submit_dispute(
         registry: &mut Registry,
         clock: &Clock,
@@ -422,7 +422,7 @@ module aura::aura_registry {
         let record = table::borrow(&registry.agents, agent_addr);
         assert!(record.active, EAgentInactive);
 
-        // Enforce locked dispute bond is sufficient (1.0 SUI)
+        // Enforce locked dispute bond is sufficient (0.01 SUI)
         let bond_value = bond_coin.value();
         assert!(bond_value >= DISPUTE_BOND_AMOUNT, EStakeTooLow);
 

@@ -171,7 +171,7 @@ async function bootstrapAgent(
   if (!registered) {
     console.log(yellow(`   Registering copy trader in registry...`));
     const tx3 = new Transaction();
-    const [stakeCoin] = tx3.splitCoins(tx3.gas, [tx3.pure.u64(10_000_000)]); // 0.01 SUI stake
+    const [stakeCoin] = tx3.splitCoins(tx3.gas, [tx3.pure.u64(100_000_000)]); // 0.1 SUI stake
     tx3.moveCall({
       target: `${AURA_PACKAGE_ID}::aura_registry::register_agent`,
       arguments: [tx3.object(REGISTRY_OBJECT_ID), stakeCoin]

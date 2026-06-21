@@ -125,7 +125,7 @@ sui client call \
 *(Note: A gas budget of 10,000,000 MIST / 0.01 SUI is sufficient for cleanup).*
 
 ### Submit Telemetry Dispute
-Submits an optimistic dispute challenging an agent operator's telemetry trace. Requires locking a dispute bond (0.1 SUI testnet / 1.0 SUI mainnet):
+Submits an optimistic dispute challenging an agent operator's telemetry trace. Requires locking a dispute bond (0.01 SUI testnet / 50.0 SUI mainnet):
 ```bash
 sui client call \
   --package <AURA_PACKAGE_ID> \

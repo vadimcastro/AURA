@@ -51,7 +51,13 @@ AURA solves all three with a protocol-level architecture built on Sui Move primi
 
 - **🧠 Hybrid Validator-Consensus Pattern** — Employs a dual-layer AI strategy: a lightning-fast `google/gemma-4-26b-a4b-it:free` "Grunt" executor running under a deterministic TypeScript Sanity Sandbox, combined with an off-chain background "Thinker" Panel consensus trio (`nvidia/nemotron-3-ultra-550b-a55b:free`, `qwen/qwen3-coder:free`, and `meta-llama/llama-3.3-70b-instruct:free`) periodically summarizing historical Walrus traces to update strategy prompts off the live trading path.
 
-- **📊 Optimistic Slashing Dispute Game** — Replaces trusted admin slashing. Users submit disputes by locking a dispute bond. Operators must disclose the decryption key within 24 hours. Failure automatically slashes the operator's performance bond and awards it to the challenger.
+- **📊 Optimistic Slashing Dispute Game & Encrypted Auditing** — Resolves disputes trustlessly using cryptoeconomics:
+  * **Encrypted Telemetry:** Agent mind-trails are encrypted client-side via AES-256-GCM (Seal) and uploaded to Walrus, ensuring strategies remain confidential. Only public transaction outputs are visible by default.
+  * **Filing a Challenge:** Any user can file a dispute against a telemetry `blob_id` by locking a **0.01 SUI challenge bond** (reflected in the `Dispute Escrow` on-chain, which reads `0 SUI` by default when no disputes are active).
+  * **The 24h Disclosure Window:** The challenged operator **must** post the decryption key on-chain within 24 hours via `disclose_telemetry_key`. 
+  * **Resolution Outcome:**
+    * **If they disclose:** The key becomes public, allowing anyone to decrypt and audit the Walrus payload in browser memory. The challenger is refunded their 0.01 SUI.
+    * **If they fail to disclose:** The agent is deemed malicious. The smart contract slashes the agent's performance bond (e.g. 0.1 SUI) and awards it directly to the challenger as a bounty!
 
 - **🏬 Sui Kiosk Strategy NFT wrapping** — High-performing strategy records and reputations can be packaged into an `AgentNFT` containing snapshots of the agent's exact model/orchestration parameters, then placed in a shared `sui::kiosk::Kiosk` to create a tradeable marketplace with high switching costs.
 

@@ -150,11 +150,11 @@ async function main() {
   await SUI_CLIENT.waitForTransaction({ digest: depositTx.digest });
   await sleep(2000);
 
-  // 4. Register Agent with 0.01 SUI stake bond
-  console.log(yellow("\n4. Registering agent with 0.01 SUI stake bond..."));
+  // 4. Register Agent with 0.1 SUI stake bond
+  console.log(yellow("\n4. Registering agent with 0.1 SUI stake bond..."));
   try {
     const txRegister = new Transaction();
-    const [stakeCoin] = txRegister.splitCoins(txRegister.gas, [10_000_000]); // 0.01 SUI
+    const [stakeCoin] = txRegister.splitCoins(txRegister.gas, [100_000_000]); // 0.1 SUI
     txRegister.moveCall({
       target: `${AURA_PACKAGE_ID}::aura_registry::register_agent`,
       arguments: [

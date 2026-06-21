@@ -995,12 +995,12 @@ A lightweight Web frontend that makes Walrus audit data legible to users and LPs
 
 ### C. Optimistic Slashing & Decentralized Dispute Resolution *(Implemented in Phase 7)*
 To remove the single-point-of-failure admin key in the reputation registry, we have implemented an **Optimistic Slashing** game-theory model that replaces the trusted admin with cryptoeconomic incentives:
-1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a SUI bond (0.1 SUI for Testnet, 1.0 SUI for Mainnet) and calling `submit_dispute` to register a `Dispute` object on-chain referencing the suspect `blob_id`.
+1.  **Dispute Bond:** A user flags an agent for a rules violation by locking a SUI bond (0.01 SUI for Testnet, 50.0 SUI for Mainnet) and calling `submit_dispute` to register a `Dispute` object on-chain referencing the suspect `blob_id`.
 2.  **Disclosure Window:** The agent operator has a 24-hour challenge period (enforced via `sui::clock` on-chain) to call `disclose_telemetry_key`, proving compliance by publishing the Seal decryption key for the challenged trace.
 3.  **Resolution Invariants**:
     *   *Timeout Slash:* If the operator fails to publish the key within 24 hours → anyone can call `resolve_dispute` to automatically slash the operator's locked staked bond, award it to the disputer, and mark the agent inactive.
     *   *Key Disclosed:* If the key is disclosed, the dispute is marked resolved, and the disputer's locked bond is refunded back to them.
-4.  **Griefing Resistance:** The required dispute bond (0.1 SUI / 1.0 SUI) prevents griefing of operators, ensuring that challengers must back their challenges with real economic value.
+4.  **Griefing Resistance:** The required dispute bond (0.01 SUI / 50.0 SUI) prevents griefing of operators, ensuring that challengers must back their challenges with real economic value.
 
 ### D. Sui Kiosk NFT Wrapping (`agent_nft.move`) *(Implemented in Phase 7)*
 To support the monetization of high-performing autonomous strategies, AURA enables operators to wrap their reputational identities into tradeable NFTs:
