@@ -19,6 +19,8 @@ import {
 import { executeTradeCycle } from "./predict_agent.js";
 import { downloadFromWalrus, decryptWithSeal } from "./walrus_archiver.js";
 
+let autoDisclose = AUTO_DISCLOSE;
+
 const green = (text: string) => `\x1b[32m${text}\x1b[0m`;
 const red = (text: string) => `\x1b[31m${text}\x1b[0m`;
 const yellow = (text: string) => `\x1b[33m${text}\x1b[0m`;
@@ -405,8 +407,19 @@ app.get("/api/status", async (req, res) => {
       sui: (Number(ownerSui) / 1e9).toFixed(4),
       dUSDC: (Number(ownerUsdc) / 1e9).toFixed(4)
     },
-    activeIntervalsCount: activeIntervals.length
+    activeIntervalsCount: activeIntervals.length,
+    autoDisclose
   });
+});
+
+app.post("/api/config/auto-disclose", requireAuth, (req, res) => {
+  const { enabled } = req.body;
+  if (typeof enabled !== "boolean") {
+    return res.status(400).json({ error: "Missing boolean 'enabled' in request body" });
+  }
+  autoDisclose = enabled;
+  console.log(`📡 Control API: Auto-Disclose state updated to ${autoDisclose}`);
+  res.json({ success: true, autoDisclose });
 });
 
 app.post("/api/resume", requireAuth, (req, res) => {
@@ -984,7 +997,7 @@ app.post("/api/stripe/create-session", async (req, res) => {
 const disclosedDisputes = new Set<string>();
 
 async function checkAndAutoDisclose() {
-  if (!AUTO_DISCLOSE) return;
+  if (!autoDisclose) return;
 
   try {
     const ownerKeypair = getAgentKeypair();

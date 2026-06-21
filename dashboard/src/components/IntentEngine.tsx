@@ -299,31 +299,45 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
+        <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] font-medium">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
             <Server className="h-3.5 w-3.5" style={{ color: 'var(--color-brand)' }} />
             <span style={{ color: 'var(--color-text-primary)' }}>1. Start Server</span>
           </div>
           
-          <ArrowRight className="h-3 w-3 opacity-40 hidden sm:block" style={{ color: 'var(--color-text-muted)' }} />
+          <ArrowRight className="h-3 w-3 opacity-40 hidden md:block" style={{ color: 'var(--color-text-muted)' }} />
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
             <UserCheck className="h-3.5 w-3.5" style={{ color: 'var(--color-brand)' }} />
             <span style={{ color: 'var(--color-text-primary)' }}>2. Register Agent</span>
           </div>
 
-          <ArrowRight className="h-3 w-3 opacity-40 hidden sm:block" style={{ color: 'var(--color-text-muted)' }} />
+          <ArrowRight className="h-3 w-3 opacity-40 hidden md:block" style={{ color: 'var(--color-text-muted)' }} />
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-indigo-500 bg-opacity-10" style={{ borderColor: 'rgba(99, 102, 241, 0.4)', background: 'var(--color-surface)' }}>
-            <PlayCircle className="h-3.5 w-3.5 text-indigo-400" />
-            <span className="text-indigo-200 font-semibold">3. Prompt Trade</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
+            <PlayCircle className="h-3.5 w-3.5" style={{ color: 'var(--color-brand)' }} />
+            <span style={{ color: 'var(--color-text-primary)' }}>3. Run Loop/Step</span>
           </div>
 
-          <ArrowRight className="h-3 w-3 opacity-40 hidden sm:block" style={{ color: 'var(--color-text-muted)' }} />
+          <ArrowRight className="h-3 w-3 opacity-40 hidden md:block" style={{ color: 'var(--color-text-muted)' }} />
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-indigo-500 bg-opacity-10" style={{ borderColor: 'rgba(99, 102, 241, 0.4)', background: 'var(--color-surface)' }}>
+            <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+            <span className="text-indigo-200 font-semibold">4. Prompt Intent</span>
+          </div>
+
+          <ArrowRight className="h-3 w-3 opacity-40 hidden md:block" style={{ color: 'var(--color-text-muted)' }} />
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
             <Eye className="h-3.5 w-3.5" style={{ color: 'var(--color-brand)' }} />
-            <span style={{ color: 'var(--color-text-primary)' }}>4. Configure & Audit</span>
+            <span style={{ color: 'var(--color-text-primary)' }}>5. Audit / Decrypt</span>
+          </div>
+
+          <ArrowRight className="h-3 w-3 opacity-40 hidden md:block" style={{ color: 'var(--color-text-muted)' }} />
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-opacity-30" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg)' }}>
+            <AlertCircle className="h-3.5 w-3.5 text-red-400" />
+            <span style={{ color: 'var(--color-text-primary)' }}>6. Dispute / Slash</span>
           </div>
         </div>
       </div>

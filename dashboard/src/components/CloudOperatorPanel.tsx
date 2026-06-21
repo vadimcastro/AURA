@@ -8,6 +8,7 @@ export const CloudOperatorPanel: React.FC = () => {
   const [daemonBalances, setDaemonBalances] = useState<{ sui: string; dUSDC: string } | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [logs, setLogs] = useState<string[]>(['Console initialized. AURA Operator Panel ready.']);
+  const [autoDiscloseEnabled, setAutoDiscloseEnabled] = useState(true);
 
   const addLog = (text: string) => {
     setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${text}`]);
@@ -21,10 +22,40 @@ export const CloudOperatorPanel: React.FC = () => {
       const data = await res.json();
       setDaemonStatus(data.status === 'RUNNING' ? 'RUNNING' : 'STOPPED');
       setDaemonBalances(data.ownerBalances);
+      if (typeof data.autoDisclose === 'boolean') {
+        setAutoDiscloseEnabled(data.autoDisclose);
+      }
     } catch (e) {
       setDaemonStatus('ERROR');
       setDaemonBalances(null);
       addLog(`Status Check Failed: ${(e as Error).message}`);
+    }
+  };
+
+  const toggleAutoDisclose = async () => {
+    if (!daemonUrl || isActionLoading) return;
+    setIsActionLoading(true);
+    const nextVal = !autoDiscloseEnabled;
+    addLog(`Setting Auto-Disclose state to ${nextVal}...`);
+    try {
+      const res = await fetch(`${daemonUrl}/api/config/auto-disclose`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': adminKey
+        },
+        body: JSON.stringify({ enabled: nextVal })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP error ${res.status}`);
+      }
+      setAutoDiscloseEnabled(nextVal);
+      addLog(`Auto-Disclose updated successfully to: ${nextVal}`);
+    } catch (e) {
+      addLog(`Failed to update Auto-Disclose: ${(e as Error).message}`);
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -213,6 +244,34 @@ export const CloudOperatorPanel: React.FC = () => {
                 Ping daemon to fetch wallet balances
               </div>
             )}
+
+            {/* Auto-Disclose Toggle */}
+            <div 
+              className="p-3 rounded-xl border space-y-2.5" 
+              style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5 max-w-[80%]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-secondary)]">Auto-Disclose (Sybil Guard)</span>
+                  <p className="text-[9px] text-[var(--color-text-muted)] leading-normal">
+                    Automatically submit telemetry keys on-chain when disputed. Keeps you safe from timeout slashes while rewarding the dispute bond SUI to the operator address.
+                  </p>
+                </div>
+                <button
+                  onClick={toggleAutoDisclose}
+                  disabled={isActionLoading || daemonStatus === 'ERROR' || daemonStatus === 'UNKNOWN'}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    autoDiscloseEnabled ? 'bg-emerald-600' : 'bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      autoDiscloseEnabled ? 'translate-x-4' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
 
             {/* Loop Actions */}
             <div className="grid grid-cols-2 gap-3 pt-2">
