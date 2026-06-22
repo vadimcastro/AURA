@@ -1120,7 +1120,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                   <span>Sui Kiosk NFT Provisioning</span>
                 </div>
                 <p className="text-[var(--color-text-secondary)]">
-                  Registering this agent automatically mints a unique **AURA Agent Registry NFT** inside a personal **Sui Kiosk**. This allows you to list your agent's strategy profile on the secondary marketplace or lease copy-trading rights.
+                  Registering this agent automatically mints a unique <strong className="font-semibold text-[var(--color-text-primary)]">AURA Agent Registry NFT</strong> inside a secure personal <strong className="font-semibold text-[var(--color-text-primary)]">Sui Kiosk</strong>. After deployment, check the assets tab in your Slush or browser wallet to view your minted strategy credentials!
                 </p>
               </div>
             </div>
