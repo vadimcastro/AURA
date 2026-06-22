@@ -5,7 +5,7 @@ import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import {
   ShieldAlert, ShieldCheck,
   RefreshCw, Settings, Terminal, Layers,
-  X, Plus, Play, Square, Zap, ArrowUpRight, ArrowDownRight
+  X, Plus, Play, Square, Zap, ArrowUpRight, ArrowDownRight, ShoppingBag
 } from 'lucide-react';
 import { AgentSettingsModal } from './AgentSettingsModal';
 
@@ -1109,6 +1109,19 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                     </>
                   )}
                 </div>
+              </div>
+
+              {/* Kiosk NFT Mint Notice */}
+              <div 
+                className="mt-5 p-3.5 rounded-xl border border-dashed text-[10px] space-y-1.5 leading-relaxed bg-[var(--color-brand-light)] border-[var(--color-brand)]/20"
+              >
+                <div className="flex items-center gap-1.5 font-bold text-[var(--color-brand)] uppercase tracking-wider text-[9px]">
+                  <ShoppingBag className="h-3.5 w-3.5" />
+                  <span>Sui Kiosk NFT Provisioning</span>
+                </div>
+                <p className="text-[var(--color-text-secondary)]">
+                  Registering this agent automatically mints a unique **AURA Agent Registry NFT** inside a personal **Sui Kiosk**. This allows you to list your agent's strategy profile on the secondary marketplace or lease copy-trading rights.
+                </p>
               </div>
             </div>
 

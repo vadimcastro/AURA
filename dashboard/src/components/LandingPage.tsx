@@ -536,6 +536,49 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {/* ─── ECOSYSTEM INTEGRATIONS ─── */}
+      <div className="mx-auto mt-24 max-w-7xl">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Ecosystem Integrations & Composability
+          </h2>
+          <p className="mt-3 text-[14px]" style={{ color: 'var(--color-text-secondary)' }}>
+            AURA composes natively across Sui primitives, DEX interfaces, and Web2/Web3 gateways for a friction-free experience.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 md:grid-cols-4">
+          <div className="card-hover rounded-2xl p-5" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+            <span className="text-[10px] font-bold text-[var(--color-brand)] uppercase tracking-wider block mb-1">Payments</span>
+            <h3 className="text-[14px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Stripe Crypto Onramp</h3>
+            <p className="text-[12px] mt-2 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              Built-in fiat gateway enabling direct account funding via Stripe to swap card payments for on-chain collateral.
+            </p>
+          </div>
+          <div className="card-hover rounded-2xl p-5" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+            <span className="text-[10px] font-bold text-sky-500 uppercase tracking-wider block mb-1">Liquidity</span>
+            <h3 className="text-[14px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Cetus DEX Composability</h3>
+            <p className="text-[12px] mt-2 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              Native swap routing integrations to automatically exchange gas tokens (SUI) for target options assets (dUSDC).
+            </p>
+          </div>
+          <div className="card-hover rounded-2xl p-5" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider block mb-1">Gas Sponsorship</span>
+            <h3 className="text-[14px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Sui Paymaster Rules</h3>
+            <p className="text-[12px] mt-2 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              Enables sponsored transaction workflows so that newly signed social zkLogin users require zero gas to initialize.
+            </p>
+          </div>
+          <div className="card-hover rounded-2xl p-5" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider block mb-1">Storage Layer</span>
+            <h3 className="text-[14px] font-bold" style={{ color: 'var(--color-text-primary)' }}>Walrus Protocol Blobs</h3>
+            <p className="text-[12px] mt-2 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              Durable, low-cost decentralized storage for cryptographically encrypted agent mind logs and audit execution histories.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ─── INTERACTIVE SHOWROOM ─── */}
       <div className="mx-auto mt-24 max-w-7xl">
         <div className="text-center mb-10">
