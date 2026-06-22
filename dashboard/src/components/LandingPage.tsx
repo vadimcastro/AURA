@@ -16,7 +16,9 @@ import {
   Layers, 
   ShieldAlert, 
   Clock, 
-  Key
+  Key,
+  Flame,
+  ShoppingBag
 } from 'lucide-react';
 import { SuiJsonRpcClient as SuiClient } from '@mysten/sui/jsonRpc';
 
@@ -501,6 +503,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             title="Decrypted Mind Trails"
             description="Off-chain telemetry logs encrypted using Seal and published directly to Walrus. Audit trails are cryptographically complete."
             badge="Telemetry"
+          />
+          <FeatureCard
+            icon={<ShoppingBag className="h-5 w-5" />}
+            title="Kiosk Strategy NFTs"
+            description="Wraps high-performing agent records and reputations into an AgentNFT stored inside a Sui Kiosk, enabling strategy creators to trade or lease setup keys."
+            badge="Tradeable"
+          />
+          <FeatureCard
+            icon={<Flame className="h-5 w-5" />}
+            title="Buy/Burn Insurance Fee"
+            description="Redirects a 0.5% protocol fee on profitable options trades directly to a deflationary buy-and-burn insurance contract, acting as a capital backstop."
+            badge="Economic"
+          />
+          <FeatureCard
+            icon={<Key className="h-5 w-5" />}
+            title="zkLogin Hybrid Onboarding"
+            description="Provides a friction-free Web2 social sign-in fallback (Google/GitHub) via zkLogin alongside standard Sui browser extension wallet connections."
+            badge="Onboarding"
           />
         </div>
       </div>
