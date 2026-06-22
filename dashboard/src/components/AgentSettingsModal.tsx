@@ -147,6 +147,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
 
   const handleSave = () => {
     setIsSimulating(true);
+    (window as any).logDiagnosticAction?.('Audit Studio: Apply Agent Configuration Settings');
     setTimeout(() => {
       setIsSimulating(false);
       setSuccessMsg('Policy updated on-chain successfully.');
@@ -164,6 +165,7 @@ export const AgentSettingsModal: React.FC<AgentSettingsModalProps> = ({
 
   const handleLiquidate = () => {
     setIsSimulating(true);
+    (window as any).logDiagnosticAction?.('Audit Studio: Trigger Agent Liquidation');
     setTimeout(() => {
       setIsSimulating(false);
       setSuccessMsg('Agent liquidated and funds returned to wallet.');

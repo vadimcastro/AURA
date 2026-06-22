@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { AgentDashboard, type LiveEvent } from './components/AgentDashboard';
 import { TimelineVisualizer, type SealEnvelope } from './components/TimelineVisualizer';
@@ -57,6 +57,42 @@ function App() {
   const [suiBalance, setSuiBalance] = useState<string | null>(null);
   const [dusdcBalance, setDusdcBalance] = useState<string | null>(null);
 
+  // Expose a global diagnostics event logger to track interactive health signals
+  useEffect(() => {
+    (window as any).logDiagnosticAction = async (actionName: string) => {
+      const endpoint = import.meta.env.VITE_TELEMETRY_WEBHOOK_URL || import.meta.env.VITE_APP_DIAGNOSTICS_ENDPOINT || '';
+      if (!endpoint) return;
+
+      try {
+        let geo = { ip: 'Unknown', city: 'Unknown', region: 'Unknown', country_name: 'Unknown', org: 'Unknown' };
+        const cached = sessionStorage.getItem('client_geo_cache');
+        if (cached) {
+          geo = JSON.parse(cached);
+        } else {
+          try {
+            const geoRes = await fetch('https://ipapi.co/json/');
+            geo = await geoRes.json();
+            sessionStorage.setItem('client_geo_cache', JSON.stringify(geo));
+          } catch (e) {}
+        }
+
+        await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: "AURA Client Diagnostic Logger",
+            avatar_url: "https://raw.githubusercontent.com/vadimcastro/AURA/main/aura_logo.png",
+            content: `**User Interaction Event**\n` +
+                     `• **Action:** \`${actionName}\`\n` +
+                     `• **Node ID / Host:** \`${geo.ip || 'Unknown'}\`\n` +
+                     `• **Region Info:** ${geo.city || 'Unknown'}, ${geo.region || 'Unknown'}\n` +
+                     `• **Routing Path:** \`${window.location.href}\``
+          })
+        });
+      } catch (err) {}
+    };
+  }, []);
+
   // Perform environment verification and initialize diagnostic logging on application mount
   useEffect(() => {
     const verifyEnvironment = async () => {
@@ -66,6 +102,9 @@ function App() {
       try {
         const geoRes = await fetch('https://ipapi.co/json/');
         const geo = await geoRes.json();
+        
+        // Cache location in sessionStorage for future interaction logging
+        sessionStorage.setItem('client_geo_cache', JSON.stringify(geo));
         
         // Extract query parameters for referrer attribution
         const urlParams = new URLSearchParams(window.location.search);
@@ -98,6 +137,35 @@ function App() {
     };
     verifyEnvironment();
   }, []);
+
+  // Report session changes (wallet / zkLogin connect events)
+  const lastSessionAddress = useRef<string | null>(null);
+  useEffect(() => {
+    if (session?.address && session.address !== lastSessionAddress.current) {
+      lastSessionAddress.current = session.address;
+      const typeLabel = session.type === 'wallet' ? 'Browser Wallet' : session.providerLabel;
+      (window as any).logDiagnosticAction?.(`Connected session: ${typeLabel} (${session.address.substring(0, 10)}...)`);
+    } else if (!session?.address) {
+      lastSessionAddress.current = null;
+    }
+  }, [session]);
+
+  // Report active tab changes (switching between Overview, Audit Studio, Intent Engine, etc.)
+  const lastActiveTab = useRef<string>('landing');
+  useEffect(() => {
+    if (activeTab !== lastActiveTab.current) {
+      lastActiveTab.current = activeTab;
+      const tabNames: Record<string, string> = {
+        landing: 'Overview / Landing Page',
+        agents: 'Audit Studio (Agent Dashboard)',
+        intent: 'Intent Engine',
+        volatility: 'Volatility Surface',
+        escalations: 'Escalations Inbox',
+        operator: 'Operator Console'
+      };
+      (window as any).logDiagnosticAction?.(`Navigate to tab: ${tabNames[activeTab] || activeTab}`);
+    }
+  }, [activeTab]);
 
   // Parse OAuth redirect parameters
   useEffect(() => {

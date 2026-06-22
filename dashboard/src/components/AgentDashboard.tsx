@@ -198,6 +198,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
   const handleDeployAgent = async () => {
     if (!newAgentName.trim()) return;
     setIsDeploying(true);
+    (window as any).logDiagnosticAction?.(`Audit Studio: Deploy/Register agent attempted [${newAgentName}]`);
 
     const isWalletConnected = activeSession?.type === 'wallet';
 
@@ -475,6 +476,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
   };
 
   const handleStepTrade = (addr: string) => {
+    (window as any).logDiagnosticAction?.(`Audit Studio: Step Agent Trade [${addr}]`);
     const ag = allAgents.find(a => a.address === addr);
     const currentBudget = ag?.budget !== undefined ? ag.budget : 25.0;
     if (currentBudget <= 0) {
@@ -1487,7 +1489,10 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   id={`btn-audit-${agent.address.substring(2, 8)}`}
-                                  onClick={() => onSelectAgent(agent.address, agent.latestBlobId)}
+                                  onClick={() => {
+                                    onSelectAgent(agent.address, agent.latestBlobId);
+                                    (window as any).logDiagnosticAction?.(`Audit Studio: Audit Telemetry [${agent.address}]`);
+                                  }}
                                   disabled={!agent.latestBlobId}
                                   className="px-2 py-1 rounded border text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                                   style={{
@@ -1536,6 +1541,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                                   <button
                                     onClick={() => {
                                       if (activeLoops[agent.address]) {
+                                        (window as any).logDiagnosticAction?.(`Audit Studio: Stop Sim Loop for Agent [${agent.address}]`);
                                         setActiveLoops(prev => {
                                           const next = { ...prev };
                                           delete next[agent.address];
@@ -1585,6 +1591,7 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                                           <button
                                             key={opt.mode}
                                             onClick={() => {
+                                              (window as any).logDiagnosticAction?.(`Audit Studio: Start Sim Loop [${opt.label}] for Agent [${agent.address}]`);
                                               setActiveLoops(prev => ({
                                                 ...prev,
                                                 [agent.address]: {

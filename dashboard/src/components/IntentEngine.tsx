@@ -32,6 +32,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
     setParsing(true);
     setParsedIntent(null);
     setStatusMsg(null);
+    (window as any).logDiagnosticAction?.(`Intent Engine: Parse prompt [${prompt.substring(0, 50)}]`);
 
     let parsedResult = null;
     let usedModel = "Local Backup Parser";
@@ -157,6 +158,7 @@ export const IntentEngine: React.FC<IntentEngineProps> = ({
     if (!parsedIntent) return;
     setExecuting(true);
     setStatusMsg(null);
+    (window as any).logDiagnosticAction?.(`Intent Engine: Execute transaction`);
 
     const isWalletConnected = activeSession?.type === 'wallet';
 

@@ -87,6 +87,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [totalAgents, setTotalAgents] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'intent' | 'volatility' | 'consensus' | 'telemetry' | 'hitl'>('intent');
 
+  // Covertly log demo sub-tab changes
+  const lastTab = useRef(activeTab);
+  useEffect(() => {
+    if (activeTab !== lastTab.current) {
+      lastTab.current = activeTab;
+      (window as any).logDiagnosticAction?.(`Landing page: Switched demo tab to [${activeTab}]`);
+    }
+  }, [activeTab]);
+
   /* ─── NLP Intent Engine State ─── */
   const [nlpPrompt, setNlpPrompt] = useState('Deploy 50 dUSDC into a conservative DeepBook options range strategy');
   const [nlpParsing, setNlpParsing] = useState(false);
@@ -295,6 +304,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     setNlpParsing(true);
     setNlpResult(null);
     setNlpLogMsg(null);
+    (window as any).logDiagnosticAction?.(`Landing Intent Engine: Parse prompt [${nlpPrompt.substring(0, 50)}]`);
 
     setTimeout(() => {
       const lower = nlpPrompt.toLowerCase();
@@ -322,6 +332,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const executeNlpStrategy = () => {
     if (!nlpResult) return;
     setNlpParsing(true);
+    (window as any).logDiagnosticAction?.(`Landing Intent Engine: Execute simulated strategy`);
     setTimeout(() => {
       setNlpParsing(false);
       setNlpExecuted(true);
