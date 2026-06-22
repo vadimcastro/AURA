@@ -98,6 +98,7 @@
 *   **Authorized MemWal Integration:** Authenticate the off-chain bot via a valid MemWal token instead of the playground fallback.
 *   **Formal Security Audit:** Conduct a formal audit of Move smart contracts, specifically using the Move Prover to verify that the `TradeTicket` hot potato cannot be dropped or copied under any circumstances.
 *   **Sui Display Metadata Mapping (agent_nft.move):** Implement OTW (One-Time Witness) publishing and register the `sui::display::Display<AgentNFT>` properties on-chain so that wallets like Slush can natively render Strategy NFTs as rich visual cards, including reputation scores, model descriptors, and direct link bindings.
+*   **Kiosk Leasing Extension (aura_kiosk_leasing.move):** Build an on-chain leasing system using Sui Kiosk Extensions. Allows leasers to lock their Strategy NFTs inside their Kiosk while granting temporal borrow authority to third-party renters in exchange for recurring dUSDC fees.
 
 ---
 
