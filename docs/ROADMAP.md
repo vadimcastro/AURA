@@ -97,6 +97,7 @@
 *   **Threshold Key Infrastructure (Seal SDK):** Migrate from mock local AES encryption to real distributed threshold keys derived from policies to encrypt and decrypt Walrus telemetry logs.
 *   **Authorized MemWal Integration:** Authenticate the off-chain bot via a valid MemWal token instead of the playground fallback.
 *   **Formal Security Audit:** Conduct a formal audit of Move smart contracts, specifically using the Move Prover to verify that the `TradeTicket` hot potato cannot be dropped or copied under any circumstances.
+*   **Sui Display Metadata Mapping (agent_nft.move):** Implement OTW (One-Time Witness) publishing and register the `sui::display::Display<AgentNFT>` properties on-chain so that wallets like Slush can natively render Strategy NFTs as rich visual cards, including reputation scores, model descriptors, and direct link bindings.
 
 ---
 

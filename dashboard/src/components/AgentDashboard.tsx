@@ -1147,21 +1147,6 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Supported Actions Description */}
-              <div 
-                className="p-3 rounded-xl border text-[10px] space-y-1.5 leading-relaxed" 
-                style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
-              >
-                <span className="font-bold text-[var(--color-text-primary)] block uppercase tracking-wider text-[9px]">
-                  Supported Actions & Strategy Mappings:
-                </span>
-                <ul className="list-disc pl-3.5 space-y-1 text-[var(--color-text-muted)]">
-                  <li><strong>Conservative</strong>: Executing wide-spread option range minting (<code className="font-mono text-[var(--color-brand)]">MINT_RANGE</code>) on DeepBook V3.</li>
-                  <li><strong>Balanced</strong>: Executing tighter options (<code className="font-mono text-[var(--color-brand)]">MINT_RANGE</code>) and Cetus pool liquidity provision (<code className="font-mono text-[var(--color-brand)]">LIQUIDITY</code>).</li>
-                  <li><strong>Aggressive</strong>: Executing directional swaps (<code className="font-mono text-[var(--color-brand)]">SWAP</code>), high-yield lending collateral (<code className="font-mono text-[var(--color-brand)]">LEND</code>), and leveraged option plays.</li>
-                </ul>
-              </div>
-
               {newAgentStrategyMode === 'preset' ? (
                 <div className="space-y-3 pt-2">
                   <div className="flex justify-between items-center text-[12px] font-semibold">
@@ -1180,10 +1165,25 @@ export const AgentDashboard: React.FC<AgentDashboardProps> = ({
                     className="w-full h-1 rounded-lg appearance-none cursor-pointer accent-[var(--color-brand)]"
                     style={{ background: 'var(--color-border)' }}
                   />
-                  <div className="flex justify-between text-[9px] font-bold uppercase" style={{ color: 'var(--color-text-muted)' }}>
+                  <div className="flex justify-between text-[9px] font-bold uppercase mb-2" style={{ color: 'var(--color-text-muted)' }}>
                     <span>Conservative</span>
                     <span>Balanced</span>
                     <span>Aggressive</span>
+                  </div>
+
+                  {/* Supported Actions Description */}
+                  <div 
+                    className="p-3 rounded-xl border text-[10px] space-y-1.5 leading-relaxed mt-2" 
+                    style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
+                  >
+                    <span className="font-bold text-[var(--color-text-primary)] block uppercase tracking-wider text-[9px]">
+                      Supported Actions & Strategy Mappings:
+                    </span>
+                    <ul className="list-disc pl-3.5 space-y-1 text-[var(--color-text-muted)]">
+                      <li><strong>Conservative</strong>: Executing wide-spread option range minting (<code className="font-mono text-[var(--color-brand)]">MINT_RANGE</code>) on DeepBook V3.</li>
+                      <li><strong>Balanced</strong>: Executing tighter options (<code className="font-mono text-[var(--color-brand)]">MINT_RANGE</code>) and Cetus pool liquidity provision (<code className="font-mono text-[var(--color-brand)]">LIQUIDITY</code>).</li>
+                      <li><strong>Aggressive</strong>: Executing directional swaps (<code className="font-mono text-[var(--color-brand)]">SWAP</code>), high-yield lending collateral (<code className="font-mono text-[var(--color-brand)]">LEND</code>), and leveraged option plays.</li>
+                    </ul>
                   </div>
                 </div>
               ) : (
